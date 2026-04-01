@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
+import { Playfair_Display, DM_Sans } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, getTranslations } from 'next-intl/server'
 import { notFound } from 'next/navigation'
@@ -9,10 +9,10 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import '../globals.css'
 
-const cormorant = Cormorant_Garamond({
+const playfair = Playfair_Display({
   variable: '--font-cormorant',
   subsets: ['latin'],
-  weight: ['300', '400', '600'],
+  weight: ['400', '500', '700'],
   style: ['normal', 'italic'],
   display: 'swap',
 })
@@ -75,7 +75,7 @@ export default async function LocaleLayout({ children, params }: Props) {
     <html
       lang={locale}
       dir={locale === 'ar' ? 'rtl' : 'ltr'}
-      className={`${cormorant.variable} ${dmSans.variable}`}
+      className={`${playfair.variable} ${dmSans.variable}`}
     >
       <body className="min-h-screen flex flex-col">
         <NextIntlClientProvider messages={messages}>

@@ -1,5 +1,13 @@
-import { DM_Sans } from 'next/font/google'
+import { Playfair_Display, DM_Sans } from 'next/font/google'
 import '../globals.css'
+
+const playfair = Playfair_Display({
+  variable: '--font-cormorant',
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  style: ['normal', 'italic'],
+  display: 'swap',
+})
 
 const dmSans = DM_Sans({
   variable: '--font-dm-sans',
@@ -15,7 +23,7 @@ export const metadata = {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={dmSans.variable}>
+    <html lang="fr" className={`${playfair.variable} ${dmSans.variable}`}>
       <body className="bg-[#F5F0EA]" style={{ fontFamily: 'var(--font-dm-sans)' }}>
         {children}
       </body>

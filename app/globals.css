@@ -21,7 +21,7 @@
   --color-brun-mid:    var(--brun-mid);
   --color-brun-light:  var(--brun-light);
 
-  --font-heading: var(--font-cormorant), Georgia, serif;
+  --font-heading: var(--font-cormorant), 'Playfair Display', Georgia, serif;
   --font-body:    var(--font-dm-sans), Arial, sans-serif;
 }
 
