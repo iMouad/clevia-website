@@ -74,13 +74,13 @@
     "title": "A 100% legal and transparent concierge",
     "subtitle": "Our commitments to every property owner.",
     "list": {
-      "contract": "Official management contract",
-      "report": "Detailed monthly report",
-      "commission": "Transparent commission 20–25%",
-      "noFees": "Zero hidden fees"
+      "contract": "Full management of listings and bookings",
+      "report": "Detailed monthly report and automatic transfer",
+      "commission": "Professional cleaning between every stay",
+      "noFees": "Price optimization to maximize your income"
     },
     "stats": {
-      "biens": "5–6 properties managed by summer",
+      "biens": "Complete end-to-end management",
       "nuits": "15+ nights/month"
     },
     "hero": {
@@ -89,29 +89,29 @@
     },
     "arguments": {
       "reliability": {
-        "title": "Reliability & transparency",
-        "description": "Clear contract, commission and process. You know exactly what's happening with your property. No surprises."
+        "title": "Complete end-to-end management",
+        "description": "Optimized listings on Airbnb, Booking and Avito, reservation management, check-in and check-out handled by our team — you manage nothing."
       },
       "local": {
-        "title": "Local presence",
-        "description": "We know Mansouria and Mohammedia well. Our teams are on the ground for fast response."
+        "title": "Price & occupancy optimization",
+        "description": "Dynamic pricing adjusted to the season, local events and demand. Goal: maximize your income every month."
       },
       "legal": {
-        "title": "Full legal framework",
-        "description": "Clévia is officially registered. Your property is in professional, legal hands."
+        "title": "Professional cleaning & maintenance",
+        "description": "Full cleaning between every stay, hotel-quality linen, and a trusted network of craftsmen for any quick intervention."
       },
       "performance": {
-        "title": "Target 15+ nights/month",
-        "description": "Dynamic pricing strategy and multi-platform presence to maximize your rental income."
+        "title": "Transparency & monthly reports",
+        "description": "Detailed monthly report: revenue, nights occupied, guest reviews. Automatic transfer every month. You stay informed at every step."
       }
     },
     "bigStats": {
-      "biens": "5–6",
-      "biensLabel": "properties managed",
+      "biens": "20%",
+      "biensLabel": "commission, all included",
       "nuits": "15+",
-      "nuitsLabel": "nights/month",
-      "commission": "20%",
-      "commissionLabel": "commission"
+      "nuitsLabel": "nights rented / month",
+      "commission": "24h",
+      "commissionLabel": "response time"
     }
   },
   "how": {

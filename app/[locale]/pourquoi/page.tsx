@@ -22,24 +22,24 @@ export async function generateMetadata({
 const ARG_KEYS = ['reliability', 'local', 'legal', 'performance'] as const
 
 const ARG_ICONS = [
-  // Reliability
-  <svg key="rel" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-    <path d="M9 12l2 2 4-4" />
+  // Gestion complète
+  <svg key="gestion" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <rect x="3" y="3" width="18" height="14" rx="2" />
+    <path d="M7 21h10M12 17v4M8 8h8M8 11h5" />
   </svg>,
-  // Local
-  <svg key="loc" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-    <circle cx="12" cy="9" r="2.5" />
+  // Optimisation prix
+  <svg key="prix" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <path d="M18 20V10M12 20V4M6 20v-6" />
+    <path d="M3 3l4 4M21 3l-4 4" />
   </svg>,
-  // Legal
-  <svg key="legal" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+  // Ménage & maintenance
+  <svg key="menage" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <path d="M12 2l3.5 6.5L22 9.5l-5 4.9 1.2 6.9L12 18l-6.2 3.3L7 14.4 2 9.5l6.5-1L12 2z" />
+  </svg>,
+  // Transparence & rapports
+  <svg key="rapport" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
     <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
     <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
-  </svg>,
-  // Performance
-  <svg key="perf" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M18 20V10M12 20V4M6 20v-6" />
   </svg>,
 ]
 

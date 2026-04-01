@@ -74,13 +74,13 @@
     "title": "Une conciergerie 100% légale et transparente",
     "subtitle": "Nos engagements envers chaque propriétaire.",
     "list": {
-      "contract": "Contrat de gestion officiel",
-      "report": "Rapport mensuel détaillé",
-      "commission": "Commission transparente 20–25%",
-      "noFees": "Zéro frais cachés"
+      "contract": "Gestion complète des annonces et réservations",
+      "report": "Rapport mensuel détaillé et virement automatique",
+      "commission": "Ménage professionnel entre chaque séjour",
+      "noFees": "Optimisation des prix pour maximiser vos revenus"
     },
     "stats": {
-      "biens": "5–6 biens gérés d'ici l'été",
+      "biens": "Gestion complète de A à Z",
       "nuits": "15+ nuits/mois"
     },
     "hero": {
@@ -89,29 +89,29 @@
     },
     "arguments": {
       "reliability": {
-        "title": "Fiabilité & transparence",
-        "description": "Contrat, commission et processus clairs. Vous savez exactement ce qui se passe avec votre bien. Pas de surprises."
+        "title": "Gestion complète de A à Z",
+        "description": "Annonces optimisées sur Airbnb, Booking et Avito, gestion des réservations, check-in et check-out assurés par notre équipe — vous ne gérez rien."
       },
       "local": {
-        "title": "Ancrage local",
-        "description": "On connaît Mansouria et Mohammedia. Nos équipes sont sur place pour réagir vite."
+        "title": "Optimisation des prix et du taux d'occupation",
+        "description": "Tarification dynamique ajustée selon la saison, les événements locaux et la demande. Objectif : maximiser vos revenus chaque mois."
       },
       "legal": {
-        "title": "Cadre légal complet",
-        "description": "Clévia est enregistrée. Votre bien est géré dans un cadre professionnel et légal."
+        "title": "Ménage professionnel & maintenance",
+        "description": "Nettoyage complet entre chaque séjour, linge hôtelier fourni, et un réseau d'artisans de confiance pour toute intervention rapide."
       },
       "performance": {
-        "title": "Objectif 15+ nuits/mois",
-        "description": "Stratégie tarifaire dynamique et présence multi-plateformes pour maximiser vos revenus."
+        "title": "Transparence & rapports mensuels",
+        "description": "Rapport mensuel détaillé : revenus, nuits occupées, avis voyageurs. Virement automatique chaque mois. Vous restez informé à chaque étape."
       }
     },
     "bigStats": {
-      "biens": "5–6",
-      "biensLabel": "biens gérés",
+      "biens": "20%",
+      "biensLabel": "commission tout inclus",
       "nuits": "15+",
-      "nuitsLabel": "nuits/mois",
-      "commission": "20%",
-      "commissionLabel": "commission"
+      "nuitsLabel": "nuits louées / mois",
+      "commission": "24h",
+      "commissionLabel": "délai de réponse"
     }
   },
   "how": {

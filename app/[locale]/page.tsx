@@ -267,21 +267,21 @@ export default function HomePage() {
             <div className="flex flex-col gap-4">
               <AnimateIn delay={0.1}>
                 <div className="bg-creme/10 border border-creme/20 rounded-2xl p-8">
-                  <p className="text-5xl text-terra mb-2" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300 }}>
-                    5–6
+                  <p className="text-5xl text-terra mb-2" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
+                    20%
                   </p>
                   <p className="text-creme/70 text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                    {t('why.stats.biens')}
+                    {t('why.bigStats.biensLabel')}
                   </p>
                 </div>
               </AnimateIn>
               <AnimateIn delay={0.2}>
                 <div className="bg-terra/20 border border-terra/30 rounded-2xl p-8">
-                  <p className="text-5xl text-sable mb-2" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300 }}>
+                  <p className="text-5xl text-sable mb-2" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
                     15+
                   </p>
                   <p className="text-creme/70 text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                    {t('why.stats.nuits')}
+                    {t('why.bigStats.nuitsLabel')}
                   </p>
                 </div>
               </AnimateIn>
