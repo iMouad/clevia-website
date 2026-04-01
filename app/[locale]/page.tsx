@@ -3,6 +3,7 @@ import { Link } from '@/i18n/navigation'
 import { AnimateIn, StaggerContainer, StaggerItem } from '@/components/ui/AnimateIn'
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
+import HomeBiensSection from '@/components/HomeBiensSection'
 
 export async function generateMetadata({
   params,
@@ -223,6 +224,9 @@ export default function HomePage() {
           </AnimateIn>
         </div>
       </section>
+
+      {/* ── NOS BIENS ───────────────────────────── */}
+      <HomeBiensSection />
 
       {/* ── POURQUOI (dark) ──────────────────────── */}
       <section className="bg-brun py-24 px-4">

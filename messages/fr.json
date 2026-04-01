@@ -2,6 +2,7 @@
   "nav": {
     "home": "Accueil",
     "services": "Services",
+    "biens": "Nos biens",
     "how": "Comment ça marche",
     "why": "Pourquoi nous",
     "contact": "Contact",
@@ -245,6 +246,21 @@
       "title": "Suivez-nous"
     },
     "copyright": "© 2025 Clévia Conciergerie · Maroc"
+  },
+  "biens": {
+    "tag": "Nos biens",
+    "homeTitle": "Les biens que nous gérons",
+    "homeSubtitle": "Découvrez notre sélection de logements à Mansouria et Mohammedia, disponibles sur Airbnb, Booking et Avito.",
+    "viewAll": "Voir tous nos biens",
+    "title": "Nos biens",
+    "subtitle": "Découvrez notre sélection de logements gérés par Clévia dans la région de Mohammedia.",
+    "filterAll": "Tous les types",
+    "filterEmpty": "Aucun bien de ce type disponible pour le moment.",
+    "empty": "Aucun bien disponible pour le moment.",
+    "contactUs": "Nous contacter",
+    "ctaTitle": "Vous avez un bien à louer ?",
+    "ctaSubtitle": "Confiez-le à Clévia. On s'occupe de tout, vous percevez vos revenus chaque mois.",
+    "ctaButton": "Confier mon bien"
   },
   "admin": {
     "login": {

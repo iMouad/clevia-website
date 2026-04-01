@@ -8,15 +8,25 @@ create table if not exists biens (
   id          uuid        default gen_random_uuid() primary key,
   nom         text        not null,
   ville       text,
+  adresse     text,
   type        text        check (type in ('Appartement','Villa','Studio','Autre')),
   capacite    int,
   prix_nuit   decimal(10,2),
   description text,
   statut      text        default 'actif' check (statut in ('actif','en_attente','inactif')),
   photos      text[],
+  airbnb_url  text,
+  booking_url text,
+  avito_url   text,
   created_at  timestamptz default now(),
   updated_at  timestamptz default now()
 );
+
+-- ── Migration (si table déjà créée) ──────
+-- alter table biens add column if not exists adresse     text;
+-- alter table biens add column if not exists airbnb_url  text;
+-- alter table biens add column if not exists booking_url text;
+-- alter table biens add column if not exists avito_url   text;
 
 -- ── Table reservations ───────────────────
 create table if not exists reservations (

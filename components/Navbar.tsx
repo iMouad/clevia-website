@@ -14,6 +14,7 @@ const LOCALES = [
 const NAV_LINKS = [
   { href: '/', key: 'home' },
   { href: '/services', key: 'services' },
+  { href: '/biens', key: 'biens' },
   { href: '/comment', key: 'how' },
   { href: '/pourquoi', key: 'why' },
 ] as const

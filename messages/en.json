@@ -2,6 +2,7 @@
   "nav": {
     "home": "Home",
     "services": "Services",
+    "biens": "Our properties",
     "how": "How it works",
     "why": "Why us",
     "contact": "Contact",
@@ -245,6 +246,21 @@
       "title": "Follow us"
     },
     "copyright": "© 2025 Clévia Conciergerie · Morocco"
+  },
+  "biens": {
+    "tag": "Our properties",
+    "homeTitle": "Properties we manage",
+    "homeSubtitle": "Discover our selection of apartments and villas in Mansouria and Mohammedia, available on Airbnb, Booking and Avito.",
+    "viewAll": "View all our properties",
+    "title": "Our properties",
+    "subtitle": "Discover our selection of properties managed by Clévia in the Mohammedia region.",
+    "filterAll": "All types",
+    "filterEmpty": "No properties of this type available right now.",
+    "empty": "No properties available at the moment.",
+    "contactUs": "Contact us",
+    "ctaTitle": "Have a property to rent?",
+    "ctaSubtitle": "Entrust it to Clévia. We handle everything, you collect your income every month.",
+    "ctaButton": "Entrust my property"
   },
   "admin": {
     "login": {

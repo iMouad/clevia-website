@@ -8,12 +8,16 @@ type Bien = {
   id: string
   nom: string
   ville: string | null
+  adresse: string | null
   type: string | null
   capacite: number | null
   prix_nuit: number | null
   description: string | null
   statut: 'actif' | 'en_attente' | 'inactif'
   photos: string[] | null
+  airbnb_url: string | null
+  booking_url: string | null
+  avito_url: string | null
   created_at: string
 }
 
@@ -26,7 +30,7 @@ const STATUT_COLORS: Record<string, string> = {
   inactif: 'bg-gray-100 text-gray-500',
 }
 
-const EMPTY: Partial<Bien> = { nom: '', ville: '', type: 'Appartement', capacite: null, prix_nuit: null, description: '', statut: 'actif', photos: [] }
+const EMPTY: Partial<Bien> = { nom: '', ville: '', adresse: '', type: 'Appartement', capacite: null, prix_nuit: null, description: '', statut: 'actif', photos: [], airbnb_url: '', booking_url: '', avito_url: '' }
 
 function Modal({ open, onClose, children }: { open: boolean; onClose: () => void; children: React.ReactNode }) {
   if (!open) return null
@@ -169,6 +173,11 @@ export default function BiensPage() {
             <input className={inputClass} value={editing.nom ?? ''} onChange={(e) => setEditing((p) => ({ ...p, nom: e.target.value }))} placeholder="Ex : Appartement Corniche" />
           </div>
 
+          <div>
+            <label className={labelClass}>Adresse complète</label>
+            <input className={inputClass} value={editing.adresse ?? ''} onChange={(e) => setEditing((p) => ({ ...p, adresse: e.target.value }))} placeholder="Ex : 12 Rue des Orangers, Mansouria" />
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Ville</label>
@@ -203,6 +212,25 @@ export default function BiensPage() {
             <select className={inputClass} value={editing.statut ?? 'actif'} onChange={(e) => setEditing((p) => ({ ...p, statut: e.target.value as any }))}>
               {STATUT_OPTIONS.map((s) => <option key={s} value={s}>{STATUT_LABELS[s]}</option>)}
             </select>
+          </div>
+
+          {/* Platform URLs */}
+          <div className="border-t border-brun/10 pt-4">
+            <p className={`${labelClass} mb-3`}>Liens de réservation (optionnel)</p>
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-white bg-[#FF5A5F] rounded-full px-2.5 py-1 w-20 text-center flex-shrink-0" style={{ fontFamily: 'var(--font-dm-sans)' }}>Airbnb</span>
+                <input className={inputClass} value={editing.airbnb_url ?? ''} onChange={(e) => setEditing((p) => ({ ...p, airbnb_url: e.target.value || null }))} placeholder="https://airbnb.com/rooms/..." />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-white bg-[#003580] rounded-full px-2.5 py-1 w-20 text-center flex-shrink-0" style={{ fontFamily: 'var(--font-dm-sans)' }}>Booking</span>
+                <input className={inputClass} value={editing.booking_url ?? ''} onChange={(e) => setEditing((p) => ({ ...p, booking_url: e.target.value || null }))} placeholder="https://booking.com/hotel/..." />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-white bg-[#E07A2F] rounded-full px-2.5 py-1 w-20 text-center flex-shrink-0" style={{ fontFamily: 'var(--font-dm-sans)' }}>Avito</span>
+                <input className={inputClass} value={editing.avito_url ?? ''} onChange={(e) => setEditing((p) => ({ ...p, avito_url: e.target.value || null }))} placeholder="https://avito.ma/annonce/..." />
+              </div>
+            </div>
           </div>
 
           {/* Photos */}
