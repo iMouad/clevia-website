@@ -247,6 +247,29 @@
     },
     "copyright": "© 2025 Clévia Conciergerie · Maroc"
   },
+  "calculator": {
+    "tag": "Simulateur",
+    "title": "Combien peut rapporter votre bien ?",
+    "subtitle": "Estimez vos revenus mensuels nets en quelques secondes.",
+    "typeLabel": "Type de bien",
+    "priceLabel": "Prix par nuit estimé",
+    "nightsLabel": "Nuits louées par mois",
+    "nights": "nuits",
+    "month": "mois",
+    "presetLow": "Basse saison",
+    "presetMid": "Moyenne",
+    "presetHigh": "Haute saison",
+    "brutsLabel": "Revenus bruts",
+    "commissionLabel": "Commission Clévia",
+    "netsLabel": "Vos revenus nets",
+    "disclaimer": "Estimation indicative basée sur les données du marché local. Résultats non garantis.",
+    "cta": "Confier mon bien"
+  },
+  "testimonials": {
+    "tag": "Témoignages",
+    "title": "Ce que disent nos propriétaires",
+    "subtitle": "Ils nous ont confié leur bien. Voici leur expérience."
+  },
   "biens": {
     "tag": "Nos biens",
     "homeTitle": "Les biens que nous gérons",

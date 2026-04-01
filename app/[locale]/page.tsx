@@ -4,6 +4,8 @@ import { AnimateIn, StaggerContainer, StaggerItem } from '@/components/ui/Animat
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import HomeBiensSection from '@/components/HomeBiensSection'
+import RevenueCalculator from '@/components/RevenueCalculator'
+import TemoignagesSection from '@/components/TemoignagesSection'
 
 export async function generateMetadata({
   params,
@@ -227,6 +229,12 @@ export default function HomePage() {
 
       {/* ── NOS BIENS ───────────────────────────── */}
       <HomeBiensSection />
+
+      {/* ── CALCULATEUR DE REVENUS ──────────────── */}
+      <RevenueCalculator />
+
+      {/* ── TÉMOIGNAGES ─────────────────────────── */}
+      <TemoignagesSection />
 
       {/* ── POURQUOI (dark) ──────────────────────── */}
       <section className="bg-brun py-24 px-4">

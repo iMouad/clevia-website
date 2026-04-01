@@ -247,6 +247,29 @@
     },
     "copyright": "© 2025 Clévia Conciergerie · Morocco"
   },
+  "calculator": {
+    "tag": "Revenue estimator",
+    "title": "How much can your property earn?",
+    "subtitle": "Estimate your monthly net income in seconds.",
+    "typeLabel": "Property type",
+    "priceLabel": "Estimated price per night",
+    "nightsLabel": "Nights rented per month",
+    "nights": "nights",
+    "month": "month",
+    "presetLow": "Low season",
+    "presetMid": "Average",
+    "presetHigh": "High season",
+    "brutsLabel": "Gross revenue",
+    "commissionLabel": "Clévia commission",
+    "netsLabel": "Your net income",
+    "disclaimer": "Indicative estimate based on local market data. Results are not guaranteed.",
+    "cta": "Entrust my property"
+  },
+  "testimonials": {
+    "tag": "Testimonials",
+    "title": "What our property owners say",
+    "subtitle": "They entrusted us with their property. Here's their experience."
+  },
   "biens": {
     "tag": "Our properties",
     "homeTitle": "Properties we manage",

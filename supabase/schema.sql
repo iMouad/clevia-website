@@ -117,6 +117,28 @@ create policy "admin contacts update"
 create policy "admin settings"
   on settings for all using (auth.role() = 'authenticated');
 
+-- ── Table temoignages ───────────────────────
+create table if not exists temoignages (
+  id          uuid        default gen_random_uuid() primary key,
+  nom         text        not null,
+  ville       text,
+  type_bien   text,
+  note        int         default 5 check (note between 1 and 5),
+  message     text        not null,
+  photo_url   text,
+  actif       boolean     default true,
+  ordre       int         default 0,
+  created_at  timestamptz default now()
+);
+
+alter table temoignages enable row level security;
+
+create policy "temoignages publics"
+  on temoignages for select using (actif = true);
+
+create policy "admin temoignages"
+  on temoignages for all using (auth.role() = 'authenticated');
+
 -- ── Storage bucket (à créer manuellement) ─
 -- Supabase Dashboard → Storage → New bucket
 -- Nom : "biens-photos"
