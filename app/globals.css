@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+/* ── Clévia Design Tokens ── */
+:root {
+  --brun:        #2C1A0E;
+  --terra:       #C97B4B;
+  --sable:       #E8A87C;
+  --corail:      #F0997B;
+  --creme:       #FAF6F1;
+  --brun-mid:    #6B4C35;
+  --brun-light:  #A07850;
+}
+
+/* ── Tailwind v4 Theme Extension ── */
+@theme inline {
+  --color-brun:        var(--brun);
+  --color-terra:       var(--terra);
+  --color-sable:       var(--sable);
+  --color-corail:      var(--corail);
+  --color-creme:       var(--creme);
+  --color-brun-mid:    var(--brun-mid);
+  --color-brun-light:  var(--brun-light);
+
+  --font-heading: var(--font-cormorant), Georgia, serif;
+  --font-body:    var(--font-dm-sans), Arial, sans-serif;
+}
+
+/* ── Base ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--creme);
+  color: var(--brun);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  line-height: 1.2;
+}

@@ -1,0 +1,278 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { format } from 'date-fns'
+import { createClient } from '@/lib/supabase'
+
+type Reservation = {
+  id: string
+  bien_id: string | null
+  voyageur_nom: string
+  voyageur_email: string | null
+  voyageur_phone: string | null
+  date_arrivee: string
+  date_depart: string
+  plateforme: string | null
+  montant: number | null
+  taux_commission: number
+  statut: string
+  notes: string | null
+  created_at: string
+  biens?: { nom: string } | null
+}
+
+type Bien = { id: string; nom: string }
+
+const EMPTY_RES: Partial<Reservation> = {
+  voyageur_nom: '', voyageur_email: '', voyageur_phone: '', date_arrivee: '', date_depart: '',
+  plateforme: 'Airbnb', montant: null, taux_commission: 20, statut: 'confirmee', notes: '',
+}
+const PLATF = ['Airbnb', 'Booking', 'Avito', 'Direct']
+const STATUT_LABELS: Record<string, string> = { confirmee: 'Confirmée', annulee: 'Annulée', terminee: 'Terminée' }
+const STATUT_COLORS: Record<string, string> = {
+  confirmee: 'bg-green-100 text-green-700',
+  annulee: 'bg-red-100 text-red-700',
+  terminee: 'bg-gray-100 text-gray-500',
+}
+const PLATF_COLORS: Record<string, string> = {
+  Airbnb: 'bg-rose-100 text-rose-600',
+  Booking: 'bg-blue-100 text-blue-600',
+  Avito: 'bg-orange-100 text-orange-600',
+  Direct: 'bg-green-100 text-green-700',
+}
+
+function nuits(d1: string, d2: string) {
+  if (!d1 || !d2) return 0
+  return Math.max(0, Math.round((new Date(d2).getTime() - new Date(d1).getTime()) / 86400000))
+}
+
+function Modal({ open, onClose, children }: { open: boolean; onClose: () => void; children: React.ReactNode }) {
+  if (!open) return null
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-12 px-4 pb-8 bg-brun/50 backdrop-blur-sm overflow-y-auto" onClick={onClose}>
+      <div className="bg-white rounded-2xl w-full max-w-xl shadow-xl" onClick={(e) => e.stopPropagation()}>{children}</div>
+    </div>
+  )
+}
+
+export default function ReservationsPage() {
+  const supabase = createClient()
+  const [rows, setRows] = useState<Reservation[]>([])
+  const [biens, setBiens] = useState<Bien[]>([])
+  const [loading, setLoading] = useState(true)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editing, setEditing] = useState<Partial<Reservation>>(EMPTY_RES)
+  const [saving, setSaving] = useState(false)
+  const [filterStatut, setFilterStatut] = useState('')
+  const [filterPlatf, setFilterPlatf] = useState('')
+
+  async function fetchData() {
+    const [{ data: resData }, { data: bienData }] = await Promise.all([
+      supabase.from('reservations').select('*, biens(nom)').order('date_arrivee', { ascending: false }),
+      supabase.from('biens').select('id, nom').eq('statut', 'actif'),
+    ])
+    setRows(resData ?? [])
+    setBiens(bienData ?? [])
+    setLoading(false)
+  }
+
+  useEffect(() => { fetchData() }, [])
+
+  const filtered = rows.filter((r) => {
+    if (filterStatut && r.statut !== filterStatut) return false
+    if (filterPlatf && r.plateforme !== filterPlatf) return false
+    return true
+  })
+
+  function openAdd() { setEditing({ ...EMPTY_RES, bien_id: biens[0]?.id ?? null }); setModalOpen(true) }
+  function openEdit(r: Reservation) { setEditing({ ...r }); setModalOpen(true) }
+  function closeModal() { setModalOpen(false); setEditing(EMPTY_RES) }
+
+  async function handleSave() {
+    setSaving(true)
+    const payload = { ...editing }
+    delete (payload as any).biens
+    if (editing.id) {
+      await supabase.from('reservations').update(payload).eq('id', editing.id)
+    } else {
+      await supabase.from('reservations').insert(payload)
+    }
+    setSaving(false); closeModal(); fetchData()
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm('Supprimer cette réservation ?')) return
+    await supabase.from('reservations').delete().eq('id', id)
+    fetchData()
+  }
+
+  const commission = editing.montant && editing.taux_commission
+    ? (editing.montant * editing.taux_commission / 100).toFixed(2)
+    : '—'
+
+  const inputClass = 'w-full border border-brun/20 rounded-xl px-3 py-2.5 text-sm text-brun focus:outline-none focus:border-terra focus:ring-1 focus:ring-terra transition-colors'
+  const labelClass = 'block text-xs font-medium text-brun-mid mb-1.5 uppercase tracking-wide'
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl text-brun" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>Réservations</h1>
+        <button onClick={openAdd} className="flex items-center gap-2 bg-terra text-creme text-sm font-medium rounded-full px-5 py-2.5 hover:bg-brun transition-all">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
+          Ajouter
+        </button>
+      </div>
+
+      {/* Filters */}
+      <div className="flex gap-3 mb-5 flex-wrap">
+        <select className="border border-brun/20 rounded-xl px-3 py-2 text-sm text-brun-mid focus:outline-none focus:border-terra" value={filterStatut} onChange={(e) => setFilterStatut(e.target.value)}>
+          <option value="">Tous statuts</option>
+          {Object.entries(STATUT_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+        </select>
+        <select className="border border-brun/20 rounded-xl px-3 py-2 text-sm text-brun-mid focus:outline-none focus:border-terra" value={filterPlatf} onChange={(e) => setFilterPlatf(e.target.value)}>
+          <option value="">Toutes plateformes</option>
+          {PLATF.map((p) => <option key={p}>{p}</option>)}
+        </select>
+        <span className="self-center text-xs text-brun-mid/60">{filtered.length} réservation(s)</span>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-brun/10 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-brun/4">
+              <tr>
+                {['Voyageur', 'Bien', 'Arrivée', 'Départ', 'Nuits', 'Plateforme', 'Montant', 'Commission', 'Statut', ''].map((h) => (
+                  <th key={h} className="px-3 py-3 text-left text-xs text-brun-mid uppercase tracking-wide font-medium whitespace-nowrap">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-brun/5">
+              {loading ? (
+                <tr><td colSpan={10} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
+              ) : !filtered.length ? (
+                <tr><td colSpan={10} className="px-4 py-10 text-center text-brun-mid/50">Aucune réservation</td></tr>
+              ) : filtered.map((r) => (
+                <tr key={r.id} className="hover:bg-creme/40 transition-colors">
+                  <td className="px-3 py-3 text-brun font-medium whitespace-nowrap">{r.voyageur_nom}</td>
+                  <td className="px-3 py-3 text-brun-mid">{(r as any).biens?.nom ?? '—'}</td>
+                  <td className="px-3 py-3 text-brun-mid whitespace-nowrap">{format(new Date(r.date_arrivee), 'dd/MM/yy')}</td>
+                  <td className="px-3 py-3 text-brun-mid whitespace-nowrap">{format(new Date(r.date_depart), 'dd/MM/yy')}</td>
+                  <td className="px-3 py-3 text-center text-brun-mid">{nuits(r.date_arrivee, r.date_depart)}</td>
+                  <td className="px-3 py-3">
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${PLATF_COLORS[r.plateforme ?? ''] ?? 'bg-gray-100 text-gray-500'}`}>
+                      {r.plateforme ?? '—'}
+                    </span>
+                  </td>
+                  <td className="px-3 py-3 text-brun-mid whitespace-nowrap">{r.montant ? `${r.montant} MAD` : '—'}</td>
+                  <td className="px-3 py-3 font-medium text-terra whitespace-nowrap">
+                    {r.montant ? `${(r.montant * r.taux_commission / 100).toFixed(0)} MAD` : '—'}
+                  </td>
+                  <td className="px-3 py-3">
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUT_COLORS[r.statut]}`}>{STATUT_LABELS[r.statut] ?? r.statut}</span>
+                  </td>
+                  <td className="px-3 py-3">
+                    <div className="flex gap-2">
+                      <button onClick={() => openEdit(r)} className="text-terra text-xs underline underline-offset-2">Modifier</button>
+                      <button onClick={() => handleDelete(r.id)} className="text-red-400 text-xs underline underline-offset-2">Suppr.</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Modal */}
+      <Modal open={modalOpen} onClose={closeModal}>
+        <div className="p-5 border-b border-brun/10 flex items-center justify-between">
+          <h2 className="text-xl text-brun" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
+            {editing.id ? 'Modifier' : 'Nouvelle réservation'}
+          </h2>
+          <button onClick={closeModal} className="text-brun-mid hover:text-brun">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 4l12 12M16 4L4 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+          </button>
+        </div>
+        <div className="p-5 flex flex-col gap-4 max-h-[70vh] overflow-y-auto">
+          <div>
+            <label className={labelClass}>Bien</label>
+            <select className={inputClass} value={editing.bien_id ?? ''} onChange={(e) => setEditing((p) => ({ ...p, bien_id: e.target.value || null }))}>
+              <option value="">— Sélectionner —</option>
+              {biens.map((b) => <option key={b.id} value={b.id}>{b.nom}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className={labelClass}>Nom voyageur *</label>
+            <input className={inputClass} value={editing.voyageur_nom ?? ''} onChange={(e) => setEditing((p) => ({ ...p, voyageur_nom: e.target.value }))} placeholder="Prénom Nom" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>Email</label>
+              <input type="email" className={inputClass} value={editing.voyageur_email ?? ''} onChange={(e) => setEditing((p) => ({ ...p, voyageur_email: e.target.value }))} />
+            </div>
+            <div>
+              <label className={labelClass}>Téléphone</label>
+              <input className={inputClass} value={editing.voyageur_phone ?? ''} onChange={(e) => setEditing((p) => ({ ...p, voyageur_phone: e.target.value }))} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>Arrivée *</label>
+              <input type="date" className={inputClass} value={editing.date_arrivee ?? ''} onChange={(e) => setEditing((p) => ({ ...p, date_arrivee: e.target.value }))} />
+            </div>
+            <div>
+              <label className={labelClass}>Départ *</label>
+              <input type="date" className={inputClass} value={editing.date_depart ?? ''} onChange={(e) => setEditing((p) => ({ ...p, date_depart: e.target.value }))} />
+            </div>
+          </div>
+          {editing.date_arrivee && editing.date_depart && (
+            <p className="text-xs text-terra">{nuits(editing.date_arrivee, editing.date_depart)} nuit(s)</p>
+          )}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>Plateforme</label>
+              <select className={inputClass} value={editing.plateforme ?? 'Airbnb'} onChange={(e) => setEditing((p) => ({ ...p, plateforme: e.target.value }))}>
+                {PLATF.map((p) => <option key={p}>{p}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className={labelClass}>Statut</label>
+              <select className={inputClass} value={editing.statut ?? 'confirmee'} onChange={(e) => setEditing((p) => ({ ...p, statut: e.target.value }))}>
+                {Object.entries(STATUT_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>Montant (MAD)</label>
+              <input type="number" min={0} className={inputClass} value={editing.montant ?? ''} onChange={(e) => setEditing((p) => ({ ...p, montant: Number(e.target.value) || null }))} placeholder="1500" />
+            </div>
+            <div>
+              <label className={labelClass}>Taux commission (%)</label>
+              <select className={inputClass} value={editing.taux_commission ?? 20} onChange={(e) => setEditing((p) => ({ ...p, taux_commission: Number(e.target.value) }))}>
+                <option value={20}>20%</option>
+                <option value={25}>25%</option>
+              </select>
+            </div>
+          </div>
+          {editing.montant && (
+            <div className="bg-terra/10 rounded-xl px-4 py-3 text-sm">
+              <span className="text-brun-mid">Commission : </span>
+              <span className="text-terra font-medium">{commission} MAD</span>
+            </div>
+          )}
+          <div>
+            <label className={labelClass}>Notes</label>
+            <textarea className={`${inputClass} resize-none`} rows={2} value={editing.notes ?? ''} onChange={(e) => setEditing((p) => ({ ...p, notes: e.target.value }))} placeholder="Remarques éventuelles..." />
+          </div>
+        </div>
+        <div className="p-5 border-t border-brun/10 flex justify-end gap-3">
+          <button onClick={closeModal} className="border border-brun/20 text-brun-mid text-sm font-medium rounded-full px-5 py-2 hover:bg-brun/5 transition-all">Annuler</button>
+          <button onClick={handleSave} disabled={saving || !editing.voyageur_nom} className="bg-terra text-creme text-sm font-medium rounded-full px-5 py-2 hover:bg-brun transition-all disabled:opacity-50">
+            {saving ? 'Sauvegarde…' : 'Sauvegarder'}
+          </button>
+        </div>
+      </Modal>
+    </div>
+  )
+}

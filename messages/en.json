@@ -1,0 +1,347 @@
+{
+  "nav": {
+    "home": "Home",
+    "services": "Services",
+    "how": "How it works",
+    "why": "Why us",
+    "contact": "Contact",
+    "menuOpen": "Open menu",
+    "menuClose": "Close menu"
+  },
+  "hero": {
+    "tag": "Concierge · Morocco",
+    "title": "Your home,",
+    "titleEmphasis": "handled.",
+    "subtitle": "We manage your short-term rentals on Airbnb, Booking and Avito — from listing to guest check-in.",
+    "cta1": "Entrust your property",
+    "cta2": "How it works"
+  },
+  "stats": {
+    "days": "+15 nights rented / month",
+    "daysLabel": "on average",
+    "commission": "20% commission only",
+    "commissionLabel": "all included",
+    "stress": "0 stress for you",
+    "stressLabel": "we handle everything",
+    "platforms": "Available on"
+  },
+  "services": {
+    "tag": "Our services",
+    "title": "A complete service, A to Z",
+    "subtitle": "Everything you need to rent stress-free, from listing to monthly transfer.",
+    "cta": "See all services",
+    "hero": {
+      "title": "Our services",
+      "subtitle": "Everything you need to rent without stress."
+    },
+    "items": {
+      "publication": {
+        "title": "Listing & visibility",
+        "description": "Optimized listings on Airbnb, Booking and Avito. Dynamic pricing and professional photos included."
+      },
+      "photo": {
+        "title": "Professional photography",
+        "description": "Photo session included at onboarding to showcase your property and maximize bookings."
+      },
+      "accueil": {
+        "title": "Guest check-in & check-out",
+        "description": "Check-in and check-out managed by our team. Key handover and support 7 days a week."
+      },
+      "menage": {
+        "title": "Cleaning & laundry",
+        "description": "Full cleaning between every stay, hotel-quality linen and regular maintenance."
+      },
+      "reporting": {
+        "title": "Monthly reporting",
+        "description": "Revenue dashboard, occupancy rate, guest reviews and automatic transfer every month."
+      },
+      "maintenance": {
+        "title": "Maintenance & emergencies",
+        "description": "Fast response when needed. Trusted network of craftsmen in Mohammedia."
+      }
+    },
+    "pricing": {
+      "title": "Our pricing",
+      "commission": "20–25%",
+      "commissionLabel": "commission on generated revenue",
+      "included": "All included: photos, listings, check-in, cleaning, reporting.",
+      "cta": "Contact us"
+    }
+  },
+  "why": {
+    "tag": "Why us",
+    "title": "A 100% legal and transparent concierge",
+    "subtitle": "Our commitments to every property owner.",
+    "list": {
+      "contract": "Official management contract",
+      "report": "Detailed monthly report",
+      "commission": "Transparent commission 20–25%",
+      "noFees": "Zero hidden fees"
+    },
+    "stats": {
+      "biens": "5–6 properties managed by summer",
+      "nuits": "15+ nights/month"
+    },
+    "hero": {
+      "title": "Why choose Clévia",
+      "subtitle": "What sets us apart."
+    },
+    "arguments": {
+      "reliability": {
+        "title": "Reliability & transparency",
+        "description": "Clear contract, commission and process. You know exactly what's happening with your property. No surprises."
+      },
+      "local": {
+        "title": "Local presence",
+        "description": "We know Mansouria and Mohammedia well. Our teams are on the ground for fast response."
+      },
+      "legal": {
+        "title": "Full legal framework",
+        "description": "Clévia is officially registered. Your property is in professional, legal hands."
+      },
+      "performance": {
+        "title": "Target 15+ nights/month",
+        "description": "Dynamic pricing strategy and multi-platform presence to maximize your rental income."
+      }
+    },
+    "bigStats": {
+      "biens": "5–6",
+      "biensLabel": "properties managed",
+      "nuits": "15+",
+      "nuitsLabel": "nights/month",
+      "commission": "20%",
+      "commissionLabel": "commission"
+    }
+  },
+  "how": {
+    "tag": "How it works",
+    "title": "From first contact to first transfer",
+    "subtitle": "A simple, transparent and stress-free process.",
+    "hero": {
+      "title": "How it works",
+      "subtitle": "From first contact to first transfer."
+    },
+    "steps": {
+      "contact": {
+        "number": "01",
+        "title": "Get in touch",
+        "description": "Fill out our form or call us. We reply within 24 hours."
+      },
+      "visit": {
+        "number": "02",
+        "title": "Visit & assessment",
+        "description": "Free visit to your property and rental potential estimation."
+      },
+      "contract": {
+        "number": "03",
+        "title": "Sign the contract",
+        "description": "Clear 20–25% commission, no long-term commitment. You stay in control."
+      },
+      "publish": {
+        "number": "04",
+        "title": "Go live",
+        "description": "Professional photos, optimized listings on all platforms. Live within 48 hours."
+      },
+      "manage": {
+        "number": "05",
+        "title": "Daily management",
+        "description": "We handle bookings, guest check-in, cleaning and maintenance."
+      },
+      "payment": {
+        "number": "06",
+        "title": "Monthly transfer",
+        "description": "You receive your income every month with a detailed report."
+      }
+    }
+  },
+  "process": {
+    "tag": "The process",
+    "title": "Simple, fast, effective",
+    "step1": {
+      "number": "01",
+      "title": "Contact us"
+    },
+    "step2": {
+      "number": "02",
+      "title": "We handle everything"
+    },
+    "step3": {
+      "number": "03",
+      "title": "You collect the income"
+    }
+  },
+  "cta": {
+    "title": "Ready to rent your property?",
+    "subtitle": "Join the property owners who trust us in Mansouria and Mohammedia.",
+    "button": "Contact us"
+  },
+  "contact": {
+    "tag": "Contact",
+    "title": "Let's talk about your property",
+    "subtitle": "Reply within 24h. Free property visit.",
+    "hero": {
+      "title": "Contact us",
+      "subtitle": "Reply within 24h. Free property visit."
+    },
+    "info": {
+      "zone": {
+        "label": "Area covered",
+        "value": "Mansouria · Mohammedia · Casablanca Region"
+      },
+      "email": {
+        "label": "Email",
+        "value": "contact@clevia.ma"
+      },
+      "phone": {
+        "label": "Phone",
+        "value": "+212 6XX XXX XXX"
+      },
+      "hours": {
+        "label": "Hours",
+        "value": "Mon–Sat, 9am–7pm"
+      }
+    },
+    "form": {
+      "title": "Send us a message",
+      "name": "Full name",
+      "namePlaceholder": "Your name",
+      "phone": "Phone",
+      "phonePlaceholder": "+212 6XX XXX XXX",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "city": "Property city",
+      "cityPlaceholder": "e.g. Mansouria, Mohammedia",
+      "type": "Property type",
+      "typePlaceholder": "Select",
+      "typeOptions": {
+        "apartment": "Apartment",
+        "villa": "Villa",
+        "studio": "Studio",
+        "other": "Other"
+      },
+      "message": "Message",
+      "messagePlaceholder": "Describe your property and questions...",
+      "submit": "Send message",
+      "submitting": "Sending...",
+      "success": "Message sent! We'll reply within 24 hours.",
+      "error": "Something went wrong. Please try again.",
+      "required": "Required field"
+    }
+  },
+  "footer": {
+    "tagline": "Your home, handled.",
+    "description": "Short-term rental concierge in Mansouria · Mohammedia · Morocco.",
+    "links": {
+      "title": "Pages",
+      "services": "Services",
+      "how": "How it works",
+      "why": "Why us",
+      "contact": "Contact"
+    },
+    "contact": {
+      "title": "Contact"
+    },
+    "social": {
+      "title": "Follow us"
+    },
+    "copyright": "© 2025 Clévia Conciergerie · Morocco"
+  },
+  "admin": {
+    "login": {
+      "title": "Administration",
+      "subtitle": "Sign in to your workspace",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "error": "Invalid email or password."
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "biens": "Properties",
+      "reservations": "Reservations",
+      "contacts": "Contacts",
+      "settings": "Settings",
+      "viewSite": "View site",
+      "logout": "Sign out"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "biensActifs": "Active properties",
+      "reservationsMois": "Reservations this month",
+      "tauxOccupation": "Occupancy rate",
+      "revenusGeneres": "Revenue this month",
+      "lastReservations": "Latest reservations",
+      "lastContacts": "Latest inquiries"
+    },
+    "biens": {
+      "title": "Property management",
+      "add": "Add property",
+      "edit": "Edit",
+      "delete": "Delete",
+      "nom": "Name",
+      "ville": "City",
+      "type": "Type",
+      "prix": "Price/night",
+      "statut": "Status",
+      "actions": "Actions",
+      "statuts": {
+        "actif": "Active",
+        "en_attente": "Pending",
+        "inactif": "Inactive"
+      }
+    },
+    "reservations": {
+      "title": "Reservations",
+      "add": "Add reservation",
+      "voyageur": "Guest",
+      "bien": "Property",
+      "arrivee": "Check-in",
+      "depart": "Check-out",
+      "nuits": "Nights",
+      "plateforme": "Platform",
+      "montant": "Amount",
+      "commission": "Commission",
+      "statut": "Status",
+      "statuts": {
+        "confirmee": "Confirmed",
+        "annulee": "Cancelled",
+        "terminee": "Completed"
+      }
+    },
+    "contacts": {
+      "title": "Contact inquiries",
+      "date": "Date",
+      "nom": "Name",
+      "telephone": "Phone",
+      "email": "Email",
+      "ville": "City",
+      "type": "Property type",
+      "traite": "Handled",
+      "markTraite": "Mark as handled",
+      "filters": {
+        "all": "All",
+        "unread": "Unhandled",
+        "read": "Handled"
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "subtitle": "Edit website content in 3 languages",
+      "save": "Save",
+      "saved": "Changes saved!",
+      "fr": "French",
+      "ar": "Arabic",
+      "en": "English",
+      "keys": {
+        "slogan": "Slogan",
+        "sous_titre": "Subtitle",
+        "zone": "Area covered",
+        "email": "Email",
+        "telephone": "Phone",
+        "horaires": "Hours",
+        "instagram": "Instagram",
+        "facebook": "Facebook"
+      }
+    }
+  }
+}

@@ -1,0 +1,347 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "services": "Services",
+    "how": "Comment ça marche",
+    "why": "Pourquoi nous",
+    "contact": "Contact",
+    "menuOpen": "Ouvrir le menu",
+    "menuClose": "Fermer le menu"
+  },
+  "hero": {
+    "tag": "Conciergerie · Maroc",
+    "title": "Votre bien,",
+    "titleEmphasis": "notre priorité",
+    "subtitle": "Nous gérons vos locations courte durée sur Airbnb, Booking et Avito — de la mise en ligne jusqu'à l'accueil des voyageurs.",
+    "cta1": "Confier mon bien",
+    "cta2": "Comment ça marche"
+  },
+  "stats": {
+    "days": "+15 jours loués / mois",
+    "daysLabel": "en moyenne",
+    "commission": "20% commission seulement",
+    "commissionLabel": "tout inclus",
+    "stress": "0 stress pour vous",
+    "stressLabel": "on s'occupe de tout",
+    "platforms": "Disponible sur"
+  },
+  "services": {
+    "tag": "Nos services",
+    "title": "Un service complet, de A à Z",
+    "subtitle": "Tout ce dont vous avez besoin pour louer sans stress, de la mise en ligne jusqu'au virement mensuel.",
+    "cta": "Voir tous nos services",
+    "hero": {
+      "title": "Nos services",
+      "subtitle": "Tout ce dont vous avez besoin pour louer sans stress."
+    },
+    "items": {
+      "publication": {
+        "title": "Publication & visibilité",
+        "description": "Annonces optimisées sur Airbnb, Booking et Avito. Tarification dynamique et photos professionnelles incluses."
+      },
+      "photo": {
+        "title": "Photographie professionnelle",
+        "description": "Séance photo incluse à l'onboarding pour mettre votre bien en valeur et maximiser les réservations."
+      },
+      "accueil": {
+        "title": "Accueil & départ voyageurs",
+        "description": "Check-in et check-out gérés par notre équipe. Remise des clés et accompagnement 7j/7."
+      },
+      "menage": {
+        "title": "Ménage & linge",
+        "description": "Nettoyage complet entre chaque séjour, linge hôtelier fourni et entretien régulier."
+      },
+      "reporting": {
+        "title": "Reporting mensuel",
+        "description": "Dashboard revenus, taux d'occupation, avis voyageurs et virement automatique chaque mois."
+      },
+      "maintenance": {
+        "title": "Maintenance & urgences",
+        "description": "Intervention rapide en cas de problème. Réseau d'artisans de confiance à Mohammedia."
+      }
+    },
+    "pricing": {
+      "title": "Notre tarification",
+      "commission": "20–25%",
+      "commissionLabel": "de commission sur les revenus générés",
+      "included": "Tout inclus : photos, annonces, accueil, ménage, reporting.",
+      "cta": "Nous contacter"
+    }
+  },
+  "why": {
+    "tag": "Pourquoi nous",
+    "title": "Une conciergerie 100% légale et transparente",
+    "subtitle": "Nos engagements envers chaque propriétaire.",
+    "list": {
+      "contract": "Contrat de gestion officiel",
+      "report": "Rapport mensuel détaillé",
+      "commission": "Commission transparente 20–25%",
+      "noFees": "Zéro frais cachés"
+    },
+    "stats": {
+      "biens": "5–6 biens gérés d'ici l'été",
+      "nuits": "15+ nuits/mois"
+    },
+    "hero": {
+      "title": "Pourquoi choisir Clévia",
+      "subtitle": "Ce qui nous différencie des autres."
+    },
+    "arguments": {
+      "reliability": {
+        "title": "Fiabilité & transparence",
+        "description": "Contrat, commission et processus clairs. Vous savez exactement ce qui se passe avec votre bien. Pas de surprises."
+      },
+      "local": {
+        "title": "Ancrage local",
+        "description": "On connaît Mansouria et Mohammedia. Nos équipes sont sur place pour réagir vite."
+      },
+      "legal": {
+        "title": "Cadre légal complet",
+        "description": "Clévia est enregistrée. Votre bien est géré dans un cadre professionnel et légal."
+      },
+      "performance": {
+        "title": "Objectif 15+ nuits/mois",
+        "description": "Stratégie tarifaire dynamique et présence multi-plateformes pour maximiser vos revenus."
+      }
+    },
+    "bigStats": {
+      "biens": "5–6",
+      "biensLabel": "biens gérés",
+      "nuits": "15+",
+      "nuitsLabel": "nuits/mois",
+      "commission": "20%",
+      "commissionLabel": "commission"
+    }
+  },
+  "how": {
+    "tag": "Comment ça marche",
+    "title": "De la première prise de contact au premier virement",
+    "subtitle": "Un processus simple, transparent et sans stress.",
+    "hero": {
+      "title": "Comment ça marche",
+      "subtitle": "De la première prise de contact au premier virement."
+    },
+    "steps": {
+      "contact": {
+        "number": "01",
+        "title": "Prise de contact",
+        "description": "Remplissez notre formulaire ou appelez-nous. Nous vous répondons sous 24h."
+      },
+      "visit": {
+        "number": "02",
+        "title": "Visite & évaluation",
+        "description": "Visite gratuite de votre bien et estimation de son potentiel locatif."
+      },
+      "contract": {
+        "number": "03",
+        "title": "Signature du contrat",
+        "description": "Commission claire de 20–25%, sans engagement long terme. Vous gardez le contrôle."
+      },
+      "publish": {
+        "number": "04",
+        "title": "Mise en ligne",
+        "description": "Photos professionnelles, annonces optimisées sur toutes les plateformes. En ligne sous 48h."
+      },
+      "manage": {
+        "number": "05",
+        "title": "Gestion quotidienne",
+        "description": "On gère les réservations, l'accueil des voyageurs, le ménage et la maintenance."
+      },
+      "payment": {
+        "number": "06",
+        "title": "Virement mensuel",
+        "description": "Vous recevez vos revenus chaque mois accompagnés d'un rapport détaillé."
+      }
+    }
+  },
+  "process": {
+    "tag": "Le processus",
+    "title": "Simple, rapide, efficace",
+    "step1": {
+      "number": "01",
+      "title": "Contactez-nous"
+    },
+    "step2": {
+      "number": "02",
+      "title": "On s'occupe de tout"
+    },
+    "step3": {
+      "number": "03",
+      "title": "Vous percevez vos revenus"
+    }
+  },
+  "cta": {
+    "title": "Prêt à louer votre bien ?",
+    "subtitle": "Rejoignez les propriétaires qui nous font confiance à Mansouria et Mohammedia.",
+    "button": "Nous contacter"
+  },
+  "contact": {
+    "tag": "Contact",
+    "title": "Parlons de votre bien",
+    "subtitle": "Réponse sous 24h. Visite gratuite de votre bien.",
+    "hero": {
+      "title": "Contactez-nous",
+      "subtitle": "Réponse sous 24h. Visite gratuite de votre bien."
+    },
+    "info": {
+      "zone": {
+        "label": "Zone couverte",
+        "value": "Mansouria · Mohammedia · Région de Casablanca"
+      },
+      "email": {
+        "label": "Email",
+        "value": "contact@clevia.ma"
+      },
+      "phone": {
+        "label": "Téléphone",
+        "value": "+212 6XX XXX XXX"
+      },
+      "hours": {
+        "label": "Horaires",
+        "value": "Lun–Sam, 9h–19h"
+      }
+    },
+    "form": {
+      "title": "Envoyez-nous un message",
+      "name": "Nom complet",
+      "namePlaceholder": "Votre nom",
+      "phone": "Téléphone",
+      "phonePlaceholder": "+212 6XX XXX XXX",
+      "email": "Email",
+      "emailPlaceholder": "votre@email.com",
+      "city": "Ville du bien",
+      "cityPlaceholder": "Ex : Mansouria, Mohammedia",
+      "type": "Type de bien",
+      "typePlaceholder": "Sélectionner",
+      "typeOptions": {
+        "apartment": "Appartement",
+        "villa": "Villa",
+        "studio": "Studio",
+        "other": "Autre"
+      },
+      "message": "Message",
+      "messagePlaceholder": "Décrivez votre bien, vos questions...",
+      "submit": "Envoyer le message",
+      "submitting": "Envoi en cours...",
+      "success": "Message envoyé ! Nous vous répondons sous 24h.",
+      "error": "Une erreur est survenue. Veuillez réessayer.",
+      "required": "Champ requis"
+    }
+  },
+  "footer": {
+    "tagline": "Votre bien, notre priorité.",
+    "description": "Conciergerie de location courte durée à Mansouria · Mohammedia · Maroc.",
+    "links": {
+      "title": "Pages",
+      "services": "Services",
+      "how": "Comment ça marche",
+      "why": "Pourquoi nous",
+      "contact": "Contact"
+    },
+    "contact": {
+      "title": "Contact"
+    },
+    "social": {
+      "title": "Suivez-nous"
+    },
+    "copyright": "© 2025 Clévia Conciergerie · Maroc"
+  },
+  "admin": {
+    "login": {
+      "title": "Administration",
+      "subtitle": "Connectez-vous à votre espace",
+      "email": "Email",
+      "password": "Mot de passe",
+      "submit": "Se connecter",
+      "error": "Email ou mot de passe incorrect."
+    },
+    "nav": {
+      "dashboard": "Tableau de bord",
+      "biens": "Biens",
+      "reservations": "Réservations",
+      "contacts": "Contacts",
+      "settings": "Paramètres",
+      "viewSite": "Voir le site",
+      "logout": "Déconnexion"
+    },
+    "dashboard": {
+      "title": "Tableau de bord",
+      "biensActifs": "Biens actifs",
+      "reservationsMois": "Réservations ce mois",
+      "tauxOccupation": "Taux d'occupation",
+      "revenusGeneres": "Revenus générés ce mois",
+      "lastReservations": "Dernières réservations",
+      "lastContacts": "Dernières demandes"
+    },
+    "biens": {
+      "title": "Gestion des biens",
+      "add": "Ajouter un bien",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "nom": "Nom",
+      "ville": "Ville",
+      "type": "Type",
+      "prix": "Prix/nuit",
+      "statut": "Statut",
+      "actions": "Actions",
+      "statuts": {
+        "actif": "Actif",
+        "en_attente": "En attente",
+        "inactif": "Inactif"
+      }
+    },
+    "reservations": {
+      "title": "Réservations",
+      "add": "Ajouter une réservation",
+      "voyageur": "Voyageur",
+      "bien": "Bien",
+      "arrivee": "Arrivée",
+      "depart": "Départ",
+      "nuits": "Nuits",
+      "plateforme": "Plateforme",
+      "montant": "Montant",
+      "commission": "Commission",
+      "statut": "Statut",
+      "statuts": {
+        "confirmee": "Confirmée",
+        "annulee": "Annulée",
+        "terminee": "Terminée"
+      }
+    },
+    "contacts": {
+      "title": "Demandes de contact",
+      "date": "Date",
+      "nom": "Nom",
+      "telephone": "Téléphone",
+      "email": "Email",
+      "ville": "Ville",
+      "type": "Type bien",
+      "traite": "Traité",
+      "markTraite": "Marquer comme traité",
+      "filters": {
+        "all": "Tous",
+        "unread": "Non traités",
+        "read": "Traités"
+      }
+    },
+    "settings": {
+      "title": "Paramètres",
+      "subtitle": "Éditez les textes du site en 3 langues",
+      "save": "Sauvegarder",
+      "saved": "Modifications sauvegardées !",
+      "fr": "Français",
+      "ar": "Arabe",
+      "en": "Anglais",
+      "keys": {
+        "slogan": "Slogan",
+        "sous_titre": "Sous-titre",
+        "zone": "Zone couverte",
+        "email": "Email",
+        "telephone": "Téléphone",
+        "horaires": "Horaires",
+        "instagram": "Instagram",
+        "facebook": "Facebook"
+      }
+    }
+  }
+}
