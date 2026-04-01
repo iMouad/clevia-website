@@ -18,12 +18,12 @@
     "cta2": "How it works"
   },
   "stats": {
-    "days": "+15 nights rented / month",
-    "daysLabel": "on average",
-    "commission": "20% commission only",
-    "commissionLabel": "all included",
-    "stress": "0 stress for you",
-    "stressLabel": "we handle everything",
+    "days": "+15 nights / month",
+    "daysLabel": "average occupancy rate",
+    "commission": "48h",
+    "commissionLabel": "to get your property online",
+    "stress": "7/7",
+    "stressLabel": "team availability",
     "platforms": "Available on"
   },
   "services": {
@@ -63,8 +63,8 @@
     },
     "pricing": {
       "title": "Our pricing",
-      "commission": "20–25%",
-      "commissionLabel": "commission on generated revenue",
+      "commission": "Custom",
+      "commissionLabel": "tailored offer for your property",
       "included": "All included: photos, listings, check-in, cleaning, reporting.",
       "cta": "Contact us"
     }
@@ -107,11 +107,12 @@
     },
     "bigStats": {
       "biens": "20%",
-      "biensLabel": "commission, all included",
+      "biens": "48h",
+      "biensLabel": "guaranteed listing",
       "nuits": "15+",
       "nuitsLabel": "nights rented / month",
-      "commission": "24h",
-      "commissionLabel": "response time"
+      "commission": "7/7",
+      "commissionLabel": "team availability"
     }
   },
   "how": {
@@ -136,7 +137,7 @@
       "contract": {
         "number": "03",
         "title": "Sign the contract",
-        "description": "Clear 20–25% commission, no long-term commitment. You stay in control."
+        "description": "Personalised offer based on your property, no long-term commitment. You stay in control."
       },
       "publish": {
         "number": "04",
@@ -260,7 +261,7 @@
     "presetMid": "Average",
     "presetHigh": "High season",
     "brutsLabel": "Gross revenue",
-    "commissionLabel": "Clévia commission",
+    "commissionNote": "Our fee is personalised based on your property and its potential. Contact us for a tailored offer.",
     "netsLabel": "Your net income",
     "disclaimer": "Indicative estimate based on local market data. Results are not guaranteed.",
     "cta": "Entrust my property"

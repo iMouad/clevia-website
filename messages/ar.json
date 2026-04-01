@@ -18,12 +18,12 @@
     "cta2": "كيف يعمل"
   },
   "stats": {
-    "days": "+15 ليلة مؤجرة / شهر",
-    "daysLabel": "في المتوسط",
-    "commission": "عمولة 20% فقط",
-    "commissionLabel": "شامل كل شيء",
-    "stress": "صفر ضغط عليك",
-    "stressLabel": "نحن نتولى كل شيء",
+    "days": "+15 ليلة / شهر",
+    "daysLabel": "متوسط معدل الإشغال",
+    "commission": "48h",
+    "commissionLabel": "لنشر عقارك على المنصات",
+    "stress": "7j/7",
+    "stressLabel": "توفر فريقنا",
     "platforms": "متاح على"
   },
   "services": {
@@ -63,8 +63,8 @@
     },
     "pricing": {
       "title": "تسعيرنا",
-      "commission": "20–25%",
-      "commissionLabel": "عمولة على الإيرادات المحققة",
+      "commission": "حسب الطلب",
+      "commissionLabel": "عرض مخصص لعقارك",
       "included": "شامل كل شيء: الصور والإعلانات والاستقبال والتنظيف والتقارير.",
       "cta": "تواصل معنا"
     }
@@ -107,11 +107,12 @@
     },
     "bigStats": {
       "biens": "20%",
-      "biensLabel": "عمولة شاملة",
+      "biens": "48h",
+      "biensLabel": "نشر مضمون",
       "nuits": "+15",
       "nuitsLabel": "ليلة مؤجرة / شهر",
-      "commission": "24h",
-      "commissionLabel": "وقت الاستجابة"
+      "commission": "7j/7",
+      "commissionLabel": "توفر الفريق"
     }
   },
   "how": {
@@ -136,7 +137,7 @@
       "contract": {
         "number": "03",
         "title": "توقيع العقد",
-        "description": "عمولة واضحة 20–25%، دون التزام طويل الأمد. أنت تحتفظ بالسيطرة."
+        "description": "عرض مخصص حسب عقارك، دون التزام طويل الأمد. أنت تحتفظ بالسيطرة."
       },
       "publish": {
         "number": "04",
@@ -260,7 +261,7 @@
     "presetMid": "متوسط",
     "presetHigh": "موسم مرتفع",
     "brutsLabel": "الإيرادات الإجمالية",
-    "commissionLabel": "عمولة كليفيا",
+    "commissionNote": "عمولتنا مخصصة حسب عقارك وإمكانياته. تواصل معنا للحصول على عرض مناسب.",
     "netsLabel": "دخلك الصافي",
     "disclaimer": "تقدير استرشادي بناءً على بيانات السوق المحلية. النتائج غير مضمونة.",
     "cta": "أسند إلينا عقارك"

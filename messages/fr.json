@@ -18,12 +18,12 @@
     "cta2": "Comment ça marche"
   },
   "stats": {
-    "days": "+15 jours loués / mois",
-    "daysLabel": "en moyenne",
-    "commission": "20% commission seulement",
-    "commissionLabel": "tout inclus",
-    "stress": "0 stress pour vous",
-    "stressLabel": "on s'occupe de tout",
+    "days": "+15 nuits / mois",
+    "daysLabel": "taux d'occupation moyen",
+    "commission": "48h",
+    "commissionLabel": "pour mettre votre bien en ligne",
+    "stress": "7j/7",
+    "stressLabel": "disponibilité de notre équipe",
     "platforms": "Disponible sur"
   },
   "services": {
@@ -63,8 +63,8 @@
     },
     "pricing": {
       "title": "Notre tarification",
-      "commission": "20–25%",
-      "commissionLabel": "de commission sur les revenus générés",
+      "commission": "Sur mesure",
+      "commissionLabel": "formule adaptée à votre bien",
       "included": "Tout inclus : photos, annonces, accueil, ménage, reporting.",
       "cta": "Nous contacter"
     }
@@ -106,12 +106,12 @@
       }
     },
     "bigStats": {
-      "biens": "20%",
-      "biensLabel": "commission tout inclus",
+      "biens": "48h",
+      "biensLabel": "mise en ligne garantie",
       "nuits": "15+",
       "nuitsLabel": "nuits louées / mois",
-      "commission": "24h",
-      "commissionLabel": "délai de réponse"
+      "commission": "7j/7",
+      "commissionLabel": "disponibilité"
     }
   },
   "how": {
@@ -136,7 +136,7 @@
       "contract": {
         "number": "03",
         "title": "Signature du contrat",
-        "description": "Commission claire de 20–25%, sans engagement long terme. Vous gardez le contrôle."
+        "description": "Formule personnalisée selon votre bien, sans engagement long terme. Vous gardez le contrôle."
       },
       "publish": {
         "number": "04",
@@ -260,7 +260,7 @@
     "presetMid": "Moyenne",
     "presetHigh": "Haute saison",
     "brutsLabel": "Revenus bruts",
-    "commissionLabel": "Commission Clévia",
+    "commissionNote": "Notre commission est personnalisée selon votre bien et son potentiel. Contactez-nous pour une offre sur mesure.",
     "netsLabel": "Vos revenus nets",
     "disclaimer": "Estimation indicative basée sur les données du marché local. Résultats non garantis.",
     "cta": "Confier mon bien"

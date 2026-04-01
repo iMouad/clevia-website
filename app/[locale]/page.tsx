@@ -142,15 +142,29 @@ export default function HomePage() {
                   <span className="text-brun-mid text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                     {t('stats.platforms')} :
                   </span>
-                  {['Airbnb', 'Booking', 'Avito'].map((p) => (
-                    <span
-                      key={p}
-                      className="text-xs font-medium border border-brun/20 text-brun-mid rounded-full px-3 py-1"
-                      style={{ fontFamily: 'var(--font-dm-sans)' }}
-                    >
-                      {p}
-                    </span>
-                  ))}
+                  {/* Airbnb */}
+                  <div className="flex items-center gap-1.5 border border-brun/15 rounded-full px-3 py-1.5 bg-white shadow-xs">
+                    <svg width="14" height="14" viewBox="0 0 32 32" fill="#FF5A5F">
+                      <path d="M16 1C10.477 1 6 5.477 6 11c0 3.518 1.946 6.614 4.857 8.32L16 31l5.143-11.68C24.054 17.614 26 14.518 26 11c0-5.523-4.477-10-10-10zm0 13.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7z"/>
+                    </svg>
+                    <span className="text-xs font-medium text-[#FF5A5F]" style={{ fontFamily: 'var(--font-dm-sans)' }}>Airbnb</span>
+                  </div>
+                  {/* Booking */}
+                  <div className="flex items-center gap-1.5 border border-brun/15 rounded-full px-3 py-1.5 bg-white shadow-xs">
+                    <svg width="14" height="14" viewBox="0 0 32 32" fill="none">
+                      <rect width="32" height="32" rx="6" fill="#003580"/>
+                      <text x="5" y="23" fontSize="20" fontWeight="bold" fill="white" fontFamily="Arial">B</text>
+                    </svg>
+                    <span className="text-xs font-medium text-[#003580]" style={{ fontFamily: 'var(--font-dm-sans)' }}>Booking</span>
+                  </div>
+                  {/* Avito */}
+                  <div className="flex items-center gap-1.5 border border-brun/15 rounded-full px-3 py-1.5 bg-white shadow-xs">
+                    <svg width="14" height="14" viewBox="0 0 32 32" fill="none">
+                      <rect width="32" height="32" rx="6" fill="#E07A2F"/>
+                      <text x="6" y="23" fontSize="20" fontWeight="bold" fill="white" fontFamily="Arial">A</text>
+                    </svg>
+                    <span className="text-xs font-medium text-[#E07A2F]" style={{ fontFamily: 'var(--font-dm-sans)' }}>Avito</span>
+                  </div>
                 </div>
               </AnimateIn>
             </div>
@@ -161,14 +175,14 @@ export default function HomePage() {
                 <div className="flex flex-col divide-y divide-brun/8">
                   {[
                     { value: '+15', label: t('stats.days'), sub: t('stats.daysLabel') },
-                    { value: '20%', label: t('stats.commission'), sub: t('stats.commissionLabel') },
-                    { value: '0', label: t('stats.stress'), sub: t('stats.stressLabel') },
+                    { value: '48h', label: t('stats.commission'), sub: t('stats.commissionLabel') },
+                    { value: '7j/7', label: t('stats.stress'), sub: t('stats.stressLabel') },
                   ].map(({ value, label, sub }) => (
                     <div key={value} className="py-5 first:pt-0 last:pb-0">
                       <div className="flex items-baseline gap-3">
                         <span
                           className="text-4xl text-terra"
-                          style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300 }}
+                          style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}
                         >
                           {value}
                         </span>
@@ -268,7 +282,7 @@ export default function HomePage() {
               <AnimateIn delay={0.1}>
                 <div className="bg-creme/10 border border-creme/20 rounded-2xl p-8">
                   <p className="text-5xl text-terra mb-2" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
-                    20%
+                    {t('why.bigStats.biens')}
                   </p>
                   <p className="text-creme/70 text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                     {t('why.bigStats.biensLabel')}
@@ -278,7 +292,7 @@ export default function HomePage() {
               <AnimateIn delay={0.2}>
                 <div className="bg-terra/20 border border-terra/30 rounded-2xl p-8">
                   <p className="text-5xl text-sable mb-2" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
-                    15+
+                    {t('why.bigStats.nuits')}
                   </p>
                   <p className="text-creme/70 text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                     {t('why.bigStats.nuitsLabel')}
