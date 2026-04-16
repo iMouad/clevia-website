@@ -19,6 +19,11 @@
       "tag": "Outil gratuit",
       "title": "Combien peut rapporter votre bien ?",
       "subtitle": "Ajustez les critères et obtenez une estimation de vos revenus mensuels basée sur les données du marché local."
+    },
+    "cta": {
+      "title": "Prêt à confier votre bien à Clévia ?",
+      "subtitle": "Visite gratuite, sans engagement. Nous gérons tout, vous percevez vos revenus chaque mois.",
+      "button": "Nous contacter"
     }
   },
   "hero": {
