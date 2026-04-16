@@ -245,7 +245,7 @@ export default function HomePage() {
       <HomeBiensSection />
 
       {/* ── CALCULATEUR DE REVENUS ──────────────── */}
-      <RevenueCalculator />
+      <RevenueCalculator showLeadCapture />
 
       {/* ── TÉMOIGNAGES ─────────────────────────── */}
       <TemoignagesSection />
