@@ -6,8 +6,20 @@
     "how": "Comment ça marche",
     "why": "Pourquoi nous",
     "contact": "Contact",
+    "simulateur": "Estimer mon bien",
     "menuOpen": "Ouvrir le menu",
     "menuClose": "Fermer le menu"
+  },
+  "simulateur": {
+    "meta": {
+      "title": "Simulateur de revenus — Clévia Conciergerie",
+      "description": "Estimez combien peut rapporter votre bien à El Mansouria ou Mohammedia en location courte durée sur Airbnb, Booking et Avito."
+    },
+    "hero": {
+      "tag": "Outil gratuit",
+      "title": "Combien peut rapporter votre bien ?",
+      "subtitle": "Ajustez les critères et obtenez une estimation de vos revenus mensuels basée sur les données du marché local."
+    }
   },
   "hero": {
     "tag": "Conciergerie · Maroc",

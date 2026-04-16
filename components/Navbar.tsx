@@ -107,6 +107,18 @@ export default function Navbar() {
               ))}
             </div>
 
+            {/* Simulateur button — outline */}
+            <Link
+              href="/simulateur"
+              className={`border font-medium rounded-full px-5 py-2 text-sm transition-all duration-200 ${
+                isActive('/simulateur')
+                  ? 'border-terra bg-terra/10 text-terra'
+                  : 'border-brun/30 text-brun hover:border-terra hover:text-terra'
+              }`}
+            >
+              {t('simulateur')}
+            </Link>
+
             {/* CTA button */}
             <Link
               href="/contact"
@@ -172,6 +184,18 @@ export default function Navbar() {
                 </Link>
               </li>
             </ul>
+
+            {/* Simulateur CTA — mobile */}
+            <Link
+              href="/simulateur"
+              className={`border-2 font-medium rounded-full px-8 py-3 text-center transition-all duration-200 ${
+                isActive('/simulateur')
+                  ? 'border-terra bg-terra/10 text-terra'
+                  : 'border-terra text-terra hover:bg-terra hover:text-creme'
+              }`}
+            >
+              {t('simulateur')}
+            </Link>
 
             {/* Mobile lang switcher */}
             <div className="flex items-center gap-2 pt-2 border-t border-brun/10">

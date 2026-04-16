@@ -6,8 +6,20 @@
     "how": "How it works",
     "why": "Why us",
     "contact": "Contact",
+    "simulateur": "Estimate my revenue",
     "menuOpen": "Open menu",
     "menuClose": "Close menu"
+  },
+  "simulateur": {
+    "meta": {
+      "title": "Revenue Estimator — Clévia Conciergerie",
+      "description": "Estimate how much your property in El Mansouria or Mohammedia can earn through short-term rental on Airbnb, Booking and Avito."
+    },
+    "hero": {
+      "tag": "Free tool",
+      "title": "How much can your property earn?",
+      "subtitle": "Adjust the criteria and get a monthly revenue estimate based on local market data."
+    }
   },
   "hero": {
     "tag": "Concierge · Morocco",
