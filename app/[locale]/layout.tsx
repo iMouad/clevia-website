@@ -7,6 +7,7 @@ import { hasLocale } from 'next-intl'
 import { routing } from '@/i18n/routing'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import WhatsAppButton from '@/components/WhatsAppButton'
 import '../globals.css'
 
 const playfair = Playfair_Display({
@@ -82,6 +83,7 @@ export default async function LocaleLayout({ children, params }: Props) {
           <Navbar />
           <main className="flex-1">{children}</main>
           <Footer />
+          <WhatsAppButton />
         </NextIntlClientProvider>
       </body>
     </html>

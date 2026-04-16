@@ -94,7 +94,7 @@ export default function SimulateurPage() {
   return (
     <main>
       <SimulateurHero />
-      <RevenueCalculator />
+      <RevenueCalculator showLeadCapture />
       <SimulateurCta />
     </main>
   )

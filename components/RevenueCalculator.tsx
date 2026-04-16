@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useTransition } from 'react'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
+import { submitSimulateurLead } from '@/app/[locale]/simulateur/actions'
 
 // ─── Données marché El Mansouria / Mohammedia ─────────────────────────────────
 // Prix de base par type (avec le nombre de chambres par défaut)
@@ -80,8 +81,9 @@ function CheckBox({ checked }: { checked: boolean }) {
   )
 }
 
-export default function RevenueCalculator() {
-  const t = useTranslations('calculator')
+export default function RevenueCalculator({ showLeadCapture = false }: { showLeadCapture?: boolean }) {
+  const t  = useTranslations('calculator')
+  const tL = useTranslations('simulateur.lead')
 
   const [type,     setType]     = useState<string>('Appartement')
   const [chambres, setChambres] = useState<string>('2')
@@ -90,6 +92,13 @@ export default function RevenueCalculator() {
   const [clim,     setClim]     = useState(false)
   const [prixNuit, setPrixNuit] = useState(450)
   const [nuits,    setNuits]    = useState(18)
+
+  // Lead capture
+  const [leadPhone,    setLeadPhone]    = useState('')
+  const [leadDone,     setLeadDone]     = useState(false)
+  const [leadDismissed,setLeadDismissed]= useState(false)
+  const [leadError,    setLeadError]    = useState(false)
+  const [isPending,    startTransition] = useTransition()
 
   useEffect(() => {
     const ch = DEFAULT_CHAMBRES[type] ?? '2'
@@ -107,6 +116,20 @@ export default function RevenueCalculator() {
 
   const CH_KEYS: Record<string, 'ch1' | 'ch2' | 'ch3' | 'ch4'> = {
     '1': 'ch1', '2': 'ch2', '3': 'ch3', '4+': 'ch4',
+  }
+
+  function handleLeadSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!leadPhone.trim()) return
+    setLeadError(false)
+    startTransition(async () => {
+      try {
+        await submitSimulateurLead({ telephone: leadPhone.trim(), type, chambres, piscine, mer, clim, prixNuit, nuits, bruts })
+        setLeadDone(true)
+      } catch {
+        setLeadError(true)
+      }
+    })
   }
 
   return (
@@ -335,6 +358,60 @@ export default function RevenueCalculator() {
                 </span>
               </div>
             </div>
+
+            {/* Lead capture — uniquement sur la page /simulateur */}
+            {showLeadCapture && !leadDismissed && (
+              <div className="bg-white/8 border border-terra/30 rounded-2xl p-6">
+                {leadDone ? (
+                  <p className="text-center text-terra font-medium text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                    {tL('success')}
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-creme font-medium text-sm mb-1" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                      {tL('title')}
+                    </p>
+                    <p className="text-creme/50 text-xs mb-4 leading-relaxed" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                      {tL('subtitle')}
+                    </p>
+                    <form onSubmit={handleLeadSubmit} className="flex flex-col gap-3">
+                      <input
+                        type="tel"
+                        value={leadPhone}
+                        onChange={(e) => setLeadPhone(e.target.value)}
+                        placeholder={tL('placeholder')}
+                        required
+                        className="w-full bg-white/10 border border-creme/20 rounded-xl px-4 py-2.5 text-sm text-creme placeholder:text-creme/30 focus:outline-none focus:border-terra/60"
+                        style={{ fontFamily: 'var(--font-dm-sans)' }}
+                      />
+                      {leadError && (
+                        <p className="text-red-400 text-xs" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                          Une erreur est survenue, réessayez.
+                        </p>
+                      )}
+                      <div className="flex gap-2">
+                        <button
+                          type="submit"
+                          disabled={isPending}
+                          className="flex-1 bg-terra text-creme font-medium rounded-full py-2.5 text-sm hover:bg-sable transition-colors disabled:opacity-60"
+                          style={{ fontFamily: 'var(--font-dm-sans)' }}
+                        >
+                          {isPending ? tL('submitting') : tL('submit')}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setLeadDismissed(true)}
+                          className="px-4 py-2.5 text-xs text-creme/40 hover:text-creme/70 transition-colors"
+                          style={{ fontFamily: 'var(--font-dm-sans)' }}
+                        >
+                          {tL('skip')}
+                        </button>
+                      </div>
+                    </form>
+                  </>
+                )}
+              </div>
+            )}
 
             {/* Commission note */}
             <div className="flex items-start gap-3 bg-sable/10 border border-sable/25 rounded-xl px-4 py-3.5">

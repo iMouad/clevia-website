@@ -10,6 +10,10 @@
     "menuOpen": "Open menu",
     "menuClose": "Close menu"
   },
+  "whatsapp": {
+    "aria": "Contact Clévia on WhatsApp",
+    "message": "Hello, I would like to know more about managing my property with Clévia Conciergerie."
+  },
   "simulateur": {
     "meta": {
       "title": "Revenue Estimator — Clévia Conciergerie",
@@ -24,6 +28,15 @@
       "title": "Ready to entrust your property to Clévia?",
       "subtitle": "Free visit, no commitment. We handle everything, you receive your income every month.",
       "button": "Contact us"
+    },
+    "lead": {
+      "title": "Get a personalised estimate",
+      "subtitle": "Leave your number and we'll call you back within 24h with a full analysis of your property.",
+      "placeholder": "Your phone number",
+      "submit": "Get a callback",
+      "submitting": "Sending...",
+      "success": "Received! We'll call you back within 24h.",
+      "skip": "No thanks"
     }
   },
   "hero": {

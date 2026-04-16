@@ -10,6 +10,10 @@
     "menuOpen": "Ouvrir le menu",
     "menuClose": "Fermer le menu"
   },
+  "whatsapp": {
+    "aria": "Contacter Clévia sur WhatsApp",
+    "message": "Bonjour, je souhaite en savoir plus sur la gestion de mon bien avec Clévia Conciergerie."
+  },
   "simulateur": {
     "meta": {
       "title": "Simulateur de revenus — Clévia Conciergerie",
@@ -24,6 +28,15 @@
       "title": "Prêt à confier votre bien à Clévia ?",
       "subtitle": "Visite gratuite, sans engagement. Nous gérons tout, vous percevez vos revenus chaque mois.",
       "button": "Nous contacter"
+    },
+    "lead": {
+      "title": "Recevoir une estimation personnalisée",
+      "subtitle": "Laissez votre numéro, on vous rappelle sous 24h avec une analyse complète de votre bien.",
+      "placeholder": "Votre numéro de téléphone",
+      "submit": "Être rappelé",
+      "submitting": "Envoi...",
+      "success": "Reçu ! On vous rappelle sous 24h.",
+      "skip": "Non merci"
     }
   },
   "hero": {
