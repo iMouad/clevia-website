@@ -4,16 +4,30 @@ import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 
-// ─── Données marché El Mansouria / Mohammedia (basées sur Airbnb) ─────────────
-// Prix de base par type de bien, 1 chambre, sans aucune option
+// ─── Données marché El Mansouria / Mohammedia ─────────────────────────────────
+// Prix de base par type (avec le nombre de chambres par défaut)
+// La piscine est très courante dans la région → déjà intégrée dans le prix de base
 const BASE_PRICES: Record<string, number> = {
-  Studio:       200,
-  Appartement:  350,
-  Villa:        600,
-  Autre:        300,
+  Studio:       300,   // 1 chambre — basse saison
+  Appartement:  450,   // 2 chambres standard — basse saison (400–500 MAD marché)
+  Villa:        700,   // 3 chambres — basse saison
+  Autre:        380,
 }
 
-// Nombre de chambres par défaut selon le type
+// Delta prix selon nombre de chambres (par rapport au défaut du type)
+// Le nombre de chambres est le critère le plus impactant
+const CHAMBRE_DELTA: Record<string, Record<string, number>> = {
+  Studio:       { '1': 0 },
+  Appartement:  { '1': -100, '2': 0, '3': 130 },
+  Villa:        { '2': -130, '3': 0, '4+': 160 },
+  Autre:        { '1': -80,  '2': 0, '3': 100, '4+': 180 },
+}
+
+// Bonus options — impact volontairement modéré (piscine = norme dans la région)
+const BONUS_PISCINE = 30
+const BONUS_MER     = 50
+const BONUS_CLIM    = 20
+
 const DEFAULT_CHAMBRES: Record<string, string> = {
   Studio:       '1',
   Appartement:  '2',
@@ -21,26 +35,12 @@ const DEFAULT_CHAMBRES: Record<string, string> = {
   Autre:        '2',
 }
 
-// Chambres disponibles selon le type (Studio = toujours 1)
 const CHAMBRES_OPTIONS: Record<string, string[]> = {
   Studio:       ['1'],
   Appartement:  ['1', '2', '3'],
   Villa:        ['2', '3', '4+'],
   Autre:        ['1', '2', '3', '4+'],
 }
-
-// Bonus prix par chambre supplémentaire (au-delà de 1)
-const CHAMBRE_BONUS: Record<string, number> = {
-  '1':  0,
-  '2':  150,
-  '3':  300,
-  '4+': 480,
-}
-
-// Bonus par option (basé sur le marché local)
-const BONUS_PISCINE = 350   // +350 MAD/nuit — forte demande été
-const BONUS_MER     = 250   // +250 MAD/nuit — bord de mer / vue mer
-const BONUS_CLIM    =  80   // +80 MAD/nuit — standard attendu en été
 
 const TYPES = ['Studio', 'Appartement', 'Villa', 'Autre'] as const
 
@@ -61,15 +61,12 @@ function calcSuggestedPrice(
   mer: boolean,
   clim: boolean
 ): number {
-  const base    = BASE_PRICES[type]    ?? 300
-  const chBonus = CHAMBRE_BONUS[chambres] ?? 0
-  const pBonus  = piscine ? BONUS_PISCINE : 0
-  const mBonus  = mer     ? BONUS_MER     : 0
-  const cBonus  = clim    ? BONUS_CLIM    : 0
-  return base + chBonus + pBonus + mBonus + cBonus
+  const base  = BASE_PRICES[type] ?? 380
+  const delta = CHAMBRE_DELTA[type]?.[chambres] ?? 0
+  return base + delta + (piscine ? BONUS_PISCINE : 0) + (mer ? BONUS_MER : 0) + (clim ? BONUS_CLIM : 0)
 }
 
-function CheckIcon({ checked }: { checked: boolean }) {
+function CheckBox({ checked }: { checked: boolean }) {
   return (
     <div className={`w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 transition-all duration-150 ${
       checked ? 'bg-terra border-terra' : 'border-creme/30 bg-transparent'
@@ -86,17 +83,16 @@ function CheckIcon({ checked }: { checked: boolean }) {
 export default function RevenueCalculator() {
   const t = useTranslations('calculator')
 
-  const [type,    setType]    = useState<string>('Appartement')
-  const [chambres,setChambres]= useState<string>('2')
-  const [piscine, setPiscine] = useState(false)
-  const [mer,     setMer]     = useState(false)
-  const [clim,    setClim]    = useState(false)
-  const [prixNuit,setPrixNuit]= useState(350)
-  const [nuits,   setNuits]   = useState(18)
+  const [type,     setType]     = useState<string>('Appartement')
+  const [chambres, setChambres] = useState<string>('2')
+  const [piscine,  setPiscine]  = useState(false)
+  const [mer,      setMer]      = useState(false)
+  const [clim,     setClim]     = useState(false)
+  const [prixNuit, setPrixNuit] = useState(450)
+  const [nuits,    setNuits]    = useState(18)
 
-  // Recalcule le prix suggéré à chaque changement d'option
   useEffect(() => {
-    const ch = DEFAULT_CHAMBRES[type] ?? '1'
+    const ch = DEFAULT_CHAMBRES[type] ?? '2'
     setChambres(ch)
     setPrixNuit(calcSuggestedPrice(type, ch, piscine, mer, clim))
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -107,8 +103,11 @@ export default function RevenueCalculator() {
   }, [chambres, piscine, mer, clim, type])
 
   const bruts = prixNuit * nuits
-
   const chambresOpts = CHAMBRES_OPTIONS[type] ?? ['1', '2', '3', '4+']
+
+  const CH_KEYS: Record<string, 'ch1' | 'ch2' | 'ch3' | 'ch4'> = {
+    '1': 'ch1', '2': 'ch2', '3': 'ch3', '4+': 'ch4',
+  }
 
   return (
     <section className="bg-brun py-24 px-4">
@@ -182,19 +181,19 @@ export default function RevenueCalculator() {
                       }`}
                       style={{ fontFamily: 'var(--font-dm-sans)' }}
                     >
-                      {t(ch === '4+' ? 'ch4' : ch === '3' ? 'ch3' : ch === '2' ? 'ch2' : 'ch1')}
+                      {t(CH_KEYS[ch] ?? 'ch1')}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Options booléennes */}
-              <div className="flex flex-col gap-3">
-                {[
-                  { key: 'optionPiscine', value: piscine, set: setPiscine, bonus: BONUS_PISCINE, emoji: '🏊' },
-                  { key: 'optionMer',     value: mer,     set: setMer,     bonus: BONUS_MER,     emoji: '🌊' },
-                  { key: 'optionClim',    value: clim,    set: setClim,    bonus: BONUS_CLIM,    emoji: '❄️' },
-                ].map(({ key, value, set, bonus, emoji }) => (
+              {/* Options booléennes — sans affichage du bonus */}
+              <div className="flex flex-col gap-2.5">
+                {([
+                  { key: 'optionPiscine' as const, value: piscine, set: setPiscine },
+                  { key: 'optionMer'     as const, value: mer,     set: setMer     },
+                  { key: 'optionClim'    as const, value: clim,    set: setClim    },
+                ] as const).map(({ key, value, set }) => (
                   <button
                     key={key}
                     onClick={() => set(!value)}
@@ -204,14 +203,9 @@ export default function RevenueCalculator() {
                         : 'border-creme/15 hover:border-creme/30 hover:bg-creme/5'
                     }`}
                   >
-                    <CheckIcon checked={value} />
-                    <span className="flex-1 text-sm text-creme/80" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                      <span className="mr-2">{emoji}</span>
-                      {t(key as 'optionPiscine')}
-                    </span>
-                    <span className={`text-xs tabular-nums font-medium transition-colors ${value ? 'text-terra' : 'text-creme/30'}`}
-                      style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                      +{bonus} MAD
+                    <CheckBox checked={value} />
+                    <span className="text-sm text-creme/80" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                      {t(key)}
                     </span>
                   </button>
                 ))}
@@ -235,13 +229,13 @@ export default function RevenueCalculator() {
                 {t('priceAdjusted')}
               </p>
               <input
-                type="range" min={100} max={2000} step={25} value={prixNuit}
+                type="range" min={100} max={1500} step={25} value={prixNuit}
                 onChange={(e) => setPrixNuit(Number(e.target.value))}
                 className="w-full h-2 rounded-full appearance-none cursor-pointer"
                 style={{ accentColor: '#C97B4B' }}
               />
               <div className="flex justify-between text-xs text-creme/30 mt-2" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                <span>100 MAD</span><span>2 000 MAD</span>
+                <span>100 MAD</span><span>1 500 MAD</span>
               </div>
             </div>
 
@@ -259,7 +253,6 @@ export default function RevenueCalculator() {
                 </span>
               </div>
 
-              {/* Preset buttons */}
               <div className="flex gap-2 mb-4">
                 {PRESETS.map(({ labelKey, nuits: n }) => (
                   <button
@@ -272,7 +265,7 @@ export default function RevenueCalculator() {
                     }`}
                     style={{ fontFamily: 'var(--font-dm-sans)' }}
                   >
-                    {t(labelKey as 'presetLow')}
+                    {t(labelKey)}
                   </button>
                 ))}
               </div>
@@ -316,22 +309,21 @@ export default function RevenueCalculator() {
                   {prixNuit} MAD × {nuits} {t('nights')}
                 </span>
               </div>
-              {/* Options actives */}
               {(piscine || mer || clim) && (
                 <div className="flex flex-wrap gap-2 pt-1">
                   {piscine && (
                     <span className="text-xs bg-terra/20 text-terra px-2 py-0.5 rounded-full" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                      🏊 {t('optionPiscine')}
+                      {t('optionPiscine')}
                     </span>
                   )}
                   {mer && (
                     <span className="text-xs bg-terra/20 text-terra px-2 py-0.5 rounded-full" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                      🌊 {t('optionMer')}
+                      {t('optionMer')}
                     </span>
                   )}
                   {clim && (
                     <span className="text-xs bg-terra/20 text-terra px-2 py-0.5 rounded-full" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                      ❄️ {t('optionClim')}
+                      {t('optionClim')}
                     </span>
                   )}
                 </div>
