@@ -191,11 +191,11 @@
       },
       "email": {
         "label": "Email",
-        "value": "contact@clevia.ma"
+        "value": "contact@cleviamaroc.com"
       },
       "phone": {
         "label": "Téléphone",
-        "value": "+212 6XX XXX XXX"
+        "value": "+212 614 268 283"
       },
       "hours": {
         "label": "Horaires",
@@ -245,14 +245,24 @@
     "social": {
       "title": "Suivez-nous"
     },
-    "copyright": "© 2025 Clévia Conciergerie · Maroc"
+    "copyright": "© 2026 Clévia Conciergerie · Maroc"
   },
   "calculator": {
     "tag": "Simulateur",
     "title": "Combien peut rapporter votre bien ?",
     "subtitle": "Estimez vos revenus mensuels nets en quelques secondes.",
     "typeLabel": "Type de bien",
+    "optionsLabel": "Caractéristiques du bien",
+    "chambresLabel": "Nombre de chambres",
+    "ch1": "1 chambre",
+    "ch2": "2 chambres",
+    "ch3": "3 chambres",
+    "ch4": "4+ chambres",
+    "optionPiscine": "Piscine",
+    "optionMer": "Bord de mer / Vue mer",
+    "optionClim": "Climatisé",
     "priceLabel": "Prix par nuit estimé",
+    "priceAdjusted": "Prix ajusté selon vos options",
     "nightsLabel": "Nuits louées par mois",
     "nights": "nuits",
     "month": "mois",
@@ -262,7 +272,7 @@
     "brutsLabel": "Revenus bruts",
     "commissionNote": "Notre commission est personnalisée selon votre bien et son potentiel. Contactez-nous pour une offre sur mesure.",
     "netsLabel": "Vos revenus nets",
-    "disclaimer": "Estimation indicative basée sur les données du marché local. Résultats non garantis.",
+    "disclaimer": "Estimation indicative basée sur les données du marché local (El Mansouria · Mohammedia). Résultats non garantis.",
     "cta": "Confier mon bien"
   },
   "testimonials": {

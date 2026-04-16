@@ -43,7 +43,7 @@ export default function Footer() {
             {/* Social links */}
             <div className="flex items-center gap-3 mt-2">
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/cleviamaroc"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-creme/50 hover:text-sable transition-colors"
@@ -52,7 +52,7 @@ export default function Footer() {
                 <InstagramIcon />
               </a>
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/Cleviama"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-creme/50 hover:text-sable transition-colors"

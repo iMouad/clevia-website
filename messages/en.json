@@ -192,11 +192,11 @@
       },
       "email": {
         "label": "Email",
-        "value": "contact@clevia.ma"
+        "value": "contact@cleviamaroc.com"
       },
       "phone": {
         "label": "Phone",
-        "value": "+212 6XX XXX XXX"
+        "value": "+212 614 268 283"
       },
       "hours": {
         "label": "Hours",
@@ -246,14 +246,24 @@
     "social": {
       "title": "Follow us"
     },
-    "copyright": "© 2025 Clévia Conciergerie · Morocco"
+    "copyright": "© 2026 Clévia Conciergerie · Morocco"
   },
   "calculator": {
     "tag": "Revenue estimator",
     "title": "How much can your property earn?",
     "subtitle": "Estimate your monthly net income in seconds.",
     "typeLabel": "Property type",
+    "optionsLabel": "Property features",
+    "chambresLabel": "Number of bedrooms",
+    "ch1": "1 bedroom",
+    "ch2": "2 bedrooms",
+    "ch3": "3 bedrooms",
+    "ch4": "4+ bedrooms",
+    "optionPiscine": "Swimming pool",
+    "optionMer": "Beachfront / Sea view",
+    "optionClim": "Air conditioning",
     "priceLabel": "Estimated price per night",
+    "priceAdjusted": "Price adjusted to your options",
     "nightsLabel": "Nights rented per month",
     "nights": "nights",
     "month": "month",
@@ -263,7 +273,7 @@
     "brutsLabel": "Gross revenue",
     "commissionNote": "Our fee is personalised based on your property and its potential. Contact us for a tailored offer.",
     "netsLabel": "Your net income",
-    "disclaimer": "Indicative estimate based on local market data. Results are not guaranteed.",
+    "disclaimer": "Indicative estimate based on local market data (El Mansouria · Mohammedia). Results are not guaranteed.",
     "cta": "Entrust my property"
   },
   "testimonials": {
