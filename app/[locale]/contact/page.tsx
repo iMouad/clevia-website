@@ -37,7 +37,13 @@ function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string
   )
 }
 
-export default function ContactPage() {
+export default async function ContactPage({
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>
+  searchParams: Promise<{ bien?: string }>
+}) {
+  const { bien } = await searchParams
   const t = useTranslations('contact')
 
   return (
@@ -138,7 +144,7 @@ export default function ContactPage() {
             <AnimateIn delay={0.15} className="lg:col-span-3">
               <div className="bg-white border border-brun/10 rounded-2xl p-8 shadow-sm">
                 <h2 className="text-2xl text-brun mb-6">{t('form.title')}</h2>
-                <ContactForm />
+                <ContactForm defaultBien={bien} />
               </div>
             </AnimateIn>
           </div>

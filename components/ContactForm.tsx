@@ -15,10 +15,14 @@ function Spinner() {
   )
 }
 
-export default function ContactForm() {
+export default function ContactForm({ defaultBien }: { defaultBien?: string }) {
   const t = useTranslations('contact.form')
   const [isPending, startTransition] = useTransition()
   const [status, setStatus] = useState<Status>('idle')
+
+  const defaultMessage = defaultBien
+    ? `Bonjour, je suis intéressé(e) par le bien "${defaultBien}". Pouvez-vous me contacter pour plus d'informations ?`
+    : ''
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -130,6 +134,7 @@ export default function ContactForm() {
           name="message"
           rows={4}
           placeholder={t('messagePlaceholder')}
+          defaultValue={defaultMessage}
           className={`${inputClass} resize-none`}
           style={{ fontFamily: 'var(--font-dm-sans)' }}
         />

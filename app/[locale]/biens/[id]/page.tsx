@@ -4,6 +4,8 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { Link } from '@/i18n/navigation'
 import BienGallery from '@/components/biens/BienGallery'
+import BienCard from '@/components/BienCard'
+import type { BienPublic } from '@/components/BienCard'
 import { EQUIPEMENTS_MAP, REGLES_OPTIONS } from '@/lib/equipements'
 
 type Props = { params: Promise<{ locale: string; id: string }> }
@@ -76,13 +78,71 @@ export default async function BienDetailPage({ params }: Props) {
   const equips = ((bien.equipements ?? []) as string[]).filter((k) => k in EQUIPEMENTS_MAP)
   const regles = (bien.regles ?? []) as string[]
   const isDisponible = bien.disponible !== false
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.cleviamaroc.com'
+
+  // Autres biens
+  const { data: autresBiensRaw } = await supabase
+    .from('biens')
+    .select('id, nom, ville, adresse, type, capacite, chambres, salles_de_bain, capacite_max, surface, equipements, prix_nuit, description, photos, distance_mer, disponible, airbnb_url, booking_url, avito_url')
+    .eq('statut', 'actif')
+    .neq('id', id)
+    .limit(3)
+
+  const autresBiens: BienPublic[] = (autresBiensRaw ?? []).map((b) => ({
+    id: b.id, nom: b.nom, ville: b.ville ?? null, adresse: b.adresse ?? null,
+    type: b.type ?? null, capacite: b.capacite ?? null, chambres: b.chambres ?? null,
+    salles_de_bain: b.salles_de_bain ?? null, capacite_max: b.capacite_max ?? null,
+    surface: b.surface ?? null, equipements: b.equipements ?? null,
+    prix_nuit: b.prix_nuit ?? null, description: b.description ?? null,
+    photos: b.photos ?? null, distance_mer: b.distance_mer ?? null,
+    disponible: b.disponible ?? null, airbnb_url: b.airbnb_url ?? null,
+    booking_url: b.booking_url ?? null, avito_url: b.avito_url ?? null,
+  }))
+
+  // JSON-LD
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'LodgingBusiness',
+    name: bien.nom,
+    description: bien.description ?? `Location courte durée à ${bien.ville ?? 'Mansouria · Mohammedia'}, géré par Clévia Conciergerie.`,
+    url: `${siteUrl}/${locale}/biens/${id}`,
+    image: photos.slice(0, 5),
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: bien.adresse ?? undefined,
+      addressLocality: bien.ville ?? 'Mansouria',
+      addressCountry: 'MA',
+    },
+    ...(bien.chambres && { numberOfRooms: bien.chambres }),
+    ...(bien.prix_nuit && {
+      priceRange: `${bien.prix_nuit} MAD/nuit`,
+      offers: {
+        '@type': 'Offer',
+        price: String(bien.prix_nuit),
+        priceCurrency: 'MAD',
+        availability: isDisponible ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      },
+    }),
+    amenityFeature: equips.map((k) => ({
+      '@type': 'LocationFeatureSpecification',
+      name: EQUIPEMENTS_MAP[k].label.fr,
+      value: true,
+    })),
+  }
 
   const whatsappMsg = encodeURIComponent(
     `Bonjour, je suis intéressé(e) par le bien "${bien.nom}" sur Clévia Conciergerie. Pouvez-vous me donner plus d'informations ?`
   )
+  const contactLink = `/contact?bien=${encodeURIComponent(bien.nom)}`
 
   return (
     <>
+      {/* ── JSON-LD ── */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       {/* ── Back link ── */}
       <div className="bg-creme border-b border-brun/5 px-4 py-3">
         <div className="max-w-7xl mx-auto">
@@ -349,7 +409,7 @@ export default async function BienDetailPage({ params }: Props) {
 
                 {/* Contact CTA */}
                 <Link
-                  href="/contact"
+                  href={contactLink}
                   className="w-full flex items-center justify-center gap-2 border-2 border-brun text-brun font-medium rounded-full px-6 py-3.5 hover:bg-brun hover:text-creme transition-all duration-200"
                   style={{ fontFamily: 'var(--font-dm-sans)' }}
                 >
@@ -389,6 +449,22 @@ export default async function BienDetailPage({ params }: Props) {
             </div>
           </div>
         </div>
+
+        {/* ── Autres biens ── */}
+        {autresBiens.length > 0 && (
+          <section className="border-t border-brun/8 py-14 px-4 mt-4">
+            <div className="max-w-7xl mx-auto">
+              <h2 className="text-3xl text-brun mb-8" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
+                Autres biens disponibles
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {autresBiens.map((b) => (
+                  <BienCard key={b.id} bien={b} />
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* ── Bottom CTA banner ── */}
         <section className="bg-creme border-t border-brun/8 py-16 px-4 mt-10">
