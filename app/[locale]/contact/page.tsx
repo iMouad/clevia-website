@@ -1,4 +1,3 @@
-import { useTranslations } from 'next-intl'
 import { getTranslations } from 'next-intl/server'
 import { AnimateIn } from '@/components/ui/AnimateIn'
 import ContactForm from '@/components/ContactForm'
@@ -44,7 +43,7 @@ export default async function ContactPage({
   searchParams: Promise<{ bien?: string }>
 }) {
   const { bien } = await searchParams
-  const t = useTranslations('contact')
+  const t = await getTranslations('contact')
 
   return (
     <>
