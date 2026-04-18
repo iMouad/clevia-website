@@ -9,13 +9,34 @@ import { EQUIPEMENTS_MAP, REGLES_OPTIONS } from '@/lib/equipements'
 type Props = { params: Promise<{ locale: string; id: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params
+  const { id, locale } = await params
   const supabase = await createClient()
-  const { data } = await supabase.from('biens').select('nom, description').eq('id', id).single()
+  const { data } = await supabase.from('biens').select('nom, description, photos').eq('id', id).single()
   if (!data) return { title: 'Bien introuvable' }
+
+  const mainPhoto = (data.photos as string[] | null)?.[0] ?? null
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.cleviamaroc.com'
+
   return {
     title: `${data.nom} — Clévia Conciergerie`,
-    description: data.description ?? undefined,
+    description: data.description ?? 'Découvrez ce bien géré par Clévia Conciergerie à Mansouria · Mohammedia.',
+    openGraph: {
+      title: `${data.nom} — Clévia Conciergerie`,
+      description: data.description ?? 'Découvrez ce bien géré par Clévia Conciergerie.',
+      url: `${siteUrl}/${locale}/biens/${id}`,
+      siteName: 'Clévia Conciergerie',
+      locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_US' : 'fr_MA',
+      type: 'website',
+      ...(mainPhoto && {
+        images: [{ url: mainPhoto, width: 1200, height: 800, alt: data.nom }],
+      }),
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${data.nom} — Clévia Conciergerie`,
+      description: data.description ?? 'Découvrez ce bien géré par Clévia Conciergerie.',
+      ...(mainPhoto && { images: [mainPhoto] }),
+    },
   }
 }
 

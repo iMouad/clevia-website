@@ -212,7 +212,7 @@ export default function BiensPage() {
           <table className="w-full text-sm">
             <thead className="bg-brun/4">
               <tr>
-                {['Nom', 'Ville', 'Type', 'Prix/nuit', 'Statut', 'Disponible', 'Actions'].map((h) => (
+                {['', 'Nom', 'Ville', 'Type', 'Prix/nuit', 'Statut', 'Disponible', 'Actions'].map((h) => (
                   <th key={h} className="px-4 py-3 text-left text-xs text-brun-mid uppercase tracking-wide font-medium">{h}</th>
                 ))}
               </tr>
@@ -224,6 +224,19 @@ export default function BiensPage() {
                 <tr><td colSpan={7} className="px-4 py-10 text-center text-brun-mid/50">Aucun bien</td></tr>
               ) : biens.map((b) => (
                 <tr key={b.id} className="hover:bg-creme/40 transition-colors">
+                  <td className="px-3 py-2">
+                    <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-brun/5 flex-shrink-0">
+                      {(b.photos ?? []).length > 0 ? (
+                        <Image src={b.photos![0]} alt={b.nom} fill className="object-cover" />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <svg className="text-brun/20" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-brun font-medium">{b.nom}</td>
                   <td className="px-4 py-3 text-brun-mid">{b.ville ?? '—'}</td>
                   <td className="px-4 py-3 text-brun-mid">{b.type ?? '—'}</td>
