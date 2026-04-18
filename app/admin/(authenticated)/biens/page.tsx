@@ -93,6 +93,7 @@ export default function BiensPage() {
   const [editing, setEditing] = useState<Partial<Bien>>(EMPTY)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   async function fetchBiens() {
@@ -129,16 +130,29 @@ export default function BiensPage() {
   async function handleUpload(files: FileList | null) {
     if (!files?.length) return
     setUploading(true)
+    setUploadError(null)
     const urls: string[] = []
     for (const file of Array.from(files)) {
-      const path = `${Date.now()}-${file.name.replace(/\s/g, '_')}`
+      // Sanitize filename: remove accents, special chars, keep only safe chars
+      const safeName = file.name
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')  // remove accents
+        .replace(/[^a-zA-Z0-9._-]/g, '_')                  // replace unsafe chars
+        .toLowerCase()
+      const path = `${Date.now()}-${safeName}`
       const { data, error } = await supabase.storage.from('biens-photos').upload(path, file)
-      if (!error && data) {
+      if (error) {
+        console.error('Upload error:', error)
+        setUploadError(`Erreur : ${error.message}`)
+        break
+      }
+      if (data) {
         const { data: urlData } = supabase.storage.from('biens-photos').getPublicUrl(data.path)
         urls.push(urlData.publicUrl)
       }
     }
-    setEditing((prev) => ({ ...prev, photos: [...(prev.photos ?? []), ...urls] }))
+    if (urls.length > 0) {
+      setEditing((prev) => ({ ...prev, photos: [...(prev.photos ?? []), ...urls] }))
+    }
     setUploading(false)
   }
 
@@ -392,6 +406,9 @@ export default function BiensPage() {
                   </svg>
                   <p className="text-sm text-brun-mid">Glissez des photos ou <span className="text-terra underline">cliquez</span></p>
                 </>
+              )}
+              {uploadError && (
+                <p className="mt-2 text-xs text-red-500 font-medium">{uploadError}</p>
               )}
               <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => handleUpload(e.target.files)} />
             </div>
