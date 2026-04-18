@@ -324,7 +324,25 @@
     "contactUs": "Contact us",
     "ctaTitle": "Have a property to rent?",
     "ctaSubtitle": "Entrust it to Clévia. We handle everything, you collect your income every month.",
-    "ctaButton": "Entrust my property"
+    "ctaButton": "Entrust my property",
+    "chambres": "bedroom(s)",
+    "sdb": "bathroom(s)",
+    "capaciteMax": "guests max",
+    "surface": "m²",
+    "equipements": "Amenities",
+    "regles": "House rules",
+    "distanceMer": "from the sea",
+    "voirDetails": "View details",
+    "contacter": "Contact about this property",
+    "disponible": "Available",
+    "nonDisponible": "Not available",
+    "localisation": "Location",
+    "leBien": "The property",
+    "reserver": "Book / Contact us",
+    "nuitLabel": "/ night",
+    "retour": "Back to properties",
+    "nonTrouve": "Property not found",
+    "galerieTitre": "Photo gallery"
   },
   "admin": {
     "login": {

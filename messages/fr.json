@@ -323,7 +323,25 @@
     "contactUs": "Nous contacter",
     "ctaTitle": "Vous avez un bien à louer ?",
     "ctaSubtitle": "Confiez-le à Clévia. On s'occupe de tout, vous percevez vos revenus chaque mois.",
-    "ctaButton": "Confier mon bien"
+    "ctaButton": "Confier mon bien",
+    "chambres": "chambre(s)",
+    "sdb": "salle(s) de bain",
+    "capaciteMax": "voyageurs max",
+    "surface": "m²",
+    "equipements": "Équipements",
+    "regles": "Règles de la maison",
+    "distanceMer": "de la mer",
+    "voirDetails": "Voir les détails",
+    "contacter": "Contacter pour ce bien",
+    "disponible": "Disponible",
+    "nonDisponible": "Non disponible",
+    "localisation": "Localisation",
+    "leBien": "Le bien",
+    "reserver": "Réserver / Nous contacter",
+    "nuitLabel": "/ nuit",
+    "retour": "Retour aux biens",
+    "nonTrouve": "Bien introuvable",
+    "galerieTitre": "Galerie photos"
   },
   "admin": {
     "login": {

@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import { Link } from '@/i18n/navigation'
+import { EQUIPEMENTS_MAP } from '@/lib/equipements'
 
 export type BienPublic = {
   id: string
@@ -10,9 +12,16 @@ export type BienPublic = {
   adresse: string | null
   type: string | null
   capacite: number | null
+  chambres: number | null
+  salles_de_bain: number | null
+  capacite_max: number | null
+  surface: number | null
+  equipements: string[] | null
   prix_nuit: number | null
   description: string | null
   photos: string[] | null
+  distance_mer: string | null
+  disponible: boolean | null
   airbnb_url: string | null
   booking_url: string | null
   avito_url: string | null
@@ -25,32 +34,29 @@ const TYPE_COLORS: Record<string, string> = {
   Autre: 'bg-stone-50 text-stone-600',
 }
 
-const PLATFORMS = [
-  { key: 'airbnb',   label: 'Airbnb',       color: '#FF5A5F' },
-  { key: 'booking',  label: 'Booking.com',  color: '#003580' },
-  { key: 'avito',    label: 'Avito',        color: '#E07A2F' },
-] as const
-
 export default function BienCard({ bien }: { bien: BienPublic }) {
   const photos = (bien.photos ?? []).filter(Boolean)
   const [idx, setIdx] = useState(0)
 
-  const platforms = PLATFORMS.map((p) => ({
-    ...p,
-    url: bien[`${p.key}_url` as keyof BienPublic] as string | null,
-  })).filter((p) => p.url)
+  const equips = (bien.equipements ?? []).filter((k) => k in EQUIPEMENTS_MAP)
+  const visibleEquips = equips.slice(0, 4)
+  const extraCount = equips.length - visibleEquips.length
 
   function prev(e: React.MouseEvent) {
+    e.preventDefault()
     e.stopPropagation()
     setIdx((i) => (i - 1 + photos.length) % photos.length)
   }
   function next(e: React.MouseEvent) {
+    e.preventDefault()
     e.stopPropagation()
     setIdx((i) => (i + 1) % photos.length)
   }
 
+  const isDisponible = bien.disponible !== false
+
   return (
-    <div className="bg-white rounded-2xl overflow-hidden border border-brun/8 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col group">
+    <div className="bg-white rounded-2xl overflow-hidden border border-brun/8 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col group">
 
       {/* ── Photo Carousel ── */}
       <div className="relative aspect-[4/3] bg-brun/5 overflow-hidden">
@@ -68,7 +74,7 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
               <>
                 <button
                   onClick={prev}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-sm hover:bg-white"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-sm hover:bg-white z-10"
                   aria-label="Photo précédente"
                 >
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -77,7 +83,7 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
                 </button>
                 <button
                   onClick={next}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-sm hover:bg-white"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-sm hover:bg-white z-10"
                   aria-label="Photo suivante"
                 >
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -86,8 +92,8 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
                 </button>
 
                 {/* Dots */}
-                <div className="absolute bottom-3 inset-x-0 flex justify-center gap-1.5 pointer-events-none">
-                  {photos.map((_, i) => (
+                <div className="absolute bottom-3 inset-x-0 flex justify-center gap-1.5 pointer-events-none z-10">
+                  {photos.slice(0, 8).map((_, i) => (
                     <span
                       key={i}
                       className={`rounded-full transition-all duration-300 ${
@@ -97,8 +103,8 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
                   ))}
                 </div>
 
-                {/* Counter badge */}
-                <div className="absolute top-3 right-3 bg-black/40 text-white text-xs px-2 py-0.5 rounded-full backdrop-blur-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                {/* Counter */}
+                <div className="absolute top-3 right-3 bg-black/40 text-white text-xs px-2 py-0.5 rounded-full backdrop-blur-sm z-10" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                   {idx + 1}/{photos.length}
                 </div>
               </>
@@ -116,7 +122,7 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
 
         {/* Type badge */}
         {bien.type && (
-          <div className="absolute top-3 left-3">
+          <div className="absolute top-3 left-3 z-10">
             <span
               className={`text-xs font-medium px-2.5 py-1 rounded-full ${TYPE_COLORS[bien.type] ?? 'bg-white/80 text-brun'}`}
               style={{ fontFamily: 'var(--font-dm-sans)' }}
@@ -125,6 +131,20 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
             </span>
           </div>
         )}
+
+        {/* Disponible badge */}
+        <div className="absolute bottom-3 left-3 z-10">
+          <span
+            className={`text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-sm ${
+              isDisponible
+                ? 'bg-green-500/90 text-white'
+                : 'bg-gray-700/80 text-white'
+            }`}
+            style={{ fontFamily: 'var(--font-dm-sans)' }}
+          >
+            {isDisponible ? 'Disponible' : 'Non disponible'}
+          </span>
+        </div>
       </div>
 
       {/* ── Card Body ── */}
@@ -146,19 +166,44 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
           )}
         </div>
 
-        {/* Stats row */}
-        <div className="flex items-center gap-3 text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-          {bien.capacite && (
-            <span className="flex items-center gap-1.5 text-brun-mid">
+        {/* Stats row — chambres / sdb / capacite / surface */}
+        <div className="flex items-center flex-wrap gap-3 text-sm text-brun-mid" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+          {bien.chambres && (
+            <span className="flex items-center gap-1">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                <path d="M3 22V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v15M1 22h22M3 11h18M9 11v11" />
+              </svg>
+              {bien.chambres} ch.
+            </span>
+          )}
+          {bien.salles_de_bain && (
+            <span className="flex items-center gap-1">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                <path d="M2 12h20v2a6 6 0 0 1-6 6H8a6 6 0 0 1-6-6v-2zM6 12V6a2 2 0 0 1 2-2 2 2 0 0 1 2 2v1" />
+              </svg>
+              {bien.salles_de_bain} sdb
+            </span>
+          )}
+          {(bien.capacite_max ?? bien.capacite) && (
+            <span className="flex items-center gap-1">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <circle cx="7" cy="4" r="2" stroke="#6B4C35" strokeWidth="1.2" />
                 <path d="M1.5 13c0-3.04 2.46-5.5 5.5-5.5s5.5 2.46 5.5 5.5" stroke="#6B4C35" strokeWidth="1.2" strokeLinecap="round" />
               </svg>
-              {bien.capacite} pers.
+              {bien.capacite_max ?? bien.capacite} pers.
+            </span>
+          )}
+          {bien.surface && (
+            <span className="flex items-center gap-1">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                <rect x="3" y="3" width="18" height="18" rx="1" />
+                <path d="M9 3v18M3 9h18" />
+              </svg>
+              {bien.surface} m²
             </span>
           )}
           {bien.prix_nuit && (
-            <span className="ml-auto">
+            <span className="ml-auto flex-shrink-0">
               <span className="text-terra font-medium text-base" style={{ fontFamily: 'var(--font-cormorant)' }}>
                 {bien.prix_nuit}
               </span>
@@ -167,33 +212,55 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
           )}
         </div>
 
-        {/* Description */}
-        {bien.description && (
-          <p className="text-brun-mid/70 text-sm leading-relaxed line-clamp-2" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-            {bien.description}
+        {/* Distance mer */}
+        {bien.distance_mer && (
+          <p className="flex items-center gap-1.5 text-xs text-brun-mid/70" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <path d="M2 16c.5-1 1.5-1.5 3-1.5s2.5.5 3 1.5 1.5 1.5 3 1.5 2.5-.5 3-1.5 1.5-1.5 3-1.5M3 20h18M12 4l3 5H9l3-5zm0 0V9" />
+            </svg>
+            {bien.distance_mer} de la mer
           </p>
         )}
 
-        {/* Platform booking buttons */}
-        {platforms.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2 pt-3 mt-auto border-t border-brun/8">
-            <span className="text-xs text-brun-mid/40 mr-1" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-              Réserver :
-            </span>
-            {platforms.map(({ key, url, label, color }) => (
-              <a
-                key={key}
-                href={url!}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs font-medium px-3 py-1.5 rounded-full text-white hover:opacity-85 transition-opacity"
-                style={{ backgroundColor: color, fontFamily: 'var(--font-dm-sans)' }}
+        {/* Équipements badges */}
+        {visibleEquips.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {visibleEquips.map((key) => {
+              const def = EQUIPEMENTS_MAP[key]
+              return (
+                <span
+                  key={key}
+                  className="text-xs px-2.5 py-1 rounded-full bg-creme border border-brun/10 text-brun-mid"
+                  style={{ fontFamily: 'var(--font-dm-sans)' }}
+                >
+                  {def.label.fr}
+                </span>
+              )
+            })}
+            {extraCount > 0 && (
+              <span
+                className="text-xs px-2.5 py-1 rounded-full bg-brun/5 text-brun-mid/70"
+                style={{ fontFamily: 'var(--font-dm-sans)' }}
               >
-                {label}
-              </a>
-            ))}
+                +{extraCount} autres
+              </span>
+            )}
           </div>
         )}
+
+        {/* CTA */}
+        <div className="pt-3 mt-auto border-t border-brun/8">
+          <Link
+            href={`/biens/${bien.id}`}
+            className="w-full flex items-center justify-center gap-2 bg-terra text-creme text-sm font-medium rounded-full px-6 py-2.5 hover:bg-brun transition-all duration-200"
+            style={{ fontFamily: 'var(--font-dm-sans)' }}
+          >
+            Voir les détails
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </Link>
+        </div>
       </div>
     </div>
   )

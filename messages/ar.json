@@ -324,7 +324,25 @@
     "contactUs": "تواصل معنا",
     "ctaTitle": "هل لديك عقار للإيجار؟",
     "ctaSubtitle": "أسنده إلى كليفيا. نحن نتولى كل شيء، وتستلم دخلك كل شهر.",
-    "ctaButton": "أسند إلينا عقارك"
+    "ctaButton": "أسند إلينا عقارك",
+    "chambres": "غرفة(غرف)",
+    "sdb": "حمام(حمامات)",
+    "capaciteMax": "مسافر كحد أقصى",
+    "surface": "م²",
+    "equipements": "المرافق",
+    "regles": "قواعد المنزل",
+    "distanceMer": "من البحر",
+    "voirDetails": "عرض التفاصيل",
+    "contacter": "تواصل بشأن هذا العقار",
+    "disponible": "متاح",
+    "nonDisponible": "غير متاح",
+    "localisation": "الموقع",
+    "leBien": "العقار",
+    "reserver": "احجز / تواصل معنا",
+    "nuitLabel": "/ ليلة",
+    "retour": "العودة إلى العقارات",
+    "nonTrouve": "العقار غير موجود",
+    "galerieTitre": "معرض الصور"
   },
   "admin": {
     "login": {
