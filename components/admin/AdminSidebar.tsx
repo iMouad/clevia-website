@@ -40,6 +40,19 @@ const NAV = [
     ),
   },
   {
+    href: '/admin/calendrier',
+    label: 'Calendrier',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <rect x="3" y="4" width="18" height="18" rx="2" />
+        <path d="M16 2v4M8 2v4M3 10h18" />
+        <circle cx="8" cy="16" r="1" fill="currentColor" />
+        <circle cx="12" cy="16" r="1" fill="currentColor" />
+        <circle cx="16" cy="16" r="1" fill="currentColor" />
+      </svg>
+    ),
+  },
+  {
     href: '/admin/contacts',
     label: 'Contacts',
     icon: (
