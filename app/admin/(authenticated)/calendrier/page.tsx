@@ -14,6 +14,15 @@ type Bien = { id: string; nom: string }
 const SITE_URL = 'https://www.cleviamaroc.com'
 const DAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 
+function generateShortCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // sans O/0/I/1 pour éviter confusion
+  let code = 'CLV-'
+  for (let i = 0; i < 6; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)]
+  }
+  return code
+}
+
 function getMonday(day: number) {
   // Convert Sunday=0 to Monday-first index
   return day === 0 ? 6 : day - 1
@@ -110,8 +119,9 @@ export default function CalendrierPage() {
     if (ownerToken) {
       await supabase.from('owner_tokens').delete().eq('bien_id', selectedId)
     }
+    const shortCode = generateShortCode()
     const { data } = await supabase.from('owner_tokens')
-      .insert({ bien_id: selectedId, nom_proprio: nomProprio || null })
+      .insert({ bien_id: selectedId, nom_proprio: nomProprio || null, token: shortCode })
       .select('token').single()
     setOwnerToken(data?.token ?? null)
     setLoadingToken(false)
@@ -126,9 +136,9 @@ export default function CalendrierPage() {
     setLoadingToken(false)
   }
 
-  function copyLink() {
+  function copyCode() {
     if (!ownerToken) return
-    navigator.clipboard.writeText(`${SITE_URL}/calendrier/${ownerToken}`)
+    navigator.clipboard.writeText(ownerToken)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -275,11 +285,15 @@ export default function CalendrierPage() {
             </div>
           </div>
 
-          {/* Lien propriétaire */}
+          {/* Accès propriétaire */}
           <div className="bg-white rounded-2xl border border-brun/10 p-6">
-            <h3 className="text-xl text-brun mb-4" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
-              Lien propriétaire — {selectedBien?.nom}
+            <h3 className="text-xl text-brun mb-1" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
+              Accès propriétaire — {selectedBien?.nom}
             </h3>
+            <p className="text-xs text-brun-mid/60 mb-5" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+              Générez un code d&apos;accès à communiquer au propriétaire. Il pourra consulter le calendrier sur{' '}
+              <span className="text-terra">{SITE_URL}/calendrier</span>
+            </p>
 
             {!ownerToken ? (
               <div className="flex flex-col sm:flex-row gap-3">
@@ -298,48 +312,51 @@ export default function CalendrierPage() {
                   style={{ fontFamily: 'var(--font-dm-sans)' }}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
-                    <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
+                    <rect x="2" y="11" width="20" height="11" rx="2" />
+                    <path d="M7 11V7a5 5 0 0110 0v4" />
                   </svg>
-                  {loadingToken ? 'Génération…' : 'Générer le lien'}
+                  {loadingToken ? 'Génération…' : 'Générer un code'}
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-5">
                 {nomProprio && (
                   <p className="text-sm text-brun-mid" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                     Propriétaire : <span className="font-medium text-brun">{nomProprio}</span>
                   </p>
                 )}
 
-                {/* URL du lien */}
-                <div className="flex items-center gap-2 bg-creme rounded-xl px-4 py-3 border border-brun/10">
-                  <svg className="text-terra flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
-                    <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
-                  </svg>
-                  <span className="flex-1 text-sm text-brun-mid truncate" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                    {SITE_URL}/calendrier/{ownerToken}
-                  </span>
+                {/* Code affiché en grand */}
+                <div style={{ backgroundColor: '#FAF6F1', border: '1px solid rgba(201,123,75,0.2)', borderRadius: '16px', padding: '24px', textAlign: 'center' }}>
+                  <p className="text-xs text-brun-mid/50 uppercase tracking-widest mb-2" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                    Code d&apos;accès
+                  </p>
+                  <p style={{ fontFamily: 'var(--font-dm-sans)', fontSize: '32px', fontWeight: 700, letterSpacing: '0.15em', color: '#C97B4B' }}>
+                    {ownerToken}
+                  </p>
+                  <p className="text-xs text-brun-mid/50 mt-2" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                    À communiquer au propriétaire — accès sur{' '}
+                    <span className="text-terra">{SITE_URL}/calendrier</span>
+                  </p>
                 </div>
 
                 <div className="flex gap-2">
                   <button
-                    onClick={copyLink}
+                    onClick={copyCode}
                     className="flex-1 flex items-center justify-center gap-2 bg-terra text-creme text-sm font-medium rounded-full px-5 py-2.5 hover:bg-brun transition-all"
                     style={{ fontFamily: 'var(--font-dm-sans)' }}
                   >
                     {copied ? (
                       <>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5" strokeLinecap="round" /></svg>
-                        Copié !
+                        Code copié !
                       </>
                     ) : (
                       <>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                           <rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
                         </svg>
-                        Copier le lien
+                        Copier le code
                       </>
                     )}
                   </button>
