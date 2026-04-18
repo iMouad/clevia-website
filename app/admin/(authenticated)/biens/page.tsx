@@ -61,18 +61,21 @@ function Modal({ open, onClose, children }: { open: boolean; onClose: () => void
 
 function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
   return (
-    <label className="flex items-center gap-3 cursor-pointer select-none" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        onClick={() => onChange(!checked)}
-        className={`relative w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none ${checked ? 'bg-terra' : 'bg-brun/20'}`}
-      >
-        <span className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${checked ? 'translate-x-6' : 'translate-x-1'}`} />
-      </button>
-      <span className="text-sm text-brun-mid">{label}</span>
-    </label>
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all duration-200 ${
+        checked
+          ? 'bg-green-50 border-green-200 text-green-700'
+          : 'bg-gray-50 border-brun/15 text-brun-mid'
+      }`}
+      style={{ fontFamily: 'var(--font-dm-sans)' }}
+    >
+      <span className="text-sm font-medium">{label}</span>
+      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${checked ? 'bg-green-500 text-white' : 'bg-brun/15 text-brun-mid'}`}>
+        {checked ? 'Oui' : 'Non'}
+      </span>
+    </button>
   )
 }
 
@@ -421,45 +424,47 @@ export default function BiensPage() {
             </div>
 
             {(editing.photos ?? []).length > 0 && (
-              <div className="mt-3">
-                <p className="text-xs text-brun-mid/50 mb-2" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                  Cliquez sur ⭐ pour définir la photo principale (s'affiche en premier)
-                </p>
-                <div className="grid grid-cols-3 gap-2">
-                  {(editing.photos ?? []).map((url, i) => (
-                    <div key={url} className="relative group rounded-xl overflow-hidden aspect-square">
+              <div className="mt-3 flex flex-col gap-2">
+                {(editing.photos ?? []).map((url, i) => (
+                  <div key={url} className={`flex items-center gap-3 p-2 rounded-xl border ${i === 0 ? 'border-terra/40 bg-terra/5' : 'border-brun/10 bg-white'}`}>
+                    {/* Miniature */}
+                    <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
                       <Image src={url} alt="" fill className="object-cover" />
+                    </div>
 
-                      {/* Badge photo principale */}
-                      {i === 0 && (
-                        <div className="absolute top-1.5 left-1.5 bg-terra text-white text-[10px] font-medium px-2 py-0.5 rounded-full flex items-center gap-1" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                          <span>⭐</span> Principale
-                        </div>
+                    {/* Infos */}
+                    <div className="flex-1 min-w-0">
+                      {i === 0 ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-terra" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                          ★ Photo principale (à la une)
+                        </span>
+                      ) : (
+                        <span className="text-xs text-brun-mid/60" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                          Photo {i + 1}
+                        </span>
                       )}
+                    </div>
 
-                      {/* Actions au hover */}
-                      <div className="absolute inset-0 bg-brun/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-2">
-                        {i !== 0 && (
-                          <button
-                            onClick={() => setMainPhoto(url)}
-                            className="w-full bg-terra text-white text-[11px] font-medium rounded-lg px-2 py-1.5 hover:bg-terra/90 transition-colors flex items-center justify-center gap-1"
-                            style={{ fontFamily: 'var(--font-dm-sans)' }}
-                          >
-                            <span>⭐</span> Définir principale
-                          </button>
-                        )}
+                    {/* Actions */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {i !== 0 && (
                         <button
-                          onClick={() => removePhoto(url)}
-                          className="w-full bg-red-500 text-white text-[11px] font-medium rounded-lg px-2 py-1.5 hover:bg-red-600 transition-colors flex items-center justify-center gap-1"
+                          onClick={() => setMainPhoto(url)}
+                          className="text-xs font-medium text-terra border border-terra/30 rounded-lg px-2.5 py-1.5 hover:bg-terra hover:text-white transition-all"
                           style={{ fontFamily: 'var(--font-dm-sans)' }}
                         >
-                          <svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M4 4l12 12M16 4L4 16" stroke="white" strokeWidth="1.5" strokeLinecap="round" /></svg>
-                          Supprimer
+                          ★ Principale
                         </button>
-                      </div>
+                      )}
+                      <button
+                        onClick={() => removePhoto(url)}
+                        className="w-7 h-7 rounded-lg bg-red-50 hover:bg-red-500 text-red-400 hover:text-white flex items-center justify-center transition-all"
+                      >
+                        <svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M4 4l12 12M16 4L4 16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
+                      </button>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
