@@ -11,31 +11,40 @@ type Props = { params: Promise<{ locale: string; id: string }> }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id, locale } = await params
   const supabase = await createClient()
-  const { data } = await supabase.from('biens').select('nom, description, photos').eq('id', id).single()
+  const { data } = await supabase.from('biens').select('nom, description, photos, ville').eq('id', id).single()
   if (!data) return { title: 'Bien introuvable' }
 
   const mainPhoto = (data.photos as string[] | null)?.[0] ?? null
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.cleviamaroc.com'
 
+  // Title max ~55 chars : "Nom du bien · Clévia"
+  const nomTruncated = data.nom.length > 35 ? data.nom.slice(0, 33) + '…' : data.nom
+  const ogTitle = `${nomTruncated} · Clévia`
+
+  // Description toujours définie
+  const ville = (data.ville as string | null) ?? 'Mansouria · Mohammedia'
+  const fallbackDesc = `Location courte durée à ${ville}, géré par Clévia Conciergerie. Réservez sur Airbnb, Booking ou contactez-nous directement.`
+  const ogDescription = (data.description as string | null)?.slice(0, 160) ?? fallbackDesc
+
   return {
     title: `${data.nom} — Clévia Conciergerie`,
-    description: data.description ?? 'Découvrez ce bien géré par Clévia Conciergerie à Mansouria · Mohammedia.',
+    description: ogDescription,
     openGraph: {
-      title: `${data.nom} — Clévia Conciergerie`,
-      description: data.description ?? 'Découvrez ce bien géré par Clévia Conciergerie.',
+      title: ogTitle,
+      description: ogDescription,
       url: `${siteUrl}/${locale}/biens/${id}`,
       siteName: 'Clévia Conciergerie',
       locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_US' : 'fr_MA',
       type: 'website',
-      ...(mainPhoto && {
-        images: [{ url: mainPhoto, width: 1200, height: 800, alt: data.nom }],
-      }),
+      images: mainPhoto
+        ? [{ url: mainPhoto, width: 1200, height: 800, alt: data.nom }]
+        : [],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${data.nom} — Clévia Conciergerie`,
-      description: data.description ?? 'Découvrez ce bien géré par Clévia Conciergerie.',
-      ...(mainPhoto && { images: [mainPhoto] }),
+      title: ogTitle,
+      description: ogDescription,
+      images: mainPhoto ? [mainPhoto] : [],
     },
   }
 }
