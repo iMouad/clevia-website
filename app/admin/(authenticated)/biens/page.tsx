@@ -64,16 +64,23 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: 
     <button
       type="button"
       onClick={() => onChange(!checked)}
-      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all duration-200 ${
-        checked
-          ? 'bg-green-50 border-green-200 text-green-700'
-          : 'bg-gray-50 border-brun/15 text-brun-mid'
-      }`}
-      style={{ fontFamily: 'var(--font-dm-sans)' }}
+      className="w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all duration-200"
+      style={{
+        fontFamily: 'var(--font-dm-sans)',
+        backgroundColor: checked ? '#f0fdf4' : '#f9f9f7',
+        borderColor: checked ? '#86efac' : 'rgba(44,26,14,0.12)',
+        color: checked ? '#15803d' : '#6B4C35',
+      }}
     >
       <span className="text-sm font-medium">{label}</span>
-      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${checked ? 'bg-green-500 text-white' : 'bg-brun/15 text-brun-mid'}`}>
-        {checked ? 'Oui' : 'Non'}
+      <span
+        className="text-xs font-semibold px-2.5 py-1 rounded-full"
+        style={{
+          backgroundColor: checked ? '#22c55e' : 'rgba(44,26,14,0.1)',
+          color: checked ? '#fff' : '#6B4C35',
+        }}
+      >
+        {checked ? 'Oui ✓' : 'Non'}
       </span>
     </button>
   )
