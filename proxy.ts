@@ -45,6 +45,16 @@ export async function proxy(request: NextRequest) {
     return response
   }
 
+  // ── Calendrier propriétaire — standalone, pas de locale ─
+  if (pathname.startsWith('/calendrier')) {
+    return NextResponse.next()
+  }
+
+  // ── API routes — pas de locale ────────────────────────
+  if (pathname.startsWith('/api')) {
+    return NextResponse.next()
+  }
+
   // ── i18n routing for all other routes ────────────────
   return handleI18nRouting(request)
 }
