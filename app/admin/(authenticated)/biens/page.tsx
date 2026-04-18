@@ -160,6 +160,13 @@ export default function BiensPage() {
     setEditing((prev) => ({ ...prev, photos: (prev.photos ?? []).filter((p) => p !== url) }))
   }
 
+  function setMainPhoto(url: string) {
+    setEditing((prev) => {
+      const rest = (prev.photos ?? []).filter((p) => p !== url)
+      return { ...prev, photos: [url, ...rest] }
+    })
+  }
+
   function toggleEquipement(key: string) {
     setEditing((prev) => {
       const current = prev.equipements ?? []
@@ -414,15 +421,45 @@ export default function BiensPage() {
             </div>
 
             {(editing.photos ?? []).length > 0 && (
-              <div className="grid grid-cols-3 gap-2 mt-3">
-                {(editing.photos ?? []).map((url) => (
-                  <div key={url} className="relative group rounded-xl overflow-hidden aspect-square">
-                    <Image src={url} alt="" fill className="object-cover" />
-                    <button onClick={() => removePhoto(url)} className="absolute inset-0 bg-red-500/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity">
-                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 4l12 12M16 4L4 16" stroke="white" strokeWidth="1.5" strokeLinecap="round" /></svg>
-                    </button>
-                  </div>
-                ))}
+              <div className="mt-3">
+                <p className="text-xs text-brun-mid/50 mb-2" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                  Cliquez sur ⭐ pour définir la photo principale (s'affiche en premier)
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  {(editing.photos ?? []).map((url, i) => (
+                    <div key={url} className="relative group rounded-xl overflow-hidden aspect-square">
+                      <Image src={url} alt="" fill className="object-cover" />
+
+                      {/* Badge photo principale */}
+                      {i === 0 && (
+                        <div className="absolute top-1.5 left-1.5 bg-terra text-white text-[10px] font-medium px-2 py-0.5 rounded-full flex items-center gap-1" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                          <span>⭐</span> Principale
+                        </div>
+                      )}
+
+                      {/* Actions au hover */}
+                      <div className="absolute inset-0 bg-brun/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-2">
+                        {i !== 0 && (
+                          <button
+                            onClick={() => setMainPhoto(url)}
+                            className="w-full bg-terra text-white text-[11px] font-medium rounded-lg px-2 py-1.5 hover:bg-terra/90 transition-colors flex items-center justify-center gap-1"
+                            style={{ fontFamily: 'var(--font-dm-sans)' }}
+                          >
+                            <span>⭐</span> Définir principale
+                          </button>
+                        )}
+                        <button
+                          onClick={() => removePhoto(url)}
+                          className="w-full bg-red-500 text-white text-[11px] font-medium rounded-lg px-2 py-1.5 hover:bg-red-600 transition-colors flex items-center justify-center gap-1"
+                          style={{ fontFamily: 'var(--font-dm-sans)' }}
+                        >
+                          <svg width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M4 4l12 12M16 4L4 16" stroke="white" strokeWidth="1.5" strokeLinecap="round" /></svg>
+                          Supprimer
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
