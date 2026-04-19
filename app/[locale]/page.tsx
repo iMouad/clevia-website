@@ -4,6 +4,7 @@ import { AnimateIn, StaggerContainer, StaggerItem } from '@/components/ui/Animat
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import HomeBiensSection from '@/components/HomeBiensSection'
+import HomeBiensVenteSection from '@/components/HomeBiensVenteSection'
 import RevenueCalculator from '@/components/RevenueCalculator'
 import TemoignagesSection from '@/components/TemoignagesSection'
 
@@ -243,6 +244,9 @@ export default function HomePage() {
 
       {/* ── NOS BIENS ───────────────────────────── */}
       <HomeBiensSection />
+
+      {/* ── BIENS À VENDRE ──────────────────────── */}
+      <HomeBiensVenteSection />
 
       {/* ── CALCULATEUR DE REVENUS ──────────────── */}
       <RevenueCalculator showLeadCapture />

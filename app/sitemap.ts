@@ -12,6 +12,7 @@ const PAGES = [
   { path: '/pourquoi', priority: 0.8, changeFrequency: 'monthly' as const },
   { path: '/contact',  priority: 0.9, changeFrequency: 'monthly' as const },
   { path: '/biens',    priority: 0.9, changeFrequency: 'weekly'  as const },
+  { path: '/vente',   priority: 0.9, changeFrequency: 'weekly'  as const },
 ]
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -44,6 +45,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       for (const locale of LOCALES) {
         entries.push({
           url: `${BASE_URL}/${locale}/biens/${bien.id}`,
+          lastModified: bien.updated_at ? new Date(bien.updated_at) : new Date(),
+          changeFrequency: 'weekly',
+          priority: 0.8,
+        })
+      }
+    }
+  } catch {
+    // Ne pas faire planter le build si Supabase est inaccessible
+  }
+
+  // Pages biens_vente dynamiques
+  try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+    const { data: biensVente } = await supabase
+      .from('biens_vente')
+      .select('id, updated_at')
+      .neq('statut', 'vendu')
+
+    for (const bien of biensVente ?? []) {
+      for (const locale of LOCALES) {
+        entries.push({
+          url: `${BASE_URL}/${locale}/vente/${bien.id}`,
           lastModified: bien.updated_at ? new Date(bien.updated_at) : new Date(),
           changeFrequency: 'weekly',
           priority: 0.8,
