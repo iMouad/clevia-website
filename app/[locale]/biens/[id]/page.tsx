@@ -360,13 +360,34 @@ export default async function BienDetailPage({ params }: Props) {
                 <h2 className="text-2xl text-brun mb-4" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
                   {t('localisation')}
                 </h2>
-                <div className="flex items-center gap-2 text-brun-mid" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                <div className="flex items-center gap-2 text-brun-mid mb-4" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C97B4B" strokeWidth="1.5" strokeLinecap="round">
                     <path d="M12 2C8.1 2 5 5.1 5 9c0 5.3 6.2 12.4 6.5 12.7.3.3.7.3 1 0C12.8 21.4 19 14.3 19 9c0-3.9-3.1-7-7-7z" />
                     <circle cx="12" cy="9" r="2.5" />
                   </svg>
                   {[bien.adresse, bien.ville].filter(Boolean).join(', ') || bien.ville || '—'}
                 </div>
+                {(() => {
+                  const mapsUrl = bien.latitude && bien.longitude
+                    ? `https://maps.google.com/maps?q=${bien.latitude},${bien.longitude}&output=embed&z=15`
+                    : bien.adresse
+                    ? `https://maps.google.com/maps?q=${encodeURIComponent(`${bien.adresse} ${bien.ville ?? ''}`)}&output=embed&z=15`
+                    : null
+                  return mapsUrl ? (
+                    <div className="rounded-2xl overflow-hidden border border-brun/10" style={{ height: 280 }}>
+                      <iframe
+                        src={mapsUrl}
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0 }}
+                        allowFullScreen
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        title="Localisation"
+                      />
+                    </div>
+                  ) : null
+                })()}
               </div>
             </div>
 

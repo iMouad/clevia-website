@@ -24,6 +24,12 @@ const EQUIPEMENTS_LOGEMENT: EquipementVenteDef[] = [
   { key: 'vue_mer',         label: { fr: 'Vue mer',             ar: 'إطلالة بحرية',        en: 'Sea view' },           path: 'M2 16c.5-1 1.5-1.5 3-1.5s2.5.5 3 1.5 1.5 1.5 3 1.5 2.5-.5 3-1.5 1.5-1.5 3-1.5M3 20h18' },
   { key: 'cuisine_equipee', label: { fr: 'Cuisine équipée',     ar: 'مطبخ مجهز',           en: 'Equipped kitchen' },   path: 'M3 11l19-9-9 19-2-8-8-2z' },
   { key: 'double_vitrage',  label: { fr: 'Double vitrage',      ar: 'زجاج مزدوج',          en: 'Double glazing' },     path: 'M3 3h18v18H3zM9 3v18M3 9h6M3 15h6' },
+  { key: 'suite_parentale',  label: { fr: 'Suite parentale',    ar: 'جناح رئيسي',           en: 'Master suite' },        path: 'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM9 22V12h6v10' },
+  { key: 'dressing',         label: { fr: 'Dressing',            ar: 'غرفة ملابس',           en: 'Walk-in closet' },      path: 'M4 4h16v16H4zM4 9h16M9 4v16M14 4v16' },
+  { key: 'vue_piscine',      label: { fr: 'Vue piscine',         ar: 'إطلالة على المسبح',    en: 'Pool view' },           path: 'M2 12c.5-1 1.5-1.5 3-1.5s2.5.5 3 1.5 1.5 1.5 3 1.5 2.5-.5 3-1.5 1.5-1.5 3-1.5M2 7h20' },
+  { key: 'jacuzzi',          label: { fr: 'Jacuzzi',             ar: 'جاكوزي',               en: 'Jacuzzi' },             path: 'M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5zm5 8c.5-1 1.5-1.5 3-1.5s2.5.5 3 1.5' },
+  { key: 'piscine_chauffee', label: { fr: 'Piscine chauffée',    ar: 'مسبح مسخّن',           en: 'Heated pool' },         path: 'M2 12c.5-1 1.5-1.5 3-1.5s2.5.5 3 1.5 1.5 1.5 3 1.5 2.5-.5 3-1.5 1.5-1.5 3-1.5M9 3l3 3M15 3l-3 3' },
+  { key: 'hammam',           label: { fr: 'Hammam',              ar: 'حمام مغربي',           en: 'Hammam' },              path: 'M12 2C8 2 5 5 5 9v11h14V9c0-4-3-7-7-7zM9 15c0-1.7 1.3-3 3-3s3 1.3 3 3' },
 ]
 
 // ── Terrain ───────────────────────────────────────────────

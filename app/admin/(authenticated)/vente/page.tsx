@@ -28,6 +28,7 @@ type BienVente = {
   telephone: string
   reference: string | null
   video_url: string | null
+  sous_type: string | null
   created_at: string
 }
 
@@ -51,7 +52,7 @@ const EMPTY: Omit<BienVente, 'id' | 'created_at'> = {
   titre: '', categorie: 'Appartement', statut: 'a_vendre', prix: null,
   surface: null, chambres: null, salles_de_bain: null, etage: null,
   ville: '', adresse: null, latitude: null, longitude: null,
-  description: null, equipements: [], photos: [], telephone: '', reference: null, video_url: null,
+  description: null, equipements: [], photos: [], telephone: '', reference: null, video_url: null, sous_type: null,
 }
 
 const SITE_URL = 'https://www.cleviamaroc.com'
@@ -101,7 +102,7 @@ export default function AdminVentePage() {
       adresse: b.adresse, latitude: b.latitude, longitude: b.longitude,
       description: b.description, equipements: b.equipements ?? [],
       photos: b.photos ?? [], telephone: b.telephone, reference: b.reference,
-      video_url: b.video_url,
+      video_url: b.video_url, sous_type: b.sous_type ?? null,
     })
     setPrixSurDemande(b.prix === null)
     setUploadError(null)
@@ -516,11 +517,46 @@ export default function AdminVentePage() {
                     </div>
                     <div>
                       <label className={labelClass} style={{ fontFamily: 'var(--font-dm-sans)' }}>Catégorie *</label>
-                      <select className={inputClass} style={{ fontFamily: 'var(--font-dm-sans)' }} value={form.categorie} onChange={(e) => setForm((f) => ({ ...f, categorie: e.target.value as Categorie, equipements: [] }))}>
+                      <select className={inputClass} style={{ fontFamily: 'var(--font-dm-sans)' }} value={form.categorie} onChange={(e) => setForm((f) => ({ ...f, categorie: e.target.value as Categorie, equipements: [], sous_type: null }))}>
                         {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
                       </select>
                     </div>
                   </div>
+                  {form.categorie === 'Terrain' && (
+                    <div className="flex flex-col gap-3">
+                      <div>
+                        <label className={labelClass} style={{ fontFamily: 'var(--font-dm-sans)' }}>Type de terrain</label>
+                        <select
+                          className={inputClass}
+                          style={{ fontFamily: 'var(--font-dm-sans)' }}
+                          value={['Lot villa', 'Lot ferme', 'Lot habitation'].includes(form.sous_type ?? '') ? 'Lotissement' : (form.sous_type ?? '')}
+                          onChange={(e) => {
+                            const val = e.target.value
+                            setForm((f) => ({ ...f, sous_type: val === 'Lotissement' ? 'Lot villa' : val === '' ? null : val }))
+                          }}
+                        >
+                          <option value="">-- Sélectionner --</option>
+                          <option value="Terrain agricole">Terrain agricole</option>
+                          <option value="Lotissement">Lotissement</option>
+                        </select>
+                      </div>
+                      {['Lot villa', 'Lot ferme', 'Lot habitation'].includes(form.sous_type ?? '') && (
+                        <div>
+                          <label className={labelClass} style={{ fontFamily: 'var(--font-dm-sans)' }}>Type de lot</label>
+                          <select
+                            className={inputClass}
+                            style={{ fontFamily: 'var(--font-dm-sans)' }}
+                            value={form.sous_type ?? ''}
+                            onChange={(e) => setForm((f) => ({ ...f, sous_type: e.target.value }))}
+                          >
+                            <option value="Lot villa">Lot villa</option>
+                            <option value="Lot ferme">Lot ferme</option>
+                            <option value="Lot habitation">Lot habitation</option>
+                          </select>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <div>
                     <label className={labelClass} style={{ fontFamily: 'var(--font-dm-sans)' }}>Statut *</label>
                     <div className="flex gap-2">
@@ -576,8 +612,8 @@ export default function AdminVentePage() {
                 <h3 className="text-sm font-semibold text-brun-mid uppercase tracking-wide mb-4" style={{ fontFamily: 'var(--font-dm-sans)' }}>Caractéristiques</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className={labelClass} style={{ fontFamily: 'var(--font-dm-sans)' }}>Surface (m²)</label>
-                    <input type="number" className={inputClass} style={{ fontFamily: 'var(--font-dm-sans)' }} value={form.surface ?? ''} onChange={(e) => setForm((f) => ({ ...f, surface: e.target.value ? Number(e.target.value) : null }))} placeholder="Ex: 120" />
+                    <label className={labelClass} style={{ fontFamily: 'var(--font-dm-sans)' }}>Surface ({form.categorie === 'Terrain' ? 'ha' : 'm²'})</label>
+                    <input type="number" className={inputClass} style={{ fontFamily: 'var(--font-dm-sans)' }} value={form.surface ?? ''} onChange={(e) => setForm((f) => ({ ...f, surface: e.target.value ? Number(e.target.value) : null }))} placeholder={form.categorie === 'Terrain' ? 'Ex: 2.5' : 'Ex: 120'} />
                   </div>
                   {!['Terrain', 'Commercial'].includes(form.categorie) && (
                     <>

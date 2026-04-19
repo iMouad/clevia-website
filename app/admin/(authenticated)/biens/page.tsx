@@ -10,6 +10,8 @@ type Bien = {
   nom: string
   ville: string | null
   adresse: string | null
+  latitude: number | null
+  longitude: number | null
   type: string | null
   capacite: number | null
   chambres: number | null
@@ -42,7 +44,7 @@ const STATUT_COLORS: Record<string, string> = {
 }
 
 const EMPTY: Partial<Bien> = {
-  nom: '', ville: '', adresse: '', type: 'Appartement',
+  nom: '', ville: '', adresse: '', latitude: null, longitude: null, type: 'Appartement',
   capacite: null, prix_nuit: null, description: '', statut: 'actif', photos: [],
   airbnb_url: '', booking_url: '', avito_url: '', video_url: null,
   chambres: 1, salles_de_bain: 1, capacite_max: 2, surface: null,
@@ -351,6 +353,20 @@ export default function BiensPage() {
             <label className={labelClass}>Adresse complète</label>
             <input className={inputClass} value={editing.adresse ?? ''} onChange={(e) => setEditing((p) => ({ ...p, adresse: e.target.value }))} placeholder="Ex : 12 Rue des Orangers, Mansouria" />
           </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Latitude (GPS)</label>
+              <input type="number" step="any" className={inputClass} value={editing.latitude ?? ''} onChange={(e) => setEditing((p) => ({ ...p, latitude: e.target.value ? Number(e.target.value) : null }))} placeholder="33.68…" />
+            </div>
+            <div>
+              <label className={labelClass}>Longitude (GPS)</label>
+              <input type="number" step="any" className={inputClass} value={editing.longitude ?? ''} onChange={(e) => setEditing((p) => ({ ...p, longitude: e.target.value ? Number(e.target.value) : null }))} placeholder="-7.38…" />
+            </div>
+          </div>
+          <p className="text-xs text-brun-mid/40" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+            💡 Clic droit sur Google Maps → &quot;C&apos;est ici&quot; pour obtenir les coordonnées
+          </p>
 
           <div className="grid grid-cols-2 gap-4">
             <div>

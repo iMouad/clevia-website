@@ -155,6 +155,14 @@ export default async function VenteDetailPage({ params }: Props) {
                   >
                     {t(`categories.${data.categorie}`)}
                   </span>
+                  {data.sous_type && (
+                    <span
+                      className="text-xs font-medium rounded-full px-3 py-1"
+                      style={{ backgroundColor: '#EEF2FF', color: '#4F46E5', fontFamily: 'var(--font-dm-sans)' }}
+                    >
+                      {data.sous_type}
+                    </span>
+                  )}
                 </div>
                 <h1 className="text-4xl md:text-5xl text-brun mb-3" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
                   {data.titre}
@@ -173,7 +181,7 @@ export default async function VenteDetailPage({ params }: Props) {
                   {data.surface && (
                     <div className="bg-white border border-brun/10 rounded-xl p-4 text-center">
                       <p className="text-2xl font-semibold text-brun" style={{ fontFamily: 'var(--font-dm-sans)' }}>{data.surface}</p>
-                      <p className="text-xs text-brun-mid/50 mt-1" style={{ fontFamily: 'var(--font-dm-sans)' }}>{t('surface_label')} (m²)</p>
+                      <p className="text-xs text-brun-mid/50 mt-1" style={{ fontFamily: 'var(--font-dm-sans)' }}>{t('surface_label')} ({data.categorie === 'Terrain' ? 'ha' : 'm²'})</p>
                     </div>
                   )}
                   {data.chambres && (
