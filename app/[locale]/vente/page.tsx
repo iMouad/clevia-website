@@ -26,7 +26,7 @@ export default async function VentePage({ params }: Props) {
   const supabase = await createClient()
   const { data } = await supabase
     .from('biens_vente')
-    .select('id, titre, categorie, statut, prix, surface, chambres, ville, photos, reference')
+    .select('id, titre, categorie, statut, prix, surface, chambres, ville, photos, reference, equipements')
     .order('created_at', { ascending: false })
 
   const biens: BienVente[] = (data ?? []).map((b) => ({
@@ -40,6 +40,7 @@ export default async function VentePage({ params }: Props) {
     ville: b.ville,
     photos: b.photos ?? null,
     reference: b.reference ?? null,
+    equipements: (b.equipements as string[] | null) ?? null,
   }))
 
   return (

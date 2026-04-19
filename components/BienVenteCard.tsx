@@ -16,6 +16,7 @@ export type BienVente = {
   ville: string
   photos: string[] | null
   reference: string | null
+  equipements?: string[] | null
 }
 
 const STATUT_STYLE = {
