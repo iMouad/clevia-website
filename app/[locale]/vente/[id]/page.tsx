@@ -133,7 +133,7 @@ export default async function VenteDetailPage({ params }: Props) {
         <div className="max-w-7xl mx-auto px-4 pb-24">
           {/* Galerie */}
           <AnimateIn className="mb-8">
-            <BienGallery photos={data.photos ?? []} nom={data.titre} />
+            <BienGallery photos={data.photos ?? []} nom={data.titre} videoUrl={data.video_url ?? null} />
           </AnimateIn>
 
           {/* Corps */}

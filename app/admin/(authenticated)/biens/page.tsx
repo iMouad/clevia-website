@@ -28,6 +28,7 @@ type Bien = {
   airbnb_url: string | null
   booking_url: string | null
   avito_url: string | null
+  video_url: string | null
   created_at: string
 }
 
@@ -43,7 +44,7 @@ const STATUT_COLORS: Record<string, string> = {
 const EMPTY: Partial<Bien> = {
   nom: '', ville: '', adresse: '', type: 'Appartement',
   capacite: null, prix_nuit: null, description: '', statut: 'actif', photos: [],
-  airbnb_url: '', booking_url: '', avito_url: '',
+  airbnb_url: '', booking_url: '', avito_url: '', video_url: null,
   chambres: 1, salles_de_bain: 1, capacite_max: 2, surface: null,
   etage: '', equipements: [], regles: [], distance_mer: '', disponible: true,
 }
@@ -478,6 +479,22 @@ export default function BiensPage() {
                 <span className="text-xs font-medium text-white bg-[#E07A2F] rounded-full px-2.5 py-1 w-20 text-center flex-shrink-0" style={{ fontFamily: 'var(--font-dm-sans)' }}>Avito</span>
                 <input className={inputClass} value={editing.avito_url ?? ''} onChange={(e) => setEditing((p) => ({ ...p, avito_url: e.target.value || null }))} placeholder="https://avito.ma/annonce/..." />
               </div>
+            </div>
+          </Section>
+
+          {/* Vidéo */}
+          <Section title="Vidéo (optionnel)">
+            <div>
+              <label className={labelClass}>Lien Google Drive</label>
+              <input
+                className={inputClass}
+                value={editing.video_url ?? ''}
+                onChange={(e) => setEditing((p) => ({ ...p, video_url: e.target.value || null }))}
+                placeholder="https://drive.google.com/file/d/..."
+              />
+              <p className="text-xs text-brun-mid/40 mt-1" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                Collez le lien de partage Google Drive de la vidéo du bien
+              </p>
             </div>
           </Section>
 

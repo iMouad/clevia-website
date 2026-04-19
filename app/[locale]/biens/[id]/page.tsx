@@ -163,7 +163,7 @@ export default async function BienDetailPage({ params }: Props) {
         <div className="max-w-7xl mx-auto px-4 py-8">
 
           {/* ── Gallery ── */}
-          <BienGallery photos={photos} nom={bien.nom} />
+          <BienGallery photos={photos} nom={bien.nom} videoUrl={bien.video_url ?? null} />
 
           {/* ── Content grid ── */}
           <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-10">

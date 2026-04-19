@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Image from 'next/image'
 import { Link } from '@/i18n/navigation'
 import { EQUIPEMENTS_MAP } from '@/lib/equipements'
@@ -37,6 +37,7 @@ const TYPE_COLORS: Record<string, string> = {
 export default function BienCard({ bien }: { bien: BienPublic }) {
   const photos = (bien.photos ?? []).filter(Boolean)
   const [idx, setIdx] = useState(0)
+  const touchStartX = useRef<number | null>(null)
 
   const equips = (bien.equipements ?? []).filter((k) => k in EQUIPEMENTS_MAP)
   const visibleEquips = equips.slice(0, 4)
@@ -53,13 +54,32 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
     setIdx((i) => (i + 1) % photos.length)
   }
 
+  function onTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX
+  }
+  function onTouchEnd(e: React.TouchEvent) {
+    if (touchStartX.current === null) return
+    const diff = touchStartX.current - e.changedTouches[0].clientX
+    if (Math.abs(diff) > 40) {
+      setIdx((i) => diff > 0
+        ? (i + 1) % photos.length
+        : (i - 1 + photos.length) % photos.length
+      )
+    }
+    touchStartX.current = null
+  }
+
   const isDisponible = bien.disponible !== false
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden border border-brun/8 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col group">
 
       {/* ── Photo Carousel ── */}
-      <div className="relative aspect-[4/3] bg-brun/5 overflow-hidden">
+      <div
+        className="relative aspect-[4/3] bg-brun/5 overflow-hidden"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
         {photos.length > 0 ? (
           <>
             <Image
@@ -74,7 +94,7 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
               <>
                 <button
                   onClick={prev}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-sm hover:bg-white z-10"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center md:opacity-0 md:group-hover:opacity-100 transition-all shadow-sm hover:bg-white z-10"
                   aria-label="Photo précédente"
                 >
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -83,7 +103,7 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
                 </button>
                 <button
                   onClick={next}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-sm hover:bg-white z-10"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center md:opacity-0 md:group-hover:opacity-100 transition-all shadow-sm hover:bg-white z-10"
                   aria-label="Photo suivante"
                 >
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">

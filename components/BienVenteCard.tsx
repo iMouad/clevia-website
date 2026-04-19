@@ -1,3 +1,6 @@
+'use client'
+
+import { useState, useRef } from 'react'
 import Image from 'next/image'
 import { Link } from '@/i18n/navigation'
 import { useTranslations, useLocale } from 'next-intl'
@@ -24,21 +27,104 @@ const STATUT_STYLE = {
 export default function BienVenteCard({ bien }: { bien: BienVente }) {
   const t = useTranslations('vente')
   const locale = useLocale()
-  const photo = bien.photos?.[0] ?? null
+  const photos = (bien.photos ?? []).filter(Boolean) as string[]
+  const [idx, setIdx] = useState(0)
+  const touchStartX = useRef<number | null>(null)
   const statut = STATUT_STYLE[bien.statut] ?? STATUT_STYLE.a_vendre
 
   const prixFormate = bien.prix
     ? bien.prix.toLocaleString('fr-MA') + ' MAD'
     : null
 
+  function prev(e: React.MouseEvent) {
+    e.preventDefault(); e.stopPropagation()
+    setIdx((i) => (i - 1 + photos.length) % photos.length)
+  }
+  function next(e: React.MouseEvent) {
+    e.preventDefault(); e.stopPropagation()
+    setIdx((i) => (i + 1) % photos.length)
+  }
+
+  function onTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX
+  }
+  function onTouchEnd(e: React.TouchEvent) {
+    if (touchStartX.current === null) return
+    const diff = touchStartX.current - e.changedTouches[0].clientX
+    if (Math.abs(diff) > 40) {
+      setIdx((i) => diff > 0
+        ? (i + 1) % photos.length
+        : (i - 1 + photos.length) % photos.length
+      )
+    }
+    touchStartX.current = null
+  }
+
   return (
-    <div
-      className="bg-white border border-brun/10 rounded-2xl overflow-hidden hover:-translate-y-1 hover:shadow-lg transition-all duration-200 flex flex-col"
-    >
-      {/* Photo */}
-      <div className="relative aspect-[4/3] bg-brun/5 flex-shrink-0">
-        {photo ? (
-          <Image src={photo} alt={bien.titre} fill className="object-cover" sizes="(max-width:768px) 100vw, 33vw" />
+    <div className="bg-white border border-brun/10 rounded-2xl overflow-hidden hover:-translate-y-1 hover:shadow-lg transition-all duration-200 flex flex-col">
+
+      {/* ── Photo carousel ── */}
+      <div
+        className="relative aspect-[4/3] bg-brun/5 flex-shrink-0 group"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
+        {photos.length > 0 ? (
+          <>
+            <Image
+              src={photos[idx]}
+              alt={bien.titre}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              sizes="(max-width:768px) 100vw, 33vw"
+            />
+
+            {photos.length > 1 && (
+              <>
+                {/* Flèche gauche */}
+                <button
+                  onClick={prev}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm z-10 md:opacity-0 md:group-hover:opacity-100 transition-all"
+                  aria-label="Photo précédente"
+                >
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M9 2L4 7l5 5" stroke="#2C1A0E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+
+                {/* Flèche droite */}
+                <button
+                  onClick={next}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm z-10 md:opacity-0 md:group-hover:opacity-100 transition-all"
+                  aria-label="Photo suivante"
+                >
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M5 2l5 5-5 5" stroke="#2C1A0E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+
+                {/* Dots */}
+                <div className="absolute bottom-3 inset-x-0 flex justify-center gap-1.5 pointer-events-none z-10">
+                  {photos.slice(0, 8).map((_, i) => (
+                    <span
+                      key={i}
+                      className={`rounded-full transition-all duration-300 ${
+                        i === idx ? 'w-4 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/50'
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                {/* Compteur */}
+                <div
+                  className="absolute top-3 right-3 bg-black/40 text-white text-xs px-2 py-0.5 rounded-full backdrop-blur-sm z-10"
+                  style={{ fontFamily: 'var(--font-dm-sans)' }}
+                >
+                  {idx + 1}/{photos.length}
+                </div>
+              </>
+            )}
+          </>
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <svg className="text-brun/20" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
@@ -50,7 +136,7 @@ export default function BienVenteCard({ bien }: { bien: BienVente }) {
 
         {/* Badge statut */}
         <span
-          className="absolute top-3 left-3 text-xs font-medium rounded-full px-2.5 py-1"
+          className="absolute top-3 left-3 text-xs font-medium rounded-full px-2.5 py-1 z-10"
           style={{ backgroundColor: statut.bg, color: statut.color, fontFamily: 'var(--font-dm-sans)' }}
         >
           {t(`statuts.${bien.statut}`)}
@@ -58,7 +144,7 @@ export default function BienVenteCard({ bien }: { bien: BienVente }) {
 
         {/* Badge catégorie */}
         <span
-          className="absolute top-3 right-3 text-xs font-medium rounded-full px-2.5 py-1"
+          className="absolute top-3 right-3 text-xs font-medium rounded-full px-2.5 py-1 z-10"
           style={{ backgroundColor: 'rgba(44,26,14,0.75)', color: '#FAF6F1', fontFamily: 'var(--font-dm-sans)' }}
         >
           {t(`categories.${bien.categorie}`)}
@@ -99,7 +185,7 @@ export default function BienVenteCard({ bien }: { bien: BienVente }) {
           )}
         </div>
 
-        {/* Prix */}
+        {/* Prix + CTA */}
         <div className="mt-auto">
           {prixFormate ? (
             <p className="text-xl font-semibold text-terra" style={{ fontFamily: 'var(--font-dm-sans)' }}>

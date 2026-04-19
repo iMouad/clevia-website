@@ -1,31 +1,57 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
+
+function gdriveEmbed(url: string): string {
+  const m1 = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)
+  if (m1) return `https://drive.google.com/file/d/${m1[1]}/preview`
+  const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/)
+  if (m2) return `https://drive.google.com/file/d/${m2[1]}/preview`
+  return url
+}
 
 type Props = {
   photos: string[]
   nom: string
+  videoUrl?: string | null
 }
 
-export default function BienGallery({ photos, nom }: Props) {
+export default function BienGallery({ photos, nom, videoUrl }: Props) {
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null)
   const [carouselIdx, setCarouselIdx] = useState(0)
+  const [videoActive, setVideoActive] = useState(false)
+  const touchStartX = useRef<number | null>(null)
+
+  const videoEmbed = videoUrl ? gdriveEmbed(videoUrl) : null
+  const totalSlides = photos.length + (videoEmbed ? 1 : 0)
+  const isVideoSlide = !!videoEmbed && carouselIdx === photos.length
+
+  useEffect(() => {
+    if (!isVideoSlide) setVideoActive(false)
+  }, [carouselIdx, isVideoSlide])
 
   const hasPhotos = photos.length > 0
   const main = photos[0] ?? null
   const thumbs = photos.slice(1, 5)
 
-  function openLightbox(i: number) { setLightboxIdx(i) }
-  function closeLightbox() { setLightboxIdx(null) }
+  function prevCarousel() { setCarouselIdx((i) => (i - 1 + totalSlides) % totalSlides) }
+  function nextCarousel() { setCarouselIdx((i) => (i + 1) % totalSlides) }
   function prevLightbox() { setLightboxIdx((i) => ((i ?? 0) - 1 + photos.length) % photos.length) }
   function nextLightbox() { setLightboxIdx((i) => ((i ?? 0) + 1) % photos.length) }
 
-  function prevCarousel() { setCarouselIdx((i) => (i - 1 + photos.length) % photos.length) }
-  function nextCarousel() { setCarouselIdx((i) => (i + 1) % photos.length) }
+  function onTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX
+  }
+  function onTouchEnd(e: React.TouchEvent) {
+    if (touchStartX.current === null) return
+    const diff = touchStartX.current - e.changedTouches[0].clientX
+    if (Math.abs(diff) > 40) { diff > 0 ? nextCarousel() : prevCarousel() }
+    touchStartX.current = null
+  }
 
-  if (!hasPhotos) {
+  if (!hasPhotos && !videoEmbed) {
     return (
       <div className="w-full aspect-[16/7] bg-brun/5 rounded-2xl flex items-center justify-center">
         <svg className="text-brun/15" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
@@ -39,66 +65,116 @@ export default function BienGallery({ photos, nom }: Props) {
 
   return (
     <>
-      {/* ── Desktop: Airbnb grid (hidden on mobile) ── */}
-      <div className="hidden md:grid grid-cols-4 grid-rows-2 gap-2 h-[420px] rounded-2xl overflow-hidden">
-        {/* Main photo — spans 2 cols + 2 rows */}
-        <div
-          className="col-span-2 row-span-2 relative cursor-pointer group"
-          onClick={() => openLightbox(0)}
-        >
-          <Image src={main!} alt={nom} fill className="object-cover group-hover:brightness-95 transition-all" />
-          {photos.length > 5 && (
-            <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm text-brun text-xs font-medium px-3 py-1.5 rounded-full shadow-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-              +{photos.length - 5} photos
-            </div>
-          )}
-        </div>
-
-        {/* Thumbnails — fill remaining 4 slots */}
-        {Array.from({ length: 4 }).map((_, i) => {
-          const photo = thumbs[i]
-          if (!photo) {
-            return <div key={i} className="relative bg-brun/5" />
-          }
-          return (
-            <div
-              key={i}
-              className="relative cursor-pointer group"
-              onClick={() => openLightbox(i + 1)}
-            >
-              <Image src={photo} alt={`${nom} — photo ${i + 2}`} fill className="object-cover group-hover:brightness-95 transition-all" />
-            </div>
-          )
-        })}
-      </div>
-
-      {/* ── Mobile: carousel (visible only on mobile) ── */}
-      <div className="md:hidden relative aspect-[4/3] rounded-2xl overflow-hidden bg-brun/5">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={carouselIdx}
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -40 }}
-            transition={{ duration: 0.25 }}
-            className="absolute inset-0"
+      {/* ── Desktop: grille Airbnb ── */}
+      {hasPhotos && (
+        <div className="hidden md:grid grid-cols-4 grid-rows-2 gap-2 h-[420px] rounded-2xl overflow-hidden">
+          <div
+            className="col-span-2 row-span-2 relative cursor-pointer group"
+            onClick={() => setLightboxIdx(0)}
           >
-            <Image
-              src={photos[carouselIdx]}
-              alt={`${nom} — ${carouselIdx + 1}`}
-              fill
-              className="object-cover"
-              onClick={() => openLightbox(carouselIdx)}
-            />
-          </motion.div>
+            <Image src={main!} alt={nom} fill className="object-cover group-hover:brightness-95 transition-all" />
+            {photos.length > 5 && (
+              <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm text-brun text-xs font-medium px-3 py-1.5 rounded-full shadow-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                +{photos.length - 5} photos
+              </div>
+            )}
+          </div>
+          {Array.from({ length: 4 }).map((_, i) => {
+            const photo = thumbs[i]
+            if (!photo) return <div key={i} className="relative bg-brun/5" />
+            return (
+              <div key={i} className="relative cursor-pointer group" onClick={() => setLightboxIdx(i + 1)}>
+                <Image src={photo} alt={`${nom} — photo ${i + 2}`} fill className="object-cover group-hover:brightness-95 transition-all" />
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* ── Desktop: Vidéo ── */}
+      {videoEmbed && (
+        <div
+          className="hidden md:block mt-4 rounded-2xl overflow-hidden bg-brun"
+          style={{ aspectRatio: '16/9', maxHeight: '480px' }}
+        >
+          <iframe
+            src={videoEmbed}
+            className="w-full h-full"
+            allow="autoplay"
+            allowFullScreen
+            title={`Vidéo — ${nom}`}
+          />
+        </div>
+      )}
+
+      {/* ── Mobile: carousel ── */}
+      <div
+        className="md:hidden relative aspect-[4/3] rounded-2xl overflow-hidden bg-brun/5"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
+        <AnimatePresence mode="wait">
+          {isVideoSlide ? (
+            <motion.div
+              key="video"
+              initial={{ opacity: 0, x: 40 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -40 }}
+              transition={{ duration: 0.25 }}
+              className="absolute inset-0 bg-brun"
+            >
+              {videoActive ? (
+                <iframe
+                  src={videoEmbed!}
+                  className="w-full h-full"
+                  allow="autoplay"
+                  allowFullScreen
+                  title={`Vidéo — ${nom}`}
+                />
+              ) : (
+                <button
+                  onClick={() => setVideoActive(true)}
+                  className="absolute inset-0 flex flex-col items-center justify-center gap-3"
+                >
+                  <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
+                  <span className="text-white/80 text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                    Regarder la vidéo
+                  </span>
+                </button>
+              )}
+            </motion.div>
+          ) : (
+            <motion.div
+              key={carouselIdx}
+              initial={{ opacity: 0, x: 40 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -40 }}
+              transition={{ duration: 0.25 }}
+              className="absolute inset-0"
+            >
+              {photos[carouselIdx] && (
+                <Image
+                  src={photos[carouselIdx]}
+                  alt={`${nom} — ${carouselIdx + 1}`}
+                  fill
+                  className="object-cover"
+                  onClick={() => setLightboxIdx(carouselIdx)}
+                />
+              )}
+            </motion.div>
+          )}
         </AnimatePresence>
 
-        {photos.length > 1 && (
+        {totalSlides > 1 && (
           <>
             <button
               onClick={prevCarousel}
               className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm z-10"
-              aria-label="Photo précédente"
+              aria-label="Précédent"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M9 2L4 7l5 5" stroke="#2C1A0E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -107,28 +183,34 @@ export default function BienGallery({ photos, nom }: Props) {
             <button
               onClick={nextCarousel}
               className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm z-10"
-              aria-label="Photo suivante"
+              aria-label="Suivant"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M5 2l5 5-5 5" stroke="#2C1A0E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
+
             <div className="absolute bottom-3 inset-x-0 flex justify-center gap-1.5 pointer-events-none z-10">
-              {photos.slice(0, 8).map((_, i) => (
+              {Array.from({ length: Math.min(totalSlides, 9) }).map((_, i) => (
                 <span
                   key={i}
-                  className={`rounded-full transition-all duration-300 ${i === carouselIdx ? 'w-4 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/50'}`}
+                  className={`rounded-full transition-all duration-300 ${
+                    i === carouselIdx
+                      ? (videoEmbed && i === photos.length ? 'w-4 h-1.5 bg-terra' : 'w-4 h-1.5 bg-white')
+                      : 'w-1.5 h-1.5 bg-white/50'
+                  }`}
                 />
               ))}
             </div>
+
             <div className="absolute top-3 right-3 bg-black/40 text-white text-xs px-2 py-0.5 rounded-full backdrop-blur-sm z-10" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-              {carouselIdx + 1}/{photos.length}
+              {isVideoSlide ? '▶ vidéo' : `${carouselIdx + 1}/${photos.length}`}
             </div>
           </>
         )}
       </div>
 
-      {/* ── Lightbox ── */}
+      {/* ── Lightbox (photos uniquement) ── */}
       <AnimatePresence>
         {lightboxIdx !== null && (
           <motion.div
@@ -136,7 +218,7 @@ export default function BienGallery({ photos, nom }: Props) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
-            onClick={closeLightbox}
+            onClick={() => setLightboxIdx(null)}
           >
             <div className="relative w-full max-w-4xl aspect-[4/3]" onClick={(e) => e.stopPropagation()}>
               <Image
@@ -145,7 +227,6 @@ export default function BienGallery({ photos, nom }: Props) {
                 fill
                 className="object-contain"
               />
-
               {photos.length > 1 && (
                 <>
                   <button
@@ -168,16 +249,14 @@ export default function BienGallery({ photos, nom }: Props) {
                   </button>
                 </>
               )}
-
               <div className="absolute top-3 inset-x-0 flex justify-center">
                 <span className="bg-black/50 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                   {lightboxIdx + 1} / {photos.length}
                 </span>
               </div>
             </div>
-
             <button
-              onClick={closeLightbox}
+              onClick={() => setLightboxIdx(null)}
               className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all"
               aria-label="Fermer"
             >

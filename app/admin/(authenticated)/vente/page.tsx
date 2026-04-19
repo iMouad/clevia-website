@@ -27,6 +27,7 @@ type BienVente = {
   photos: string[]
   telephone: string
   reference: string | null
+  video_url: string | null
   created_at: string
 }
 
@@ -50,7 +51,7 @@ const EMPTY: Omit<BienVente, 'id' | 'created_at'> = {
   titre: '', categorie: 'Appartement', statut: 'a_vendre', prix: null,
   surface: null, chambres: null, salles_de_bain: null, etage: null,
   ville: '', adresse: null, latitude: null, longitude: null,
-  description: null, equipements: [], photos: [], telephone: '', reference: null,
+  description: null, equipements: [], photos: [], telephone: '', reference: null, video_url: null,
 }
 
 const SITE_URL = 'https://www.cleviamaroc.com'
@@ -100,6 +101,7 @@ export default function AdminVentePage() {
       adresse: b.adresse, latitude: b.latitude, longitude: b.longitude,
       description: b.description, equipements: b.equipements ?? [],
       photos: b.photos ?? [], telephone: b.telephone, reference: b.reference,
+      video_url: b.video_url,
     })
     setPrixSurDemande(b.prix === null)
     setUploadError(null)
@@ -677,7 +679,25 @@ export default function AdminVentePage() {
                 </div>
               </section>
 
-              {/* 8. Photos */}
+              {/* 8. Vidéo */}
+              <section>
+                <h3 className="text-sm font-semibold text-brun-mid uppercase tracking-wide mb-4" style={{ fontFamily: 'var(--font-dm-sans)' }}>Vidéo (optionnel)</h3>
+                <div>
+                  <label className={labelClass} style={{ fontFamily: 'var(--font-dm-sans)' }}>Lien Google Drive</label>
+                  <input
+                    className={inputClass}
+                    style={{ fontFamily: 'var(--font-dm-sans)' }}
+                    value={form.video_url ?? ''}
+                    onChange={(e) => setForm((f) => ({ ...f, video_url: e.target.value || null }))}
+                    placeholder="https://drive.google.com/file/d/..."
+                  />
+                  <p className="text-xs text-brun-mid/40 mt-1.5" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                    Lien de partage Google Drive — visible uniquement sur la fiche détail
+                  </p>
+                </div>
+              </section>
+
+              {/* 9. Photos */}
               <section>
                 <h3 className="text-sm font-semibold text-brun-mid uppercase tracking-wide mb-4" style={{ fontFamily: 'var(--font-dm-sans)' }}>Photos</h3>
                 <label className="flex items-center gap-2 cursor-pointer bg-creme border border-dashed border-brun/20 rounded-xl px-4 py-3 hover:border-terra transition-colors mb-3">
