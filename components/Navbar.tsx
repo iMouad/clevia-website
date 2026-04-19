@@ -11,14 +11,18 @@ const LOCALES = [
   { code: 'en', label: 'EN' },
 ]
 
+// Desktop: label court / Mobile: label complet via t(key)
 const NAV_LINKS = [
-  { href: '/', key: 'home' },
-  { href: '/services', key: 'services' },
-  { href: '/biens', key: 'biens' },
-  { href: '/vente', key: 'vente' },
-  { href: '/comment', key: 'how' },
-  { href: '/pourquoi', key: 'why' },
+  { href: '/',         key: 'home',     desktop: null },
+  { href: '/services', key: 'services', desktop: null },
+  { href: '/biens',    key: 'biens',    desktop: null },
+  { href: '/vente',    key: 'vente',    desktop: null },
+  { href: '/comment',  key: 'how',      desktop: 'Comment' },
+  { href: '/pourquoi', key: 'why',      desktop: 'Pourquoi' },
 ] as const
+
+// Liens affichés en desktop (on retire Accueil — le logo fait ce travail)
+const DESKTOP_LINKS = NAV_LINKS.filter((l) => l.href !== '/')
 
 export default function Navbar() {
   const t = useTranslations('nav')
@@ -71,8 +75,8 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop nav links */}
-          <ul className="hidden xl:flex items-center gap-5">
-            {NAV_LINKS.map(({ href, key }) => (
+          <ul className="hidden lg:flex items-center gap-5">
+            {DESKTOP_LINKS.map(({ href, key, desktop }) => (
               <li key={key}>
                 <Link
                   href={href}
@@ -82,14 +86,14 @@ export default function Navbar() {
                       : 'text-brun hover:text-terra'
                   }`}
                 >
-                  {t(key)}
+                  {desktop ?? t(key)}
                 </Link>
               </li>
             ))}
           </ul>
 
           {/* Right side: lang switcher + CTA */}
-          <div className="hidden xl:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-2">
             {/* Language switcher */}
             <div className="flex items-center gap-1 border border-brun/20 rounded-full px-2 py-1">
               {LOCALES.map(({ code, label }) => (
@@ -111,19 +115,19 @@ export default function Navbar() {
             {/* Simulateur button — outline */}
             <Link
               href="/simulateur"
-              className={`border font-medium rounded-full px-5 py-2 text-sm transition-all duration-200 ${
+              className={`border font-medium rounded-full px-4 py-2 text-sm whitespace-nowrap transition-all duration-200 ${
                 isActive('/simulateur')
                   ? 'border-terra bg-terra/10 text-terra'
                   : 'border-brun/30 text-brun hover:border-terra hover:text-terra'
               }`}
             >
-              {t('simulateur')}
+              Simulateur
             </Link>
 
             {/* CTA button */}
             <Link
               href="/contact"
-              className="bg-terra text-creme font-medium rounded-full px-6 py-2 text-sm hover:bg-brun transition-all duration-200"
+              className="bg-terra text-creme font-medium rounded-full px-5 py-2 text-sm whitespace-nowrap hover:bg-brun transition-all duration-200"
             >
               {t('contact')}
             </Link>
@@ -132,7 +136,7 @@ export default function Navbar() {
           {/* Mobile burger */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="xl:hidden flex items-center justify-center w-10 h-10 text-brun"
+            className="lg:hidden flex items-center justify-center w-10 h-10 text-brun"
             aria-label={mobileOpen ? t('menuClose') : t('menuOpen')}
             aria-expanded={mobileOpen}
           >
@@ -152,7 +156,7 @@ export default function Navbar() {
       {/* Mobile drawer */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 xl:hidden"
+          className="fixed inset-0 z-40 lg:hidden"
           onClick={() => setMobileOpen(false)}
         >
           <div className="absolute inset-0 bg-brun/40 backdrop-blur-sm" />
