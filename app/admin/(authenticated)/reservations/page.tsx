@@ -136,7 +136,78 @@ export default function ReservationsPage() {
         <span className="self-center text-xs text-brun-mid/60">{filtered.length} réservation(s)</span>
       </div>
 
-      <div className="bg-white rounded-2xl border border-brun/10 overflow-hidden">
+      {/* ── MOBILE : cartes ── */}
+      <div className="lg:hidden flex flex-col gap-3">
+        {loading ? (
+          <p className="text-center py-10 text-brun-mid/50 text-sm">Chargement…</p>
+        ) : !filtered.length ? (
+          <p className="text-center py-10 text-brun-mid/50 text-sm">Aucune réservation</p>
+        ) : filtered.map((r) => (
+          <div key={r.id} className="bg-white rounded-2xl border border-brun/10 p-4">
+            {/* Ligne 1 : nom + statut */}
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <p className="font-medium text-brun text-sm truncate" style={{ fontFamily: 'var(--font-dm-sans)' }}>{r.voyageur_nom}</p>
+              <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${STATUT_COLORS[r.statut]}`}>
+                {STATUT_LABELS[r.statut] ?? r.statut}
+              </span>
+            </div>
+            {/* Bien */}
+            <p className="text-xs text-brun-mid/60 mb-2" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+              {(r as any).biens?.nom ?? '—'}
+            </p>
+            {/* Dates + nuits + plateforme */}
+            <div className="flex items-center gap-2 flex-wrap mb-2">
+              <span className="text-xs text-brun-mid" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                {format(new Date(r.date_arrivee), 'dd/MM/yy')} → {format(new Date(r.date_depart), 'dd/MM/yy')}
+              </span>
+              <span className="text-xs text-brun-mid/50">·</span>
+              <span className="text-xs text-brun-mid" style={{ fontFamily: 'var(--font-dm-sans)' }}>{nuits(r.date_arrivee, r.date_depart)} nuit(s)</span>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${PLATF_COLORS[r.plateforme ?? ''] ?? 'bg-gray-100 text-gray-500'}`}>
+                {r.plateforme ?? '—'}
+              </span>
+            </div>
+            {/* Montant + commission */}
+            <div className="flex items-center gap-3 mb-3">
+              {r.montant ? (
+                <>
+                  <span className="text-sm font-medium text-brun" style={{ fontFamily: 'var(--font-dm-sans)' }}>{r.montant} MAD</span>
+                  <span className="text-xs text-terra" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                    Commission : {(r.montant * r.taux_commission / 100).toFixed(0)} MAD
+                  </span>
+                </>
+              ) : (
+                <span className="text-sm text-brun-mid/40">Montant —</span>
+              )}
+            </div>
+            {/* Actions */}
+            <div className="flex gap-3 pt-3 border-t border-brun/8">
+              <button
+                onClick={() => openEdit(r)}
+                className="flex-1 flex items-center justify-center gap-1.5 bg-terra/10 text-terra text-sm font-medium rounded-xl py-2 hover:bg-terra/20 transition-all"
+                style={{ fontFamily: 'var(--font-dm-sans)' }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+                Modifier
+              </button>
+              <button
+                onClick={() => handleDelete(r.id)}
+                className="flex-1 flex items-center justify-center gap-1.5 bg-red-50 text-red-500 text-sm font-medium rounded-xl py-2 hover:bg-red-100 transition-all"
+                style={{ fontFamily: 'var(--font-dm-sans)' }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+                </svg>
+                Supprimer
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── DESKTOP : table ── */}
+      <div className="hidden lg:block bg-white rounded-2xl border border-brun/10 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-brun/4">
