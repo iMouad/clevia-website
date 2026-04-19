@@ -206,8 +206,71 @@ export default function BiensPage() {
         </button>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-2xl border border-brun/10 overflow-hidden">
+      {/* ── MOBILE : cartes ── */}
+      <div className="lg:hidden flex flex-col gap-3">
+        {loading ? (
+          <p className="text-center py-10 text-brun-mid/50 text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>Chargement…</p>
+        ) : !biens.length ? (
+          <p className="text-center py-10 text-brun-mid/50 text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>Aucun bien. Cliquez sur "Ajouter".</p>
+        ) : biens.map((b) => (
+          <div key={b.id} className="bg-white rounded-2xl border border-brun/10 p-4 flex gap-3">
+            {/* Photo */}
+            <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-brun/5 flex-shrink-0">
+              {(b.photos ?? []).length > 0 ? (
+                <Image src={b.photos![0]} alt={b.nom} fill className="object-cover" />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <svg className="text-brun/20" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
+                  </svg>
+                </div>
+              )}
+            </div>
+            {/* Infos */}
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-brun truncate text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>{b.nom}</p>
+              <p className="text-xs text-brun-mid/60 mt-0.5" style={{ fontFamily: 'var(--font-dm-sans)' }}>{b.ville ?? ''}{b.type ? ` · ${b.type}` : ''}</p>
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUT_COLORS[b.statut]}`}>
+                  {STATUT_LABELS[b.statut]}
+                </span>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${b.disponible !== false ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                  {b.disponible !== false ? 'Disponible' : 'Indisponible'}
+                </span>
+                {b.prix_nuit && (
+                  <span className="text-xs text-brun-mid/60" style={{ fontFamily: 'var(--font-dm-sans)' }}>{b.prix_nuit} MAD/nuit</span>
+                )}
+              </div>
+              {/* Actions */}
+              <div className="flex items-center gap-3 mt-3 pt-3 border-t border-brun/8">
+                <button
+                  onClick={() => openEdit(b)}
+                  className="flex-1 flex items-center justify-center gap-1.5 bg-terra/10 text-terra text-sm font-medium rounded-xl py-2 hover:bg-terra/20 transition-all"
+                  style={{ fontFamily: 'var(--font-dm-sans)' }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                  </svg>
+                  Modifier
+                </button>
+                <button
+                  onClick={() => handleDelete(b.id)}
+                  className="flex-1 flex items-center justify-center gap-1.5 bg-red-50 text-red-500 text-sm font-medium rounded-xl py-2 hover:bg-red-100 transition-all"
+                  style={{ fontFamily: 'var(--font-dm-sans)' }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+                  </svg>
+                  Supprimer
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── DESKTOP : table ── */}
+      <div className="hidden lg:block bg-white rounded-2xl border border-brun/10 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-brun/4">
@@ -219,9 +282,9 @@ export default function BiensPage() {
             </thead>
             <tbody className="divide-y divide-brun/5">
               {loading ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
+                <tr><td colSpan={8} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
               ) : !biens.length ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-brun-mid/50">Aucun bien</td></tr>
+                <tr><td colSpan={8} className="px-4 py-10 text-center text-brun-mid/50">Aucun bien</td></tr>
               ) : biens.map((b) => (
                 <tr key={b.id} className="hover:bg-creme/40 transition-colors">
                   <td className="px-3 py-2">
