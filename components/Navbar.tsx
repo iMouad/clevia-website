@@ -124,12 +124,24 @@ export default function Navbar() {
               Simulateur
             </Link>
 
-            {/* CTA button */}
+            {/* CTA confier */}
             <Link
               href="/contact"
               className="bg-terra text-creme font-medium rounded-full px-5 py-2 text-sm whitespace-nowrap hover:bg-brun transition-all duration-200"
             >
               {t('contact')}
+            </Link>
+
+            {/* CTA vendre */}
+            <Link
+              href="/vente"
+              className={`border font-medium rounded-full px-4 py-2 text-sm whitespace-nowrap transition-all duration-200 ${
+                isActive('/vente')
+                  ? 'border-terra bg-terra/10 text-terra'
+                  : 'border-terra/60 text-terra hover:border-terra hover:bg-terra/5'
+              }`}
+            >
+              {t('vendre')}
             </Link>
           </div>
 
@@ -200,6 +212,18 @@ export default function Navbar() {
               }`}
             >
               {t('simulateur')}
+            </Link>
+
+            {/* Vendre votre bien CTA — mobile */}
+            <Link
+              href="/vente"
+              className={`border-2 font-medium rounded-full px-8 py-3 text-center transition-all duration-200 ${
+                isActive('/vente')
+                  ? 'border-brun bg-brun/10 text-brun'
+                  : 'border-brun/30 text-brun-mid hover:border-brun hover:text-brun'
+              }`}
+            >
+              {t('vendre')}
             </Link>
 
             {/* Mobile lang switcher */}

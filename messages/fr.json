@@ -2,11 +2,12 @@
   "nav": {
     "home": "Accueil",
     "services": "Services",
-    "biens": "Nos biens",
+    "biens": "Biens à louer",
     "vente": "Biens à vendre",
     "how": "Comment ça marche",
     "why": "Pourquoi nous",
-    "contact": "Contact",
+    "contact": "Confier votre bien",
+    "vendre": "Vendre votre bien",
     "simulateur": "Estimer mon bien",
     "menuOpen": "Ouvrir le menu",
     "menuClose": "Fermer le menu"

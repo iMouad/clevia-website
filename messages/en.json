@@ -2,11 +2,12 @@
   "nav": {
     "home": "Home",
     "services": "Services",
-    "biens": "Our properties",
+    "biens": "Rentals",
     "vente": "Properties for sale",
     "how": "How it works",
     "why": "Why us",
-    "contact": "Contact",
+    "contact": "Entrust your property",
+    "vendre": "Sell your property",
     "simulateur": "Estimate my revenue",
     "menuOpen": "Open menu",
     "menuClose": "Close menu"
