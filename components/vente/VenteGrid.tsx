@@ -13,6 +13,9 @@ type Props = {
   categories: Record<string, string>
 }
 
+const CITIES_VENTE = ['Mohammedia', 'Mansouria', 'Bouznika', 'Benslimane', 'Rabat', 'Casablanca']
+const CITY_AUTRES = 'Autres villes'
+
 const PRICE_RANGES = [
   { label: 'Tous les budgets', min: null, max: null },
   { label: '< 500 000',        min: null, max: 500_000 },
@@ -36,6 +39,7 @@ export default function VenteGrid({ biens, filterAllLabel, filterVendusLabel, ca
   const [priceRange, setPriceRange] = useState(0)
   const [selectedEqs, setSelectedEqs] = useState<Set<string>>(new Set())
   const [showEqPanel, setShowEqPanel] = useState(false)
+  const [villeFilter, setVilleFilter] = useState<string | null>(null)
 
   const categoriesPresentes = useMemo(() => {
     const s = new Set(biens.map((b) => b.categorie))
@@ -49,6 +53,14 @@ export default function VenteGrid({ biens, filterAllLabel, filterVendusLabel, ca
     return Array.from(s).filter((k) => k in ALL_EQ_DEFS)
   }, [biens])
 
+  // Cities that appear in the data
+  const availableCities = useMemo(() => {
+    const villes = new Set(biens.map((b) => b.ville?.trim()).filter(Boolean) as string[])
+    const main = CITIES_VENTE.filter((c) => [...villes].some((v) => v.toLowerCase().includes(c.toLowerCase())))
+    const hasOthers = [...villes].some((v) => !CITIES_VENTE.some((c) => v.toLowerCase().includes(c.toLowerCase())))
+    return hasOthers ? [...main, CITY_AUTRES] : main
+  }, [biens])
+
   const filtered = useMemo(() => {
     const range = PRICE_RANGES[priceRange]
     return biens.filter((b) => {
@@ -56,6 +68,15 @@ export default function VenteGrid({ biens, filterAllLabel, filterVendusLabel, ca
       if (categorie !== 'all' && b.categorie !== categorie) return false
       if (range.min !== null && (b.prix === null || b.prix < range.min)) return false
       if (range.max !== null && b.prix !== null && b.prix > range.max) return false
+      if (villeFilter) {
+        const v = b.ville?.toLowerCase() ?? ''
+        if (villeFilter === CITY_AUTRES) {
+          const isMain = CITIES_VENTE.some((c) => v.includes(c.toLowerCase()))
+          if (isMain) return false
+        } else {
+          if (!v.includes(villeFilter.toLowerCase())) return false
+        }
+      }
       if (selectedEqs.size > 0) {
         const bEqs = new Set(b.equipements ?? [])
         for (const eq of selectedEqs) {
@@ -64,7 +85,7 @@ export default function VenteGrid({ biens, filterAllLabel, filterVendusLabel, ca
       }
       return true
     })
-  }, [biens, categorie, showVendus, priceRange, selectedEqs])
+  }, [biens, categorie, showVendus, priceRange, selectedEqs, villeFilter])
 
   function toggleEq(key: string) {
     setSelectedEqs((prev) => {
@@ -78,6 +99,7 @@ export default function VenteGrid({ biens, filterAllLabel, filterVendusLabel, ca
   const activeFiltersCount =
     (categorie !== 'all' ? 1 : 0) +
     (priceRange !== 0 ? 1 : 0) +
+    (villeFilter ? 1 : 0) +
     selectedEqs.size
 
   return (
@@ -155,7 +177,43 @@ export default function VenteGrid({ biens, filterAllLabel, filterVendusLabel, ca
           ))}
         </div>
 
-        {/* Ligne 3: Équipements */}
+        {/* Ligne 3: Ville */}
+        {availableCities.length > 1 && (
+          <div className="flex flex-wrap items-center gap-2 border-t border-brun/8 pt-3">
+            <span className="text-xs font-medium text-brun-mid/60 uppercase tracking-wide mr-1 flex-shrink-0" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+              Ville
+            </span>
+            <button
+              onClick={() => setVilleFilter(null)}
+              className="text-sm rounded-full px-3 py-1.5 font-medium transition-all border"
+              style={{
+                backgroundColor: !villeFilter ? '#2C1A0E' : 'transparent',
+                color: !villeFilter ? '#FAF6F1' : '#6B4C35',
+                borderColor: !villeFilter ? '#2C1A0E' : 'rgba(44,26,14,0.15)',
+                fontFamily: 'var(--font-dm-sans)',
+              }}
+            >
+              Toutes
+            </button>
+            {availableCities.map((city) => (
+              <button
+                key={city}
+                onClick={() => setVilleFilter(city)}
+                className="text-sm rounded-full px-3 py-1.5 font-medium transition-all border"
+                style={{
+                  backgroundColor: villeFilter === city ? '#2C1A0E' : 'transparent',
+                  color: villeFilter === city ? '#FAF6F1' : '#6B4C35',
+                  borderColor: villeFilter === city ? '#2C1A0E' : 'rgba(44,26,14,0.15)',
+                  fontFamily: 'var(--font-dm-sans)',
+                }}
+              >
+                {city}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Ligne 4: Équipements */}
         {availableEqs.length > 0 && (
           <div className="border-t border-brun/8 pt-3">
             <button
@@ -216,7 +274,7 @@ export default function VenteGrid({ biens, filterAllLabel, filterVendusLabel, ca
               {filtered.length} bien{filtered.length > 1 ? 's' : ''} correspondant{filtered.length > 1 ? 's' : ''}
             </span>
             <button
-              onClick={() => { setCategorie('all'); setPriceRange(0); setSelectedEqs(new Set()) }}
+              onClick={() => { setCategorie('all'); setPriceRange(0); setSelectedEqs(new Set()); setVilleFilter(null) }}
               className="text-xs text-terra hover:text-brun underline underline-offset-2 transition-colors"
               style={{ fontFamily: 'var(--font-dm-sans)' }}
             >

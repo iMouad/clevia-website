@@ -351,7 +351,7 @@ export default function BiensPage() {
 
           <div>
             <label className={labelClass}>Adresse complète</label>
-            <input className={inputClass} value={editing.adresse ?? ''} onChange={(e) => setEditing((p) => ({ ...p, adresse: e.target.value }))} placeholder="Ex : 12 Rue des Orangers, Mansouria" />
+            <input className={inputClass} value={editing.adresse ?? ''} onChange={(e) => setEditing((p) => ({ ...p, adresse: e.target.value }))} placeholder="Ex : 12 Rue des Orangers, Mohammedia" />
           </div>
 
           <div className="grid grid-cols-2 gap-4">

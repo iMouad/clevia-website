@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ogTitle = `${nomTruncated} · Clévia`
 
   // Description toujours définie
-  const ville = (data.ville as string | null) ?? 'Mansouria · Mohammedia'
+  const ville = (data.ville as string | null) ?? 'Maroc'
   const fallbackDesc = `Location courte durée à ${ville}, géré par Clévia Conciergerie. Réservez sur Airbnb, Booking ou contactez-nous directement.`
   const ogDescription = (data.description as string | null)?.slice(0, 160) ?? fallbackDesc
 
@@ -104,13 +104,13 @@ export default async function BienDetailPage({ params }: Props) {
     '@context': 'https://schema.org',
     '@type': 'LodgingBusiness',
     name: bien.nom,
-    description: bien.description ?? `Location courte durée à ${bien.ville ?? 'Mansouria · Mohammedia'}, géré par Clévia Conciergerie.`,
+    description: bien.description ?? `Location courte durée à ${bien.ville ?? 'Maroc'}, géré par Clévia Conciergerie.`,
     url: `${siteUrl}/${locale}/biens/${id}`,
     image: photos.slice(0, 5),
     address: {
       '@type': 'PostalAddress',
       streetAddress: bien.adresse ?? undefined,
-      addressLocality: bien.ville ?? 'Mansouria',
+      addressLocality: bien.ville ?? 'Maroc',
       addressCountry: 'MA',
     },
     ...(bien.chambres && { numberOfRooms: bien.chambres }),

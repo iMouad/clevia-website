@@ -19,7 +19,7 @@
   "simulateur": {
     "meta": {
       "title": "Simulateur de revenus — Clévia Conciergerie",
-      "description": "Estimez combien peut rapporter votre bien à El Mansouria ou Mohammedia en location courte durée sur Airbnb, Booking et Avito."
+      "description": "Estimez combien peut rapporter votre bien à Mohammedia, Mansouria, Bouznika ou Benslimane en location courte durée sur Airbnb, Booking et Avito."
     },
     "hero": {
       "tag": "Outil gratuit",
@@ -90,7 +90,7 @@
       },
       "maintenance": {
         "title": "Maintenance & urgences",
-        "description": "Intervention rapide en cas de problème. Réseau d'artisans de confiance à Mohammedia."
+        "description": "Intervention rapide en cas de problème. Réseau d'artisans de confiance dans toute notre zone d'intervention."
       }
     },
     "pricing": {
@@ -205,7 +205,7 @@
   },
   "cta": {
     "title": "Prêt à louer votre bien ?",
-    "subtitle": "Rejoignez les propriétaires qui nous font confiance à Mansouria et Mohammedia.",
+    "subtitle": "Rejoignez les propriétaires qui nous font confiance à Mohammedia, Mansouria, Bouznika et Benslimane.",
     "button": "Nous contacter"
   },
   "contact": {
@@ -219,7 +219,7 @@
     "info": {
       "zone": {
         "label": "Zone couverte",
-        "value": "Mansouria · Mohammedia · Région de Casablanca"
+        "value": "Mohammedia · Mansouria · Bouznika · Benslimane"
       },
       "email": {
         "label": "Email",
@@ -243,7 +243,7 @@
       "email": "Email",
       "emailPlaceholder": "votre@email.com",
       "city": "Ville du bien",
-      "cityPlaceholder": "Ex : Mansouria, Mohammedia",
+      "cityPlaceholder": "Ex : Mohammedia, Bouznika",
       "type": "Type de bien",
       "typePlaceholder": "Sélectionner",
       "typeOptions": {
@@ -263,7 +263,7 @@
   },
   "footer": {
     "tagline": "Votre bien, notre priorité.",
-    "description": "Conciergerie de location courte durée à Mansouria · Mohammedia · Maroc.",
+    "description": "Conciergerie de location courte durée à Mohammedia · Mansouria · Bouznika · Benslimane · Maroc.",
     "links": {
       "title": "Pages",
       "services": "Services",
@@ -304,7 +304,7 @@
     "brutsLabel": "Revenus bruts",
     "commissionNote": "Notre commission est personnalisée selon votre bien et son potentiel. Contactez-nous pour une offre sur mesure.",
     "netsLabel": "Vos revenus nets",
-    "disclaimer": "Estimation indicative basée sur les données du marché local (El Mansouria · Mohammedia). Résultats non garantis.",
+    "disclaimer": "Estimation indicative basée sur les données du marché local (Mohammedia · Mansouria · Bouznika · Benslimane). Résultats non garantis.",
     "cta": "Confier mon bien"
   },
   "testimonials": {
@@ -315,10 +315,10 @@
   "biens": {
     "tag": "Nos biens",
     "homeTitle": "Les biens que nous gérons",
-    "homeSubtitle": "Découvrez notre sélection de logements à Mansouria et Mohammedia, disponibles sur Airbnb, Booking et Avito.",
+    "homeSubtitle": "Découvrez notre sélection de logements à Mohammedia, Mansouria, Bouznika et Benslimane, disponibles sur Airbnb, Booking et Avito.",
     "viewAll": "Voir tous nos biens",
     "title": "Nos biens",
-    "subtitle": "Découvrez notre sélection de logements gérés par Clévia dans la région de Mohammedia.",
+    "subtitle": "Découvrez notre sélection de logements gérés par Clévia à Mohammedia, Mansouria, Bouznika et Benslimane.",
     "filterAll": "Tous les types",
     "filterEmpty": "Aucun bien de ce type disponible pour le moment.",
     "empty": "Aucun bien disponible pour le moment.",
@@ -348,10 +348,10 @@
   "vente": {
     "tag": "Immobilier",
     "homeTitle": "Biens à vendre",
-    "homeSubtitle": "Découvrez notre sélection de biens immobiliers à Mansouria et Mohammedia.",
+    "homeSubtitle": "Découvrez notre sélection de biens immobiliers à Mohammedia, Mansouria, Bouznika et Benslimane.",
     "viewAll": "Voir tous les biens",
     "title": "Biens à vendre",
-    "subtitle": "Trouvez votre prochain investissement à Mansouria et Mohammedia.",
+    "subtitle": "Trouvez votre prochain investissement à Mohammedia, Mansouria, Bouznika, Benslimane, Rabat, Casablanca et partout au Maroc.",
     "filterAll": "Tous",
     "filterVendus": "Afficher les vendus",
     "empty": "Aucun bien disponible pour le moment.",

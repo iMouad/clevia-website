@@ -19,7 +19,7 @@
   "simulateur": {
     "meta": {
       "title": "Revenue Estimator — Clévia Conciergerie",
-      "description": "Estimate how much your property in El Mansouria or Mohammedia can earn through short-term rental on Airbnb, Booking and Avito."
+      "description": "Estimate how much your property in Mohammedia, Mansouria, Bouznika or Benslimane can earn through short-term rental on Airbnb, Booking and Avito."
     },
     "hero": {
       "tag": "Free tool",
@@ -90,7 +90,7 @@
       },
       "maintenance": {
         "title": "Maintenance & emergencies",
-        "description": "Fast response when needed. Trusted network of craftsmen in Mohammedia."
+        "description": "Fast response when needed. Trusted network of craftsmen across our entire service area."
       }
     },
     "pricing": {
@@ -206,7 +206,7 @@
   },
   "cta": {
     "title": "Ready to rent your property?",
-    "subtitle": "Join the property owners who trust us in Mansouria and Mohammedia.",
+    "subtitle": "Join the property owners who trust us in Mohammedia, Mansouria, Bouznika and Benslimane.",
     "button": "Contact us"
   },
   "contact": {
@@ -220,7 +220,7 @@
     "info": {
       "zone": {
         "label": "Area covered",
-        "value": "Mansouria · Mohammedia · Casablanca Region"
+        "value": "Mohammedia · Mansouria · Bouznika · Benslimane"
       },
       "email": {
         "label": "Email",
@@ -244,7 +244,7 @@
       "email": "Email",
       "emailPlaceholder": "your@email.com",
       "city": "Property city",
-      "cityPlaceholder": "e.g. Mansouria, Mohammedia",
+      "cityPlaceholder": "e.g. Mohammedia, Bouznika",
       "type": "Property type",
       "typePlaceholder": "Select",
       "typeOptions": {
@@ -264,7 +264,7 @@
   },
   "footer": {
     "tagline": "Your home, handled.",
-    "description": "Short-term rental concierge in Mansouria · Mohammedia · Morocco.",
+    "description": "Short-term rental concierge in Mohammedia · Mansouria · Bouznika · Benslimane · Morocco.",
     "links": {
       "title": "Pages",
       "services": "Services",
@@ -305,7 +305,7 @@
     "brutsLabel": "Gross revenue",
     "commissionNote": "Our fee is personalised based on your property and its potential. Contact us for a tailored offer.",
     "netsLabel": "Your net income",
-    "disclaimer": "Indicative estimate based on local market data (El Mansouria · Mohammedia). Results are not guaranteed.",
+    "disclaimer": "Indicative estimate based on local market data (Mohammedia · Mansouria · Bouznika · Benslimane). Results are not guaranteed.",
     "cta": "Entrust my property"
   },
   "testimonials": {
@@ -316,10 +316,10 @@
   "biens": {
     "tag": "Our properties",
     "homeTitle": "Properties we manage",
-    "homeSubtitle": "Discover our selection of apartments and villas in Mansouria and Mohammedia, available on Airbnb, Booking and Avito.",
+    "homeSubtitle": "Discover our selection of apartments and villas in Mohammedia, Mansouria, Bouznika and Benslimane, available on Airbnb, Booking and Avito.",
     "viewAll": "View all our properties",
     "title": "Our properties",
-    "subtitle": "Discover our selection of properties managed by Clévia in the Mohammedia region.",
+    "subtitle": "Discover our selection of properties managed by Clévia in Mohammedia, Mansouria, Bouznika and Benslimane.",
     "filterAll": "All types",
     "filterEmpty": "No properties of this type available right now.",
     "empty": "No properties available at the moment.",
@@ -349,10 +349,10 @@
   "vente": {
     "tag": "Real Estate",
     "homeTitle": "Properties for sale",
-    "homeSubtitle": "Discover our selection of properties in Mansouria and Mohammedia.",
+    "homeSubtitle": "Discover our selection of properties in Mohammedia, Mansouria, Bouznika and Benslimane.",
     "viewAll": "View all properties",
     "title": "Properties for sale",
-    "subtitle": "Find your next investment in Mansouria and Mohammedia.",
+    "subtitle": "Find your next investment in Mohammedia, Mansouria, Bouznika, Benslimane, Rabat, Casablanca and across Morocco.",
     "filterAll": "All",
     "filterVendus": "Show sold",
     "empty": "No properties available at the moment.",
