@@ -18,7 +18,7 @@ type Contact = {
   created_at: string
 }
 
-type Filter = 'all' | 'unread' | 'read'
+type Filter = 'all' | 'unread' | 'read' | 'contact' | 'simulateur' | 'visite'
 
 const SOURCE_LABELS: Record<string, string> = {
   contact: 'Formulaire',
@@ -59,6 +59,7 @@ export default function ContactsPage() {
   const filtered = contacts.filter((c) => {
     if (filter === 'unread') return !c.traite
     if (filter === 'read') return c.traite
+    if (filter === 'contact' || filter === 'simulateur' || filter === 'visite') return c.source === filter
     return true
   })
 
@@ -74,6 +75,9 @@ export default function ContactsPage() {
     { key: 'all', label: 'Tous' },
     { key: 'unread', label: 'Non traités' },
     { key: 'read', label: 'Traités' },
+    { key: 'contact', label: 'Formulaire' },
+    { key: 'simulateur', label: 'Simulateur' },
+    { key: 'visite', label: 'Visite' },
   ]
 
   return (

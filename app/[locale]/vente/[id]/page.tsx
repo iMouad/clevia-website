@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getTranslations } from 'next-intl/server'
 import type { Metadata } from 'next'
@@ -57,6 +57,7 @@ export default async function VenteDetailPage({ params }: Props) {
     .single()
 
   if (error || !data) notFound()
+  if (isUUID && (data as any).slug) permanentRedirect(`/${locale}/vente/${(data as any).slug}`)
 
   const equipementsDefs = getEquipementsForCategorie(data.categorie)
   const equipementsActifs = equipementsDefs.filter((e) =>

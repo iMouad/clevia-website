@@ -18,6 +18,133 @@ type Props = {
   videoUrl?: string | null
 }
 
+function LightboxOverlay({ photos, nom, idx, onClose, onPrev, onNext, onGoTo }: {
+  photos: string[]; nom: string; idx: number
+  onClose: () => void; onPrev: () => void; onNext: () => void; onGoTo: (i: number) => void
+}) {
+  const touchStartX = useRef<number | null>(null)
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose()
+      if (e.key === 'ArrowLeft') onPrev()
+      if (e.key === 'ArrowRight') onNext()
+    }
+    document.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [onClose, onPrev, onNext])
+
+  function onTouchStart(e: React.TouchEvent) { touchStartX.current = e.touches[0].clientX }
+  function onTouchEnd(e: React.TouchEvent) {
+    if (touchStartX.current === null) return
+    const diff = touchStartX.current - e.changedTouches[0].clientX
+    if (Math.abs(diff) > 40) { diff > 0 ? onNext() : onPrev() }
+    touchStartX.current = null
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-[100] bg-black flex flex-col"
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+    >
+      {/* Topbar */}
+      <div className="flex items-center justify-between px-4 py-3 flex-shrink-0">
+        <span className="text-white/60 text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+          {nom}
+        </span>
+        <div className="flex items-center gap-4">
+          <span className="text-white/60 text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+            {idx + 1} / {photos.length}
+          </span>
+          <button
+            onClick={onClose}
+            className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all"
+            aria-label="Fermer"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M2 2l12 12M14 2L2 14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Image principale */}
+      <div className="flex-1 relative flex items-center justify-center px-14 min-h-0" onClick={onClose}>
+        <div className="relative w-full h-full" onClick={(e) => e.stopPropagation()}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.97 }}
+              transition={{ duration: 0.15 }}
+              className="absolute inset-0"
+            >
+              <Image
+                src={photos[idx]}
+                alt={`${nom} — ${idx + 1}`}
+                fill
+                className="object-contain"
+                sizes="100vw"
+                priority
+              />
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {photos.length > 1 && (
+          <>
+            <button
+              onClick={(e) => { e.stopPropagation(); onPrev() }}
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center text-white transition-all"
+              aria-label="Photo précédente"
+            >
+              <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
+                <path d="M9 2L4 7l5 5" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); onNext() }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center text-white transition-all"
+              aria-label="Photo suivante"
+            >
+              <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
+                <path d="M5 2l5 5-5 5" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* Thumbnails strip */}
+      {photos.length > 1 && (
+        <div className="flex-shrink-0 px-4 pb-4 pt-2">
+          <div className="flex gap-2 overflow-x-auto justify-center">
+            {photos.map((p, i) => (
+              <button
+                key={i}
+                onClick={() => onGoTo(i)}
+                className={`relative flex-shrink-0 w-14 h-10 rounded-lg overflow-hidden transition-all ${i === idx ? 'ring-2 ring-white' : 'opacity-50 hover:opacity-80'}`}
+              >
+                <Image src={p} alt="" fill className="object-cover" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </motion.div>
+  )
+}
+
 export default function BienGallery({ photos, nom, videoUrl }: Props) {
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null)
   const [carouselIdx, setCarouselIdx] = useState(0)
@@ -210,61 +337,18 @@ export default function BienGallery({ photos, nom, videoUrl }: Props) {
         )}
       </div>
 
-      {/* ── Lightbox (photos uniquement) ── */}
+      {/* ── Lightbox full-screen ── */}
       <AnimatePresence>
         {lightboxIdx !== null && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
-            onClick={() => setLightboxIdx(null)}
-          >
-            <div className="relative w-full max-w-4xl aspect-[4/3]" onClick={(e) => e.stopPropagation()}>
-              <Image
-                src={photos[lightboxIdx]}
-                alt={`${nom} — ${lightboxIdx + 1}`}
-                fill
-                className="object-contain"
-              />
-              {photos.length > 1 && (
-                <>
-                  <button
-                    onClick={prevLightbox}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all"
-                    aria-label="Photo précédente"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
-                      <path d="M9 2L4 7l5 5" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={nextLightbox}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all"
-                    aria-label="Photo suivante"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
-                      <path d="M5 2l5 5-5 5" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                    </svg>
-                  </button>
-                </>
-              )}
-              <div className="absolute top-3 inset-x-0 flex justify-center">
-                <span className="bg-black/50 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                  {lightboxIdx + 1} / {photos.length}
-                </span>
-              </div>
-            </div>
-            <button
-              onClick={() => setLightboxIdx(null)}
-              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all"
-              aria-label="Fermer"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M2 2l12 12M14 2L2 14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-            </button>
-          </motion.div>
+          <LightboxOverlay
+            photos={photos}
+            nom={nom}
+            idx={lightboxIdx}
+            onClose={() => setLightboxIdx(null)}
+            onPrev={prevLightbox}
+            onNext={nextLightbox}
+            onGoTo={setLightboxIdx}
+          />
         )}
       </AnimatePresence>
     </>

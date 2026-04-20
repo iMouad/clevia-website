@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { getTranslations } from 'next-intl/server'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { Link } from '@/i18n/navigation'
 import BienGallery from '@/components/biens/BienGallery'
@@ -77,6 +77,7 @@ export default async function BienDetailPage({ params }: Props) {
     .single()
 
   if (!bien) notFound()
+  if (isUUID && (bien as any).slug) permanentRedirect(`/${locale}/biens/${(bien as any).slug}`)
 
   const photos = (bien.photos ?? []).filter(Boolean) as string[]
   const equips = ((bien.equipements ?? []) as string[]).filter((k) => k in EQUIPEMENTS_MAP)

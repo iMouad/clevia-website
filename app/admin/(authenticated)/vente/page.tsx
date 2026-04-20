@@ -72,6 +72,7 @@ export default function AdminVentePage() {
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [statsOpen, setStatsOpen] = useState<string | null>(null)
+  const [periode, setPeriode] = useState<'7j' | '30j' | 'tout'>('tout')
   const [generatingSlugs, setGeneratingSlugs] = useState(false)
   const [slugsResult, setSlugsResult] = useState<string | null>(null)
 
@@ -204,10 +205,17 @@ export default function AdminVentePage() {
     }))
   }
 
-  const visitesParBien = (bienId: string) => visites.filter((v) => v.bien_id === bienId)
+  const visitesFiltered = (() => {
+    if (periode === 'tout') return visites
+    const days = periode === '7j' ? 7 : 30
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - days)
+    return visites.filter((v) => new Date(v.created_at) >= cutoff)
+  })()
+
+  const visitesParBien = (bienId: string) => visitesFiltered.filter((v) => v.bien_id === bienId)
 
   // Stats globales
-  const totalVisites = visites.length
+  const totalVisites = visitesFiltered.length
   const biensActifs = biens.filter((b) => b.statut === 'a_vendre').length
   const biensVendus = biens.filter((b) => b.statut === 'vendu').length
   const bienPlusConsulte = biens.reduce<BienVente | null>((best, b) => {
@@ -279,6 +287,17 @@ export default function AdminVentePage() {
           {slugsResult}
         </div>
       )}
+
+      {/* Filtre période */}
+      <div className="flex gap-2 mb-4">
+        {(['7j', '30j', 'tout'] as const).map((p) => (
+          <button key={p} onClick={() => setPeriode(p)}
+            className={`text-sm font-medium rounded-full px-4 py-1.5 transition-all ${periode === p ? 'bg-terra text-creme' : 'border border-brun/20 text-brun-mid hover:border-terra hover:text-terra'}`}
+            style={{ fontFamily: 'var(--font-dm-sans)' }}>
+            {p === 'tout' ? 'Tout' : p === '7j' ? '7 jours' : '30 jours'}
+          </button>
+        ))}
+      </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

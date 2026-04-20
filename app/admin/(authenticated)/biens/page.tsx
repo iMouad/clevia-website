@@ -114,6 +114,7 @@ export default function BiensPage() {
   const [visites, setVisites] = useState<Visite[]>([])
   const [loading, setLoading] = useState(true)
   const [statsOpen, setStatsOpen] = useState<string | null>(null)
+  const [periode, setPeriode] = useState<'7j' | '30j' | 'tout'>('tout')
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Partial<Bien>>(EMPTY)
   const [saving, setSaving] = useState(false)
@@ -239,9 +240,16 @@ export default function BiensPage() {
     })
   }
 
-  const visitesParBien = (bienId: string) => visites.filter((v) => v.bien_id === bienId)
+  const visitesFiltered = (() => {
+    if (periode === 'tout') return visites
+    const days = periode === '7j' ? 7 : 30
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - days)
+    return visites.filter((v) => new Date(v.created_at) >= cutoff)
+  })()
 
-  const totalVisites = visites.length
+  const visitesParBien = (bienId: string) => visitesFiltered.filter((v) => v.bien_id === bienId)
+
+  const totalVisites = visitesFiltered.length
   const bienPlusConsulte = biens.reduce<Bien | null>((best, b) => {
     const count = visitesParBien(b.id).length
     const bestCount = best ? visitesParBien(best.id).length : -1
@@ -299,6 +307,17 @@ export default function BiensPage() {
           {slugsResult}
         </div>
       )}
+
+      {/* Filtre période */}
+      <div className="flex gap-2 mb-4">
+        {(['7j', '30j', 'tout'] as const).map((p) => (
+          <button key={p} onClick={() => setPeriode(p)}
+            className={`text-sm font-medium rounded-full px-4 py-1.5 transition-all ${periode === p ? 'bg-terra text-creme' : 'border border-brun/20 text-brun-mid hover:border-terra hover:text-terra'}`}
+            style={{ fontFamily: 'var(--font-dm-sans)' }}>
+            {p === 'tout' ? 'Tout' : p === '7j' ? '7 jours' : '30 jours'}
+          </button>
+        ))}
+      </div>
 
       {/* Stats globales */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
@@ -388,16 +407,16 @@ export default function BiensPage() {
           <table className="w-full text-sm">
             <thead className="bg-brun/4">
               <tr>
-                {['', 'Nom', 'Ville', 'Type', 'Prix/nuit', 'Statut', 'Vues', 'Actions'].map((h) => (
+                {['', 'Nom', 'Ville', 'Type', 'Prix/nuit', 'Statut', 'Dispo', 'Vues', 'Actions'].map((h) => (
                   <th key={h} className="px-4 py-3 text-left text-xs text-brun-mid uppercase tracking-wide font-medium">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-brun/5">
               {loading ? (
-                <tr><td colSpan={8} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
+                <tr><td colSpan={9} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
               ) : !biens.length ? (
-                <tr><td colSpan={8} className="px-4 py-10 text-center text-brun-mid/50">Aucun bien</td></tr>
+                <tr><td colSpan={9} className="px-4 py-10 text-center text-brun-mid/50">Aucun bien</td></tr>
 
               ) : biens.map((b) => (
                 <>
@@ -425,6 +444,11 @@ export default function BiensPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
+                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${b.disponible !== false ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                        {b.disponible !== false ? 'Oui' : 'Non'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
                       <button
                         onClick={() => setStatsOpen(statsOpen === b.id ? null : b.id)}
                         className="flex items-center gap-1 text-terra hover:underline"
@@ -445,7 +469,7 @@ export default function BiensPage() {
                     const stats = getStatsBien(b.id)
                     return (
                       <tr key={`stats-${b.id}`}>
-                        <td colSpan={8} className="px-6 pb-4 pt-2 bg-creme/60">
+                        <td colSpan={9} className="px-6 pb-4 pt-2 bg-creme/60">
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                               <p className="text-xs font-medium text-brun-mid/50 uppercase tracking-wide mb-2">7 derniers jours</p>
