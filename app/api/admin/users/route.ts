@@ -11,10 +11,14 @@ function getAdminClient() {
 }
 
 export async function GET() {
-  // Verify the caller is an authenticated admin
   const serverClient = await createServerClient()
   const { data: { user } } = await serverClient.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+
+  // Only super admins can list users
+  if (user.app_metadata?.role === 'admin') {
+    return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
+  }
 
   const admin = getAdminClient()
   const { data, error } = await admin.auth.admin.listUsers()
@@ -25,6 +29,7 @@ export async function GET() {
     email: u.email,
     created_at: u.created_at,
     last_sign_in_at: u.last_sign_in_at ?? null,
+    is_sub_admin: u.app_metadata?.role === 'admin',
   }))
 
   return NextResponse.json({ users })

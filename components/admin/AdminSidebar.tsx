@@ -110,6 +110,13 @@ export default function AdminSidebar() {
   const router = useRouter()
   const supabase = createClient()
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [isSuperAdmin, setIsSuperAdmin] = useState(true)
+
+  useState(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsSuperAdmin(user?.app_metadata?.role !== 'admin')
+    })
+  })
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -123,10 +130,12 @@ export default function AdminSidebar() {
 
   const currentPage = NAV.find((n) => isActive(n.href))
 
+  const filteredNav = NAV.filter((n) => n.href !== '/admin/users' || isSuperAdmin)
+
   const NavLinks = () => (
     <>
       <ul className="flex flex-col gap-1">
-        {NAV.map(({ href, label, icon }) => (
+        {filteredNav.map(({ href, label, icon }) => (
           <li key={href}>
             <Link
               href={href}

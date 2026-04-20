@@ -17,6 +17,9 @@ export async function DELETE(
   const serverClient = await createServerClient()
   const { data: { user } } = await serverClient.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+  if (user.app_metadata?.role === 'admin') {
+    return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
+  }
 
   const { userId } = await params
 
