@@ -8,6 +8,7 @@ import BienGallery from '@/components/biens/BienGallery'
 import BienVenteCard, { type BienVente } from '@/components/BienVenteCard'
 import VenteTracker from '@/components/vente/VenteTracker'
 import { getEquipementsForCategorie } from '@/lib/equipements-vente'
+import DemandeVisiteForm from '@/components/vente/DemandeVisiteForm'
 
 type Props = { params: Promise<{ locale: string; id: string }> }
 
@@ -46,10 +47,12 @@ export default async function VenteDetailPage({ params }: Props) {
   const t = await getTranslations({ locale, namespace: 'vente' })
   const supabase = await createClient()
 
+  // Accept both UUID and slug
+  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
   const { data, error } = await supabase
     .from('biens_vente')
     .select('*')
-    .eq('id', id)
+    .eq(isUUID ? 'id' : 'slug', id)
     .single()
 
   if (error || !data) notFound()
@@ -68,9 +71,9 @@ export default async function VenteDetailPage({ params }: Props) {
   // Autres biens (même catégorie, sans le courant)
   const { data: autresBiensData } = await supabase
     .from('biens_vente')
-    .select('id, titre, categorie, statut, prix, surface, chambres, ville, photos, reference')
+    .select('id, titre, categorie, statut, prix, surface, chambres, ville, photos, reference, slug')
     .eq('categorie', data.categorie)
-    .neq('id', id)
+    .neq('id', data.id)
     .neq('statut', 'vendu')
     .limit(3)
 
@@ -78,6 +81,7 @@ export default async function VenteDetailPage({ params }: Props) {
     id: b.id, titre: b.titre, categorie: b.categorie, statut: b.statut,
     prix: b.prix ?? null, surface: b.surface ?? null, chambres: b.chambres ?? null,
     ville: b.ville, photos: b.photos ?? null, reference: b.reference ?? null,
+    slug: (b.slug as string | null) ?? null,
   }))
 
   // Maps embed URL
@@ -345,6 +349,13 @@ export default async function VenteDetailPage({ params }: Props) {
                         {t('contacter')}
                       </Link>
                     </div>
+
+                    <DemandeVisiteForm
+                      bienTitre={data.titre}
+                      bienReference={data.reference ?? null}
+                      bienVille={data.ville}
+                      bienCategorie={data.categorie}
+                    />
                   </div>
                 </AnimateIn>
               </div>

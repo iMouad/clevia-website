@@ -28,9 +28,9 @@ export default function Footer() {
   return (
     <footer className="bg-brun text-creme">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-10">
           {/* Brand column */}
-          <div className="md:col-span-2 flex flex-col gap-4">
+          <div className="col-span-2 md:col-span-1 flex flex-col gap-4">
             <Image
               src="/logo-light.svg"
               alt="Clévia Conciergerie"
@@ -61,6 +61,35 @@ export default function Footer() {
                 <FacebookIcon />
               </a>
             </div>
+          </div>
+
+          {/* Cities column */}
+          <div className="flex flex-col gap-4">
+            <h3 className="text-sable font-medium text-sm tracking-widest uppercase">
+              Nos villes
+            </h3>
+            <ul className="flex flex-col gap-3">
+              <li>
+                <Link href="/mohammedia" className="text-creme/60 hover:text-sable text-sm transition-colors">
+                  Mohammedia
+                </Link>
+              </li>
+              <li>
+                <Link href="/mansouria" className="text-creme/60 hover:text-sable text-sm transition-colors">
+                  Mansouria
+                </Link>
+              </li>
+              <li>
+                <Link href="/bouznika" className="text-creme/60 hover:text-sable text-sm transition-colors">
+                  Bouznika
+                </Link>
+              </li>
+              <li>
+                <Link href="/benslimane" className="text-creme/60 hover:text-sable text-sm transition-colors">
+                  Benslimane
+                </Link>
+              </li>
+            </ul>
           </div>
 
           {/* Pages column */}

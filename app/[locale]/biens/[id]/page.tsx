@@ -65,10 +65,12 @@ export default async function BienDetailPage({ params }: Props) {
   const t = await getTranslations({ locale, namespace: 'biens' })
 
   const supabase = await createClient()
+  // Accept both UUID and slug
+  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
   const { data: bien } = await supabase
     .from('biens')
     .select('*')
-    .eq('id', id)
+    .eq(isUUID ? 'id' : 'slug', id)
     .eq('statut', 'actif')
     .single()
 

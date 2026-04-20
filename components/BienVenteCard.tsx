@@ -17,6 +17,7 @@ export type BienVente = {
   photos: string[] | null
   reference: string | null
   equipements?: string[] | null
+  slug?: string | null
 }
 
 const STATUT_STYLE = {
@@ -199,7 +200,7 @@ export default function BienVenteCard({ bien }: { bien: BienVente }) {
           )}
 
           <Link
-            href={`/vente/${bien.id}`}
+            href={`/vente/${bien.slug ?? bien.id}`}
             className="mt-3 flex items-center justify-center gap-2 bg-terra text-creme text-sm font-medium rounded-full px-5 py-2.5 hover:bg-brun transition-all duration-200"
             style={{ fontFamily: 'var(--font-dm-sans)' }}
           >

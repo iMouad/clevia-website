@@ -25,6 +25,7 @@ export type BienPublic = {
   airbnb_url: string | null
   booking_url: string | null
   avito_url: string | null
+  slug?: string | null
 }
 
 const TYPE_COLORS: Record<string, string> = {
@@ -271,7 +272,7 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
         {/* CTA */}
         <div className="pt-3 mt-auto border-t border-brun/8">
           <Link
-            href={`/biens/${bien.id}`}
+            href={`/biens/${bien.slug ?? bien.id}`}
             className="w-full flex items-center justify-center gap-2 bg-terra text-creme text-sm font-medium rounded-full px-6 py-2.5 hover:bg-brun transition-all duration-200"
             style={{ fontFamily: 'var(--font-dm-sans)' }}
           >

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase'
 import { getEquipementsForCategorie } from '@/lib/equipements-vente'
+import { generateVenteSlug } from '@/lib/slugify'
 
 type Categorie = 'Appartement' | 'Studio' | 'Villa' | 'Terrain' | 'Ferme' | 'Commercial'
 type Statut = 'a_vendre' | 'sous_compromis' | 'vendu'
@@ -120,9 +121,16 @@ export default function AdminVentePage() {
     }
 
     if (editing) {
-      await supabase.from('biens_vente').update(payload).eq('id', editing.id)
+      // Generate slug if missing
+      const slug = (editing as any).slug || generateVenteSlug(form.titre, form.ville, form.reference, editing.id)
+      await supabase.from('biens_vente').update({ ...payload, slug }).eq('id', editing.id)
     } else {
-      await supabase.from('biens_vente').insert(payload)
+      // Insert first, then update with slug using returned ID
+      const { data: inserted } = await supabase.from('biens_vente').insert(payload).select('id').single()
+      if (inserted) {
+        const slug = generateVenteSlug(form.titre, form.ville, form.reference, inserted.id)
+        await supabase.from('biens_vente').update({ slug }).eq('id', inserted.id)
+      }
     }
 
     setSaving(false)

@@ -25,7 +25,7 @@ export default async function BiensPage({ params }: Props) {
   const supabase = await createClient()
   const { data } = await supabase
     .from('biens')
-    .select('id, nom, ville, adresse, type, capacite, chambres, salles_de_bain, capacite_max, surface, equipements, prix_nuit, description, photos, distance_mer, disponible, airbnb_url, booking_url, avito_url')
+    .select('id, nom, ville, adresse, type, capacite, chambres, salles_de_bain, capacite_max, surface, equipements, prix_nuit, description, photos, distance_mer, disponible, airbnb_url, booking_url, avito_url, slug')
     .eq('statut', 'actif')
     .order('created_at', { ascending: false })
 
@@ -49,6 +49,7 @@ export default async function BiensPage({ params }: Props) {
     airbnb_url: b.airbnb_url ?? null,
     booking_url: b.booking_url ?? null,
     avito_url: b.avito_url ?? null,
+    slug: (b.slug as string | null) ?? null,
   }))
 
   return (

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase'
+import { generateLocationSlug } from '@/lib/slugify'
 import { EQUIPEMENTS, REGLES_OPTIONS } from '@/lib/equipements'
 
 type Bien = {
@@ -125,9 +126,14 @@ export default function BiensPage() {
     setSaving(true)
     const payload = { ...editing, updated_at: new Date().toISOString() }
     if (editing.id) {
-      await supabase.from('biens').update(payload).eq('id', editing.id)
+      const slug = (editing as any).slug || generateLocationSlug(editing.nom ?? '', editing.ville ?? null, editing.id)
+      await supabase.from('biens').update({ ...payload, slug }).eq('id', editing.id)
     } else {
-      await supabase.from('biens').insert(editing)
+      const { data: inserted } = await supabase.from('biens').insert(editing).select('id, nom, ville').single()
+      if (inserted) {
+        const slug = generateLocationSlug(inserted.nom, inserted.ville, inserted.id)
+        await supabase.from('biens').update({ slug }).eq('id', inserted.id)
+      }
     }
     setSaving(false)
     closeModal()
