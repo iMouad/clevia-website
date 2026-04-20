@@ -76,6 +76,52 @@ const serviceIcons: Record<string, React.ReactNode> = {
   ),
 }
 
+// ── Simulateur Banner ─────────────────────────────────
+function SimulateurBanner() {
+  const t = useTranslations('simulateur.hero')
+  return (
+    <section className="bg-terra py-16 px-4 overflow-hidden relative">
+      <div
+        className="absolute inset-0 pointer-events-none opacity-10"
+        style={{ background: 'radial-gradient(ellipse at 80% 50%, #FAF6F1 0%, transparent 60%)' }}
+      />
+      <div className="max-w-7xl mx-auto relative">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="text-center md:text-left">
+            <span
+              className="inline-block text-white/70 text-xs font-medium tracking-[0.2em] uppercase mb-3"
+              style={{ fontFamily: 'var(--font-dm-sans)' }}
+            >
+              {t('tag')}
+            </span>
+            <h2
+              className="text-3xl md:text-4xl text-white mb-3"
+              style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}
+            >
+              {t('title')}
+            </h2>
+            <p className="text-white/80 max-w-md" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+              {t('subtitle')}
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 flex-shrink-0">
+            <a
+              href="#simulateur"
+              className="inline-flex items-center justify-center gap-2 bg-white text-terra font-medium rounded-full px-8 py-3.5 hover:bg-creme transition-all duration-200"
+              style={{ fontFamily: 'var(--font-dm-sans)' }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 7h6M9 11h6M9 15h4M5 3h14a2 2 0 012 2v16l-3-2-2 2-2-2-2 2-2-2-3 2V5a2 2 0 012-2z" />
+              </svg>
+              Calculer mes revenus
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 // ── Page Component ────────────────────────────────────
 export default function HomePage() {
   const t = useTranslations()
@@ -301,8 +347,13 @@ export default function HomePage() {
       {/* ── BIENS À VENDRE ──────────────────────── */}
       <HomeBiensVenteSection />
 
+      {/* ── SIMULATEUR INTRO BANNER ─────────────── */}
+      <SimulateurBanner />
+
       {/* ── CALCULATEUR DE REVENUS ──────────────── */}
-      <RevenueCalculator showLeadCapture />
+      <div id="simulateur">
+        <RevenueCalculator showLeadCapture />
+      </div>
 
       {/* ── TÉMOIGNAGES ─────────────────────────── */}
       <TemoignagesSection />

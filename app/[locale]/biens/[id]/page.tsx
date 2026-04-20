@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 import { Link } from '@/i18n/navigation'
 import BienGallery from '@/components/biens/BienGallery'
 import BienTracker from '@/components/biens/BienTracker'
+import BienDisponibilite from '@/components/biens/BienDisponibilite'
 import BienCard from '@/components/BienCard'
 import type { BienPublic } from '@/components/BienCard'
 import { EQUIPEMENTS_MAP, REGLES_OPTIONS } from '@/lib/equipements'
@@ -371,6 +372,11 @@ export default async function BienDetailPage({ params }: Props) {
                   </ul>
                 </div>
               )}
+
+              {/* Disponibilités */}
+              <div className="border border-brun/8 rounded-2xl p-6 bg-creme/30">
+                <BienDisponibilite bienId={bien.id} />
+              </div>
 
               {/* Localisation */}
               <div>
