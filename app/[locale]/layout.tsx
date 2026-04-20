@@ -36,6 +36,8 @@ export const viewport: Viewport = {
   initialScale: 1,
 }
 
+const SITE_URL = 'https://www.cleviamaroc.com'
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'hero' })
@@ -53,8 +55,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     openGraph: {
       siteName: 'Clévia Conciergerie',
-      locale,
+      locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_US' : 'fr_MA',
       type: 'website',
+    },
+    alternates: {
+      languages: {
+        'fr': `${SITE_URL}/fr`,
+        'ar': `${SITE_URL}/ar`,
+        'en': `${SITE_URL}/en`,
+        'x-default': `${SITE_URL}/fr`,
+      },
     },
   }
 }

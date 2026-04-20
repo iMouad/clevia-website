@@ -30,13 +30,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const fallbackDesc = `Location courte durée à ${ville}, géré par Clévia Conciergerie. Réservez sur Airbnb, Booking ou contactez-nous directement.`
   const ogDescription = (data.description as string | null)?.slice(0, 160) ?? fallbackDesc
 
+  const slugOrId = (data as any).slug || id
   return {
     title: `${data.nom} — Clévia Conciergerie`,
     description: ogDescription,
     openGraph: {
       title: ogTitle,
       description: ogDescription,
-      url: `${siteUrl}/${locale}/biens/${id}`,
+      url: `${siteUrl}/${locale}/biens/${slugOrId}`,
       siteName: 'Clévia Conciergerie',
       locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_US' : 'fr_MA',
       type: 'website',
@@ -49,6 +50,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: ogTitle,
       description: ogDescription,
       images: mainPhoto ? [mainPhoto] : [],
+    },
+    alternates: {
+      canonical: `${siteUrl}/fr/biens/${slugOrId}`,
+      languages: {
+        'fr': `${siteUrl}/fr/biens/${slugOrId}`,
+        'ar': `${siteUrl}/ar/biens/${slugOrId}`,
+        'en': `${siteUrl}/en/biens/${slugOrId}`,
+        'x-default': `${siteUrl}/fr/biens/${slugOrId}`,
+      },
     },
   }
 }

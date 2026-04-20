@@ -15,11 +15,20 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'hero' })
+  const siteUrl = 'https://www.cleviamaroc.com'
   return {
     title: 'Clévia Conciergerie · Maroc',
     description: t('subtitle'),
-    openGraph: { url: `/${locale}` },
-    alternates: { canonical: `/${locale}` },
+    openGraph: { url: `${siteUrl}/${locale}` },
+    alternates: {
+      canonical: `${siteUrl}/${locale}`,
+      languages: {
+        'fr': `${siteUrl}/fr`,
+        'ar': `${siteUrl}/ar`,
+        'en': `${siteUrl}/en`,
+        'x-default': `${siteUrl}/fr`,
+      },
+    },
   }
 }
 
@@ -78,8 +87,52 @@ export default function HomePage() {
     { key: 'menage', icon: serviceIcons.menage },
   ]
 
+  const localBusinessJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name: 'Clévia Conciergerie',
+    description: 'Conciergerie de location courte durée à Mansouria-Mohammedia, Maroc. Gestion complète de votre bien sur Airbnb, Booking et Avito.',
+    url: 'https://www.cleviamaroc.com',
+    logo: 'https://www.cleviamaroc.com/logo.svg',
+    image: 'https://www.cleviamaroc.com/logo.svg',
+    telephone: '+212614268283',
+    email: 'contact@cleviamaroc.com',
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Mohammedia',
+      addressRegion: 'Casablanca-Settat',
+      addressCountry: 'MA',
+    },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: 33.7300,
+      longitude: -7.3900,
+    },
+    openingHoursSpecification: {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],
+      opens: '00:00',
+      closes: '23:59',
+    },
+    priceRange: '$$',
+    areaServed: [
+      { '@type': 'City', name: 'Mohammedia' },
+      { '@type': 'City', name: 'Mansouria' },
+      { '@type': 'City', name: 'Bouznika' },
+      { '@type': 'City', name: 'Benslimane' },
+    ],
+    sameAs: [
+      'https://www.instagram.com/cleviamaroc',
+      'https://www.facebook.com/cleviamaroc',
+    ],
+  }
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
+      />
       {/* ── HERO ────────────────────────────────── */}
       <section className="bg-creme py-20 md:py-28 px-4 overflow-hidden relative">
         {/* Decorative gradient */}

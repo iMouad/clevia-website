@@ -23,6 +23,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const desc = data.description?.slice(0, 160) ?? `${t(`categories.${data.categorie}`)} à ${data.ville} — Clévia Immobilier`
   const image = data.photos?.[0] ?? null
 
+  const slugOrId = (data as any).slug || id
+  const siteUrl = 'https://www.cleviamaroc.com'
   return {
     title: `${data.titre.slice(0, 50)} · Clévia`,
     description: desc,
@@ -30,10 +32,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${data.titre} · Clévia`,
       description: desc,
       ...(image ? { images: [{ url: image, width: 1200, height: 630 }] } : {}),
-      url: `/${locale}/vente/${id}`,
+      url: `${siteUrl}/${locale}/vente/${slugOrId}`,
     },
     twitter: { card: 'summary_large_image', title: data.titre, description: desc, ...(image ? { images: [image] } : {}) },
-    alternates: { canonical: `/${locale}/vente/${id}` },
+    alternates: {
+      canonical: `${siteUrl}/fr/vente/${slugOrId}`,
+      languages: {
+        'fr': `${siteUrl}/fr/vente/${slugOrId}`,
+        'ar': `${siteUrl}/ar/vente/${slugOrId}`,
+        'en': `${siteUrl}/en/vente/${slugOrId}`,
+        'x-default': `${siteUrl}/fr/vente/${slugOrId}`,
+      },
+    },
   }
 }
 

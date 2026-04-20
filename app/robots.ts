@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://clevia.ma'
+const BASE_URL = 'https://www.cleviamaroc.com'
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -8,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/admin/', '/admin/login'],
+        disallow: ['/admin/', '/api/'],
       },
     ],
     sitemap: `${BASE_URL}/sitemap.xml`,
