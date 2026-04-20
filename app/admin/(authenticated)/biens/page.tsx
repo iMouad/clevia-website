@@ -108,6 +108,8 @@ export default function BiensPage() {
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [generatingSlugs, setGeneratingSlugs] = useState(false)
+  const [slugsResult, setSlugsResult] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   async function fetchBiens() {
@@ -143,6 +145,26 @@ export default function BiensPage() {
   async function handleDelete(id: string) {
     if (!confirm('Supprimer ce bien ?')) return
     await supabase.from('biens').delete().eq('id', id)
+    fetchBiens()
+  }
+
+  async function handleGenerateSlugs() {
+    setGeneratingSlugs(true)
+    setSlugsResult(null)
+    const { data } = await supabase.from('biens').select('id, nom, ville').is('slug', null)
+    if (!data || data.length === 0) {
+      setSlugsResult('Tous les biens ont déjà un slug.')
+      setGeneratingSlugs(false)
+      return
+    }
+    let count = 0
+    for (const b of data) {
+      const slug = generateLocationSlug(b.nom, b.ville, b.id)
+      const { error } = await supabase.from('biens').update({ slug }).eq('id', b.id)
+      if (!error) count++
+    }
+    setSlugsResult(`${count} slug(s) générés sur ${data.length} bien(s) sans slug.`)
+    setGeneratingSlugs(false)
     fetchBiens()
   }
 
@@ -207,13 +229,30 @@ export default function BiensPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <h1 className="text-3xl text-brun" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>Gestion des biens</h1>
-        <button onClick={openAdd} className="flex items-center gap-2 bg-terra text-creme text-sm font-medium rounded-full px-5 py-2.5 hover:bg-brun transition-all">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
-          Ajouter un bien
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={handleGenerateSlugs}
+            disabled={generatingSlugs}
+            className="flex items-center gap-2 border border-brun/20 text-brun-mid text-sm font-medium rounded-full px-4 py-2.5 hover:border-terra hover:text-terra transition-all disabled:opacity-50"
+            style={{ fontFamily: 'var(--font-dm-sans)' }}
+            title="Génère les URLs SEO pour tous les biens qui n'en ont pas encore"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+            {generatingSlugs ? 'Génération…' : 'Générer les slugs SEO'}
+          </button>
+          <button onClick={openAdd} className="flex items-center gap-2 bg-terra text-creme text-sm font-medium rounded-full px-5 py-2.5 hover:bg-brun transition-all">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
+            Ajouter un bien
+          </button>
+        </div>
       </div>
+      {slugsResult && (
+        <div className="mb-4 px-4 py-2.5 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+          {slugsResult}
+        </div>
+      )}
 
       {/* ── MOBILE : cartes ── */}
       <div className="lg:hidden flex flex-col gap-3">
