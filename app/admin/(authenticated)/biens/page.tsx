@@ -6,6 +6,15 @@ import { createClient } from '@/lib/supabase'
 import { generateLocationSlug } from '@/lib/slugify'
 import { EQUIPEMENTS, REGLES_OPTIONS } from '@/lib/equipements'
 
+type Visite = {
+  id: string
+  bien_id: string
+  source: string | null
+  utm_source: string | null
+  appareil: string | null
+  created_at: string
+}
+
 type Bien = {
   id: string
   nom: string
@@ -102,7 +111,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export default function BiensPage() {
   const supabase = createClient()
   const [biens, setBiens] = useState<Bien[]>([])
+  const [visites, setVisites] = useState<Visite[]>([])
   const [loading, setLoading] = useState(true)
+  const [statsOpen, setStatsOpen] = useState<string | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Partial<Bien>>(EMPTY)
   const [saving, setSaving] = useState(false)
@@ -113,8 +124,12 @@ export default function BiensPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   async function fetchBiens() {
-    const { data } = await supabase.from('biens').select('*').order('created_at', { ascending: false })
-    setBiens(data ?? [])
+    const [{ data: biensData }, { data: visitesData }] = await Promise.all([
+      supabase.from('biens').select('*').order('created_at', { ascending: false }),
+      supabase.from('biens_visites').select('*').order('created_at', { ascending: false }),
+    ])
+    setBiens(biensData ?? [])
+    setVisites(visitesData ?? [])
     setLoading(false)
   }
 
@@ -224,6 +239,37 @@ export default function BiensPage() {
     })
   }
 
+  const visitesParBien = (bienId: string) => visites.filter((v) => v.bien_id === bienId)
+
+  const totalVisites = visites.length
+  const bienPlusConsulte = biens.reduce<Bien | null>((best, b) => {
+    const count = visitesParBien(b.id).length
+    const bestCount = best ? visitesParBien(best.id).length : -1
+    return count > bestCount ? b : best
+  }, null)
+
+  function getStatsBien(bienId: string) {
+    const v = visitesParBien(bienId)
+    const parSource: Record<string, number> = {}
+    const parAppareil: Record<string, number> = {}
+    const parJour: Record<string, number> = {}
+    v.forEach((vi) => {
+      const src = vi.source ?? 'direct'
+      parSource[src] = (parSource[src] ?? 0) + 1
+      const app = vi.appareil ?? 'desktop'
+      parAppareil[app] = (parAppareil[app] ?? 0) + 1
+      const jour = vi.created_at.slice(0, 10)
+      parJour[jour] = (parJour[jour] ?? 0) + 1
+    })
+    const days7: { date: string; count: number }[] = []
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(); d.setDate(d.getDate() - i)
+      const key = d.toISOString().slice(0, 10)
+      days7.push({ date: key, count: parJour[key] ?? 0 })
+    }
+    return { total: v.length, parSource, parAppareil, days7 }
+  }
+
   const inputClass = 'w-full border border-brun/20 rounded-xl px-3 py-2.5 text-sm text-brun focus:outline-none focus:border-terra focus:ring-1 focus:ring-terra transition-colors'
   const labelClass = 'block text-xs font-medium text-brun-mid mb-1.5 uppercase tracking-wide'
 
@@ -253,6 +299,22 @@ export default function BiensPage() {
           {slugsResult}
         </div>
       )}
+
+      {/* Stats globales */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        {[
+          { label: 'Biens actifs', value: biens.filter((b) => b.statut === 'actif').length, icon: '🏠' },
+          { label: 'Total vues', value: totalVisites, icon: '👁' },
+          { label: 'Plus consulté', value: bienPlusConsulte && visitesParBien(bienPlusConsulte.id).length > 0 ? `${visitesParBien(bienPlusConsulte.id).length} vues` : '—', icon: '⭐', sub: bienPlusConsulte && visitesParBien(bienPlusConsulte.id).length > 0 ? bienPlusConsulte.nom : undefined },
+        ].map(({ label, value, icon, sub }) => (
+          <div key={label} className="bg-white border border-brun/10 rounded-2xl p-5">
+            <p className="text-2xl mb-1">{icon}</p>
+            <p className="text-2xl font-semibold text-brun" style={{ fontFamily: 'var(--font-dm-sans)' }}>{value}</p>
+            {sub && <p className="text-xs text-brun-mid/50 truncate" style={{ fontFamily: 'var(--font-dm-sans)' }}>{sub}</p>}
+            <p className="text-xs text-brun-mid/40 mt-0.5" style={{ fontFamily: 'var(--font-dm-sans)' }}>{label}</p>
+          </div>
+        ))}
+      </div>
 
       {/* ── MOBILE : cartes ── */}
       <div className="lg:hidden flex flex-col gap-3">
@@ -288,6 +350,9 @@ export default function BiensPage() {
                 {b.prix_nuit && (
                   <span className="text-xs text-brun-mid/60" style={{ fontFamily: 'var(--font-dm-sans)' }}>{b.prix_nuit} MAD/nuit</span>
                 )}
+                <span className="text-xs text-terra" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                  {visitesParBien(b.id).length} vues
+                </span>
               </div>
               {/* Actions */}
               <div className="flex items-center gap-3 mt-3 pt-3 border-t border-brun/8">
@@ -323,7 +388,7 @@ export default function BiensPage() {
           <table className="w-full text-sm">
             <thead className="bg-brun/4">
               <tr>
-                {['', 'Nom', 'Ville', 'Type', 'Prix/nuit', 'Statut', 'Disponible', 'Actions'].map((h) => (
+                {['', 'Nom', 'Ville', 'Type', 'Prix/nuit', 'Statut', 'Vues', 'Actions'].map((h) => (
                   <th key={h} className="px-4 py-3 text-left text-xs text-brun-mid uppercase tracking-wide font-medium">{h}</th>
                 ))}
               </tr>
@@ -333,42 +398,105 @@ export default function BiensPage() {
                 <tr><td colSpan={8} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
               ) : !biens.length ? (
                 <tr><td colSpan={8} className="px-4 py-10 text-center text-brun-mid/50">Aucun bien</td></tr>
+
               ) : biens.map((b) => (
-                <tr key={b.id} className="hover:bg-creme/40 transition-colors">
-                  <td className="px-3 py-2">
-                    <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-brun/5 flex-shrink-0">
-                      {(b.photos ?? []).length > 0 ? (
-                        <Image src={b.photos![0]} alt={b.nom} fill className="object-cover" />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <svg className="text-brun/20" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
-                            <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
-                          </svg>
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-brun font-medium">{b.nom}</td>
-                  <td className="px-4 py-3 text-brun-mid">{b.ville ?? '—'}</td>
-                  <td className="px-4 py-3 text-brun-mid">{b.type ?? '—'}</td>
-                  <td className="px-4 py-3 text-brun-mid">{b.prix_nuit ? `${b.prix_nuit} MAD` : '—'}</td>
-                  <td className="px-4 py-3">
-                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUT_COLORS[b.statut]}`}>
-                      {STATUT_LABELS[b.statut]}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${b.disponible !== false ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                      {b.disponible !== false ? 'Oui' : 'Non'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <button onClick={() => openEdit(b)} className="text-terra hover:text-brun text-xs font-medium underline underline-offset-2">Modifier</button>
-                      <button onClick={() => handleDelete(b.id)} className="text-red-400 hover:text-red-600 text-xs font-medium underline underline-offset-2">Supprimer</button>
-                    </div>
-                  </td>
-                </tr>
+                <>
+                  <tr key={b.id} className="hover:bg-creme/40 transition-colors">
+                    <td className="px-3 py-2">
+                      <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-brun/5 flex-shrink-0">
+                        {(b.photos ?? []).length > 0 ? (
+                          <Image src={b.photos![0]} alt={b.nom} fill className="object-cover" />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <svg className="text-brun/20" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
+                              <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-brun font-medium">{b.nom}</td>
+                    <td className="px-4 py-3 text-brun-mid">{b.ville ?? '—'}</td>
+                    <td className="px-4 py-3 text-brun-mid">{b.type ?? '—'}</td>
+                    <td className="px-4 py-3 text-brun-mid">{b.prix_nuit ? `${b.prix_nuit} MAD` : '—'}</td>
+                    <td className="px-4 py-3">
+                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUT_COLORS[b.statut]}`}>
+                        {STATUT_LABELS[b.statut]}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => setStatsOpen(statsOpen === b.id ? null : b.id)}
+                        className="flex items-center gap-1 text-terra hover:underline"
+                        style={{ fontFamily: 'var(--font-dm-sans)' }}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                        {visitesParBien(b.id).length}
+                      </button>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => openEdit(b)} className="text-terra hover:text-brun text-xs font-medium underline underline-offset-2">Modifier</button>
+                        <button onClick={() => handleDelete(b.id)} className="text-red-400 hover:text-red-600 text-xs font-medium underline underline-offset-2">Supprimer</button>
+                      </div>
+                    </td>
+                  </tr>
+                  {statsOpen === b.id && (() => {
+                    const stats = getStatsBien(b.id)
+                    return (
+                      <tr key={`stats-${b.id}`}>
+                        <td colSpan={8} className="px-6 pb-4 pt-2 bg-creme/60">
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                              <p className="text-xs font-medium text-brun-mid/50 uppercase tracking-wide mb-2">7 derniers jours</p>
+                              <div className="flex items-end gap-1 h-12">
+                                {stats.days7.map(({ date, count }) => {
+                                  const max = Math.max(...stats.days7.map((d) => d.count), 1)
+                                  return (
+                                    <div key={date} className="flex-1 flex flex-col items-center gap-0.5" title={`${date}: ${count}`}>
+                                      <div className="w-full rounded-t" style={{ height: `${(count / max) * 40}px`, minHeight: count > 0 ? '4px' : '2px', backgroundColor: count > 0 ? '#C97B4B' : '#E8DDD4' }} />
+                                      <span className="text-[9px] text-brun-mid/30">{date.slice(8)}</span>
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium text-brun-mid/50 uppercase tracking-wide mb-2">Sources</p>
+                              <div className="flex flex-col gap-1">
+                                {Object.entries(stats.parSource).slice(0, 4).map(([src, count]) => (
+                                  <div key={src} className="flex items-center justify-between">
+                                    <span className="text-xs text-brun-mid/70 truncate max-w-[120px]">{src}</span>
+                                    <span className="text-xs font-medium text-brun">{count}</span>
+                                  </div>
+                                ))}
+                                {Object.keys(stats.parSource).length === 0 && <p className="text-xs text-brun-mid/30">Aucune donnée</p>}
+                              </div>
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium text-brun-mid/50 uppercase tracking-wide mb-2">Appareils</p>
+                              <div className="flex flex-col gap-1">
+                                {(['mobile', 'desktop', 'tablet'] as const).map((app) => {
+                                  const count = stats.parAppareil[app] ?? 0
+                                  const pct = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0
+                                  return (
+                                    <div key={app} className="flex items-center gap-2">
+                                      <span className="text-xs text-brun-mid/50 w-14 capitalize">{app}</span>
+                                      <div className="flex-1 h-1.5 bg-brun/10 rounded-full overflow-hidden">
+                                        <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: '#C97B4B' }} />
+                                      </div>
+                                      <span className="text-xs text-brun w-7 text-right">{pct}%</span>
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })()}
+                </>
               ))}
             </tbody>
           </table>
