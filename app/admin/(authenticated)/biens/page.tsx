@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
+import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { generateLocationSlug } from '@/lib/slugify'
 import { EQUIPEMENTS, REGLES_OPTIONS } from '@/lib/equipements'
@@ -41,6 +42,7 @@ type Bien = {
   booking_url: string | null
   avito_url: string | null
   video_url: string | null
+  slug: string | null
   created_at: string
 }
 
@@ -108,8 +110,41 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   )
 }
 
+function PlatformIcons({ b }: { b: Bien }) {
+  return (
+    <div className="flex items-center gap-1">
+      {b.airbnb_url && (
+        <a href={b.airbnb_url} target="_blank" rel="noopener noreferrer"
+          title="Voir sur Airbnb"
+          className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold hover:opacity-80 transition-opacity flex-shrink-0"
+          style={{ backgroundColor: '#FF5A5F', fontFamily: 'var(--font-dm-sans)' }}>
+          A
+        </a>
+      )}
+      {b.booking_url && (
+        <a href={b.booking_url} target="_blank" rel="noopener noreferrer"
+          title="Voir sur Booking"
+          className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold hover:opacity-80 transition-opacity flex-shrink-0"
+          style={{ backgroundColor: '#003580', fontFamily: 'var(--font-dm-sans)' }}>
+          B
+        </a>
+      )}
+      {b.avito_url && (
+        <a href={b.avito_url} target="_blank" rel="noopener noreferrer"
+          title="Voir sur Avito"
+          className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[9px] font-bold hover:opacity-80 transition-opacity flex-shrink-0"
+          style={{ backgroundColor: '#E07A2F', fontFamily: 'var(--font-dm-sans)' }}>
+          AV
+        </a>
+      )}
+    </div>
+  )
+}
+
 export default function BiensPage() {
   const supabase = createClient()
+  const params = useParams()
+  const locale = (params?.locale as string) ?? 'fr'
   const [biens, setBiens] = useState<Bien[]>([])
   const [visites, setVisites] = useState<Visite[]>([])
   const [loading, setLoading] = useState(true)
@@ -373,6 +408,19 @@ export default function BiensPage() {
                   {visitesParBien(b.id).length} vues
                 </span>
               </div>
+              {/* Plateformes */}
+              <div className="flex items-center gap-1.5 mt-2">
+                <PlatformIcons b={b} />
+                <a
+                  href={`/${locale}/biens/${b.slug ?? b.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Voir sur le site"
+                  className="w-6 h-6 rounded-full border border-brun/20 flex items-center justify-center text-brun-mid hover:border-terra hover:text-terra transition-all flex-shrink-0"
+                >
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
+                </a>
+              </div>
               {/* Actions */}
               <div className="flex items-center gap-3 mt-3 pt-3 border-t border-brun/8">
                 <button
@@ -407,7 +455,7 @@ export default function BiensPage() {
           <table className="w-full text-sm">
             <thead className="bg-brun/4">
               <tr>
-                {['', 'Nom', 'Ville', 'Type', 'Prix/nuit', 'Statut', 'Dispo', 'Vues', 'Actions'].map((h) => (
+                {['', 'Nom', 'Ville', 'Type', 'Prix/nuit', 'Statut', 'Dispo', 'Vues', 'Plateformes', 'Actions'].map((h) => (
                   <th key={h} className="px-4 py-3 text-left text-xs text-brun-mid uppercase tracking-wide font-medium">{h}</th>
                 ))}
               </tr>
@@ -416,7 +464,7 @@ export default function BiensPage() {
               {loading ? (
                 <tr><td colSpan={9} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
               ) : !biens.length ? (
-                <tr><td colSpan={9} className="px-4 py-10 text-center text-brun-mid/50">Aucun bien</td></tr>
+                <tr><td colSpan={10} className="px-4 py-10 text-center text-brun-mid/50">Aucun bien</td></tr>
 
               ) : biens.map((b) => (
                 <>
@@ -459,7 +507,19 @@ export default function BiensPage() {
                       </button>
                     </td>
                     <td className="px-4 py-3">
+                      <PlatformIcons b={b} />
+                    </td>
+                    <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
+                        <a
+                          href={`/${locale}/biens/${b.slug ?? b.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Voir sur le site"
+                          className="text-brun-mid/50 hover:text-terra transition-colors"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
+                        </a>
                         <button onClick={() => openEdit(b)} className="text-terra hover:text-brun text-xs font-medium underline underline-offset-2">Modifier</button>
                         <button onClick={() => handleDelete(b.id)} className="text-red-400 hover:text-red-600 text-xs font-medium underline underline-offset-2">Supprimer</button>
                       </div>
@@ -469,7 +529,7 @@ export default function BiensPage() {
                     const stats = getStatsBien(b.id)
                     return (
                       <tr key={`stats-${b.id}`}>
-                        <td colSpan={9} className="px-6 pb-4 pt-2 bg-creme/60">
+                        <td colSpan={10} className="px-6 pb-4 pt-2 bg-creme/60">
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                               <p className="text-xs font-medium text-brun-mid/50 uppercase tracking-wide mb-2">7 derniers jours</p>
