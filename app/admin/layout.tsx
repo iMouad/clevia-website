@@ -19,6 +19,11 @@ const dmSans = DM_Sans({
 export const metadata = {
   title: { template: '%s | Admin Clévia', default: 'Admin Clévia' },
   robots: { index: false, follow: false },
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
+  },
 }
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
