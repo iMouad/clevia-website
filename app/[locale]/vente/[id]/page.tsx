@@ -113,7 +113,7 @@ export default async function VenteDetailPage({ params }: Props) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <VenteTracker bienId={id} />
+      <VenteTracker bienId={data.id} />
 
       <div className="bg-creme min-h-screen">
         {/* Breadcrumb */}
