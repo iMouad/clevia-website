@@ -15,6 +15,7 @@ export async function submitContact(formData: FormData) {
     ville_bien: formData.get('ville_bien') as string | null,
     type_bien: formData.get('type_bien') as string | null,
     message: formData.get('message') as string | null,
+    source: 'contact',
   })
 
   if (error) {

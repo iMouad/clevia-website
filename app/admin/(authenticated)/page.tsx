@@ -50,11 +50,15 @@ export default async function AdminDashboard() {
     { count: reservationsMois },
     { data: reservationsData },
     { data: lastContacts },
+    { count: vuesLocation },
+    { count: vuesVente },
   ] = await Promise.all([
     supabase.from('biens').select('*', { count: 'exact', head: true }).eq('statut', 'actif'),
     supabase.from('reservations').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
     supabase.from('reservations').select('date_arrivee,date_depart,montant').gte('created_at', monthStart).eq('statut', 'confirmee'),
     supabase.from('contacts').select('*').eq('traite', false).order('created_at', { ascending: false }).limit(5),
+    supabase.from('biens_visites').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
+    supabase.from('vente_visites').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
   ])
 
   // Calcul revenus et taux d'occupation
@@ -89,7 +93,7 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
         <StatCard label="Biens actifs" value={biensActifs ?? 0} sub="en gestion" />
         <StatCard label="Réservations ce mois" value={reservationsMois ?? 0} sub="confirmées" />
         <StatCard label="Taux d'occupation" value={`${tauxOccupation}%`} sub="sur 30 jours" color="brun-mid" />
@@ -99,6 +103,10 @@ export default async function AdminDashboard() {
           sub="hors commission"
           color="terra"
         />
+      </div>
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+        <StatCard label="Vues location ce mois" value={vuesLocation ?? 0} sub="pages biens à louer" color="brun-mid" />
+        <StatCard label="Vues vente ce mois" value={vuesVente ?? 0} sub="pages biens à vendre" color="brun-mid" />
       </div>
 
       <div className="grid xl:grid-cols-2 gap-6">

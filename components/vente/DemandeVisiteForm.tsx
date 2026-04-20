@@ -38,6 +38,7 @@ export default function DemandeVisiteForm({ bienTitre, bienReference, bienVille,
       type_bien: `Demande de visite — ${bienCategorie}`,
       message: fullMessage,
       traite: false,
+      source: 'visite',
     })
 
     setStatus(error ? 'error' : 'success')

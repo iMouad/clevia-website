@@ -14,10 +14,22 @@ type Contact = {
   type_bien: string | null
   message: string | null
   traite: boolean
+  source: string | null
   created_at: string
 }
 
 type Filter = 'all' | 'unread' | 'read'
+
+const SOURCE_LABELS: Record<string, string> = {
+  contact: 'Formulaire',
+  simulateur: 'Simulateur',
+  visite: 'Visite',
+}
+const SOURCE_COLORS: Record<string, string> = {
+  contact: 'bg-blue-50 text-blue-700',
+  simulateur: 'bg-purple-50 text-purple-700',
+  visite: 'bg-terra/10 text-terra',
+}
 
 function Modal({ open, onClose, children }: { open: boolean; onClose: () => void; children: React.ReactNode }) {
   if (!open) return null
@@ -89,7 +101,7 @@ export default function ContactsPage() {
           <table className="w-full text-sm">
             <thead className="bg-brun/4">
               <tr>
-                {['Date', 'Nom', 'Téléphone', 'Email', 'Ville', 'Type', 'Traité'].map((h) => (
+                {['Date', 'Nom', 'Téléphone', 'Email', 'Ville', 'Type', 'Source', 'Traité'].map((h) => (
                   <th key={h} className="px-4 py-3 text-left text-xs text-brun-mid uppercase tracking-wide font-medium">{h}</th>
                 ))}
               </tr>
@@ -113,6 +125,13 @@ export default function ContactsPage() {
                   <td className="px-4 py-3 text-brun-mid">{c.email ?? '—'}</td>
                   <td className="px-4 py-3 text-brun-mid">{c.ville_bien ?? '—'}</td>
                   <td className="px-4 py-3 text-brun-mid">{c.type_bien ?? '—'}</td>
+                  <td className="px-4 py-3">
+                    {c.source ? (
+                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${SOURCE_COLORS[c.source] ?? 'bg-gray-100 text-gray-600'}`}>
+                        {SOURCE_LABELS[c.source] ?? c.source}
+                      </span>
+                    ) : <span className="text-brun-mid/40">—</span>}
+                  </td>
                   <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                     <button
                       onClick={() => toggleTraite(c)}
@@ -164,6 +183,14 @@ export default function ContactsPage() {
                     <p className="text-sm text-brun">{value ?? '—'}</p>
                   </div>
                 ))}
+                {selected.source && (
+                  <div>
+                    <p className="text-xs text-brun-mid/60 uppercase tracking-wide mb-1">Source</p>
+                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${SOURCE_COLORS[selected.source] ?? 'bg-gray-100 text-gray-600'}`}>
+                      {SOURCE_LABELS[selected.source] ?? selected.source}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {selected.message && (

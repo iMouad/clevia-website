@@ -27,6 +27,7 @@ export async function submitSimulateurLead(data: {
     ville_bien: 'El Mansouria / Mohammedia',
     type_bien: data.type,
     message,
+    source: 'simulateur',
   })
 
   if (error) throw new Error(error.message)
