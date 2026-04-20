@@ -15,7 +15,8 @@ type Props = { params: Promise<{ locale: string; id: string }> }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, id } = await params
   const supabase = await createClient()
-  const { data } = await supabase.from('biens_vente').select('titre, description, photos, ville, categorie').eq('id', id).single()
+  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+  const { data } = await supabase.from('biens_vente').select('titre, description, photos, ville, categorie').eq(isUUID ? 'id' : 'slug', id).single()
   if (!data) return { title: 'Bien introuvable · Clévia' }
 
   const t = await getTranslations({ locale, namespace: 'vente' })
