@@ -714,24 +714,19 @@ Le footer contient une colonne "Nos villes" avec liens vers les 4 pages SEO loca
 
 ---
 
-## 12. Migrations SQL à appliquer
+## 12. Migrations SQL
 
-Ces colonnes ont été développées mais n'existent pas encore en production (à lancer dans Supabase → SQL Editor) :
+Toutes les migrations ont été appliquées en production. ✅
 
-```sql
--- Slugs SEO
-ALTER TABLE biens ADD COLUMN IF NOT EXISTS slug text UNIQUE;
-ALTER TABLE biens_vente ADD COLUMN IF NOT EXISTS slug text UNIQUE;
+| Colonne | Table | Type | Statut |
+|---|---|---|---|
+| `slug` | `biens` | `text UNIQUE` | ✅ Appliqué |
+| `slug` | `biens_vente` | `text UNIQUE` | ✅ Appliqué |
+| `latitude` | `biens` | `numeric` | ✅ Appliqué |
+| `longitude` | `biens` | `numeric` | ✅ Appliqué |
+| `sous_type` | `biens_vente` | `text` | ✅ Appliqué |
 
--- GPS biens à louer
-ALTER TABLE biens ADD COLUMN IF NOT EXISTS latitude numeric;
-ALTER TABLE biens ADD COLUMN IF NOT EXISTS longitude numeric;
-
--- Sous-type terrain (biens à vendre)
-ALTER TABLE biens_vente ADD COLUMN IF NOT EXISTS sous_type text;
-```
-
-**Après les migrations** : aller dans l'admin `/admin/biens` et `/admin/vente` puis cliquer sur "Générer les slugs SEO" pour remplir les slugs de tous les biens existants.
+Les slugs des biens existants ont été générés via le bouton "Générer les slugs SEO" disponible dans `/admin/biens` et `/admin/vente`.
 
 ---
 
