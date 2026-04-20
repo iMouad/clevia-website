@@ -138,7 +138,6 @@
       }
     },
     "bigStats": {
-      "biens": "20%",
       "biens": "48h",
       "biensLabel": "نشر مضمون",
       "nuits": "+15",
@@ -233,6 +232,10 @@
       "hours": {
         "label": "ساعات العمل",
         "value": "الإثنين–السبت، 9ص–7م"
+      },
+      "phone2": {
+        "label": "Téléphone 2",
+        "value": "+212 754-385616"
       }
     },
     "form": {

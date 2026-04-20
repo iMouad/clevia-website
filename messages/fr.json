@@ -232,6 +232,10 @@
       "hours": {
         "label": "Horaires",
         "value": "Lun–Sam, 9h–19h"
+      },
+      "phone2": {
+        "label": "Téléphone 2",
+        "value": "+212 754-385616"
       }
     },
     "form": {

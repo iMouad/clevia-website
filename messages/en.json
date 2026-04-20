@@ -138,7 +138,6 @@
       }
     },
     "bigStats": {
-      "biens": "20%",
       "biens": "48h",
       "biensLabel": "guaranteed listing",
       "nuits": "15+",
@@ -233,6 +232,10 @@
       "hours": {
         "label": "Hours",
         "value": "Mon–Sat, 9am–7pm"
+      },
+      "phone2": {
+        "label": "Téléphone 2",
+        "value": "+212 754-385616"
       }
     },
     "form": {

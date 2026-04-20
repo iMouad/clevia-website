@@ -130,8 +130,15 @@ export default function Footer() {
               <li className="text-creme/60 text-sm">
                 {tContact('email.value')}
               </li>
-              <li className="text-creme/60 text-sm">
-                {tContact('phone.value')}
+              <li>
+                <a href={`tel:${tContact('phone.value').replace(/\s/g, '')}`} className="text-creme/60 hover:text-sable text-sm transition-colors">
+                  {tContact('phone.value')}
+                </a>
+              </li>
+              <li>
+                <a href={`tel:${tContact('phone2.value').replace(/\s|-/g, '')}`} className="text-creme/60 hover:text-sable text-sm transition-colors">
+                  {tContact('phone2.value')}
+                </a>
               </li>
               <li className="text-creme/60 text-sm">
                 {tContact('hours.value')}
