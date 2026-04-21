@@ -302,7 +302,7 @@ export default async function VenteDetailPage({ params }: Props) {
                           <p className="text-3xl font-bold text-terra" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                             {prixFormate}
                           </p>
-                          {data.surface && (
+                          {data.surface && data.categorie !== 'Terrain' && (
                             <p className="text-xs text-brun-mid/40 mt-1" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                               {Math.round(data.prix / data.surface).toLocaleString('fr-MA')} MAD/m²
                             </p>

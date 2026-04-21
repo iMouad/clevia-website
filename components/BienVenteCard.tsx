@@ -177,7 +177,7 @@ export default function BienVenteCard({ bien }: { bien: BienVente }) {
         <div className="flex items-center gap-3 mb-4" style={{ fontFamily: 'var(--font-dm-sans)' }}>
           {bien.surface && (
             <span className="text-xs text-brun-mid/70">
-              <span className="font-medium text-brun">{bien.surface}</span> {t('surface')}
+              <span className="font-medium text-brun">{bien.surface}</span> {bien.categorie === 'Terrain' ? 'ha' : t('surface')}
             </span>
           )}
           {bien.chambres && (

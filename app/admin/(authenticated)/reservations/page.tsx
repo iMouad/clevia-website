@@ -321,17 +321,32 @@ export default function ReservationsPage() {
               <input type="number" min={0} className={inputClass} value={editing.montant ?? ''} onChange={(e) => setEditing((p) => ({ ...p, montant: Number(e.target.value) || null }))} placeholder="1500" />
             </div>
             <div>
-              <label className={labelClass}>Taux commission (%)</label>
-              <AdminSelect value={editing.taux_commission ?? 20} onChange={(e) => setEditing((p) => ({ ...p, taux_commission: Number(e.target.value) }))}>
-                <option value={20}>20%</option>
-                <option value={25}>25%</option>
-              </AdminSelect>
+              <label className={labelClass}>Commission (%)</label>
+              <div className="flex gap-1.5 mb-1.5">
+                {[0, 20, 25].map((v) => (
+                  <button key={v} type="button"
+                    onClick={() => setEditing((p) => ({ ...p, taux_commission: v }))}
+                    className={`text-xs rounded-lg px-2.5 py-1 font-medium transition-all ${editing.taux_commission === v ? 'bg-terra text-creme' : 'bg-brun/8 text-brun-mid hover:bg-terra/20'}`}
+                  >
+                    {v === 0 ? 'Sans' : `${v}%`}
+                  </button>
+                ))}
+              </div>
+              <input
+                type="number" min={0} max={100} step={0.5}
+                className={inputClass}
+                value={editing.taux_commission ?? ''}
+                onChange={(e) => setEditing((p) => ({ ...p, taux_commission: Number(e.target.value) }))}
+                placeholder="Taux %"
+              />
             </div>
           </div>
-          {editing.montant && (
+          {editing.montant != null && editing.montant > 0 && (
             <div className="bg-terra/10 rounded-xl px-4 py-3 text-sm">
-              <span className="text-brun-mid">Commission : </span>
-              <span className="text-terra font-medium">{commission} MAD</span>
+              {editing.taux_commission === 0
+                ? <span className="text-brun-mid">Sans commission</span>
+                : <><span className="text-brun-mid">Commission ({editing.taux_commission}%) : </span><span className="text-terra font-medium">{commission} MAD</span></>
+              }
             </div>
           )}
           <div>
