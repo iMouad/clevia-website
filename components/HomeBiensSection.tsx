@@ -60,7 +60,7 @@ export default async function HomeBiensSection() {
 
         <StaggerContainer className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {biens.map((b) => (
-            <StaggerItem key={b.id}>
+            <StaggerItem key={b.id} className="h-full">
               <BienCard bien={b} />
             </StaggerItem>
           ))}
