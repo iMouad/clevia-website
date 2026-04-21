@@ -231,7 +231,7 @@ export default function CalendrierPage() {
         <>
           {/* Stats occupation du mois */}
           {!loadingCal && (
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
               {[
                 { label: 'Nuits réservées', value: reservedNights, icon: '🔴', color: '#FEE2E2', textColor: '#DC2626' },
                 { label: 'Nuits libres', value: freeNights, icon: '🟢', color: '#DCFCE7', textColor: '#15803D' },

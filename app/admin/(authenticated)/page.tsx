@@ -54,7 +54,7 @@ export default async function AdminDashboard() {
     { count: vuesVente },
   ] = await Promise.all([
     supabase.from('biens').select('*', { count: 'exact', head: true }).eq('statut', 'actif'),
-    supabase.from('reservations').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
+    supabase.from('reservations').select('*', { count: 'exact', head: true }).gte('created_at', monthStart).eq('statut', 'confirmee'),
     supabase.from('reservations').select('date_arrivee,date_depart,montant').gte('created_at', monthStart).eq('statut', 'confirmee'),
     supabase.from('contacts').select('*').eq('traite', false).order('created_at', { ascending: false }).limit(5),
     supabase.from('biens_visites').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
@@ -95,7 +95,7 @@ export default async function AdminDashboard() {
       {/* Stats */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
         <StatCard label="Biens actifs" value={biensActifs ?? 0} sub="en gestion" />
-        <StatCard label="Réservations ce mois" value={reservationsMois ?? 0} sub="confirmées" />
+        <StatCard label="Réservations ce mois" value={reservationsMois ?? 0} sub="confirmées ce mois" />
         <StatCard label="Taux d'occupation" value={`${tauxOccupation}%`} sub="sur 30 jours" color="brun-mid" />
         <StatCard
           label="Revenus ce mois"

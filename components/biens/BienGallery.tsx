@@ -199,7 +199,7 @@ export default function BienGallery({ photos, nom, videoUrl }: Props) {
             className="col-span-2 row-span-2 relative cursor-pointer group"
             onClick={() => setLightboxIdx(0)}
           >
-            <Image src={main!} alt={nom} fill className="object-cover group-hover:brightness-95 transition-all" />
+            <Image src={main!} alt={nom} fill sizes="(max-width: 768px) 0px, (max-width: 1280px) 50vw, 640px" className="object-cover group-hover:brightness-95 transition-all" priority />
             {photos.length > 5 && (
               <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm text-brun text-xs font-medium px-3 py-1.5 rounded-full shadow-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                 +{photos.length - 5} photos
@@ -211,7 +211,7 @@ export default function BienGallery({ photos, nom, videoUrl }: Props) {
             if (!photo) return <div key={i} className="relative bg-brun/5" />
             return (
               <div key={i} className="relative cursor-pointer group" onClick={() => setLightboxIdx(i + 1)}>
-                <Image src={photo} alt={`${nom} — photo ${i + 2}`} fill className="object-cover group-hover:brightness-95 transition-all" />
+                <Image src={photo} alt={`${nom} — photo ${i + 2}`} fill sizes="(max-width: 768px) 0px, (max-width: 1280px) 25vw, 320px" className="object-cover group-hover:brightness-95 transition-all" />
               </div>
             )
           })}
@@ -288,7 +288,9 @@ export default function BienGallery({ photos, nom, videoUrl }: Props) {
                   src={photos[carouselIdx]}
                   alt={`${nom} — ${carouselIdx + 1}`}
                   fill
+                  sizes="100vw"
                   className="object-cover"
+                  priority={carouselIdx === 0}
                   onClick={() => setLightboxIdx(carouselIdx)}
                 />
               )}

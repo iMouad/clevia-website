@@ -88,7 +88,7 @@ export default function ContactsPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-2 mb-5">
+      <div className="flex flex-wrap gap-2 mb-5">
         {filters.map(({ key, label }) => (
           <button
             key={key}
@@ -100,7 +100,51 @@ export default function ContactsPage() {
         ))}
       </div>
 
-      <div className="bg-white rounded-2xl border border-brun/10 overflow-hidden">
+      {/* ── Mobile : cartes ── */}
+      <div className="lg:hidden flex flex-col gap-3">
+        {loading ? (
+          <p className="text-center py-10 text-brun-mid/50 text-sm">Chargement…</p>
+        ) : !filtered.length ? (
+          <p className="text-center py-10 text-brun-mid/50 text-sm">Aucune demande</p>
+        ) : filtered.map((c) => (
+          <div
+            key={c.id}
+            className="bg-white rounded-2xl border border-brun/10 p-4 cursor-pointer active:bg-creme/40"
+            onClick={() => setSelected(c)}
+          >
+            <div className="flex items-start justify-between gap-3 mb-2">
+              <div>
+                <p className="font-medium text-brun text-sm">{c.nom ?? '—'}</p>
+                <p className="text-xs text-brun-mid/50 mt-0.5">{format(new Date(c.created_at), 'dd/MM/yy HH:mm')}</p>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {c.source && (
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${SOURCE_COLORS[c.source] ?? 'bg-gray-100 text-gray-600'}`}>
+                    {SOURCE_LABELS[c.source] ?? c.source}
+                  </span>
+                )}
+                <button
+                  onClick={(e) => { e.stopPropagation(); toggleTraite(c) }}
+                  disabled={toggling === c.id}
+                  className={`text-xs font-medium px-2.5 py-1 rounded-full transition-all ${
+                    c.traite ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
+                  }`}
+                >
+                  {toggling === c.id ? '…' : c.traite ? '✓' : '!'}
+                </button>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-brun-mid/70">
+              {c.telephone && <span>📞 {c.telephone}</span>}
+              {c.ville_bien && <span>📍 {c.ville_bien}</span>}
+              {c.type_bien && <span>🏠 {c.type_bien}</span>}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Desktop : table ── */}
+      <div className="hidden lg:block bg-white rounded-2xl border border-brun/10 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-brun/4">
@@ -112,9 +156,9 @@ export default function ContactsPage() {
             </thead>
             <tbody className="divide-y divide-brun/5">
               {loading ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
+                <tr><td colSpan={8} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
               ) : !filtered.length ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-brun-mid/50">Aucune demande</td></tr>
+                <tr><td colSpan={8} className="px-4 py-10 text-center text-brun-mid/50">Aucune demande</td></tr>
               ) : filtered.map((c) => (
                 <tr
                   key={c.id}
