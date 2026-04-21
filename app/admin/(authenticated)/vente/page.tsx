@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase'
 import AdminSelect from '@/components/admin/AdminSelect'
 import { getEquipementsForCategorie } from '@/lib/equipements-vente'
 import { generateVenteSlug } from '@/lib/slugify'
+import { applyWatermark } from '@/lib/watermark'
 
 type Categorie = 'Appartement' | 'Studio' | 'Villa' | 'Terrain' | 'Ferme' | 'Commercial'
 type Statut = 'a_vendre' | 'sous_compromis' | 'vendu'
@@ -178,7 +179,9 @@ export default function AdminVentePage() {
     for (const file of Array.from(files)) {
       const safeName = file.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9._-]/g, '_').toLowerCase()
       const path = `${Date.now()}-${safeName}`
-      const { data, error } = await supabase.storage.from('vente-photos').upload(path, file)
+      let fileToUpload: File | Blob = file
+      try { fileToUpload = await applyWatermark(file) } catch { /* fallback sans watermark */ }
+      const { data, error } = await supabase.storage.from('vente-photos').upload(path, fileToUpload, { contentType: fileToUpload.type })
       if (error || !data) { setUploadError(`Erreur upload : ${error?.message}`); break }
       const { data: { publicUrl } } = supabase.storage.from('vente-photos').getPublicUrl(data.path)
       uploaded.push(publicUrl)

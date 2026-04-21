@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase'
 import AdminSelect from '@/components/admin/AdminSelect'
 import { generateLocationSlug } from '@/lib/slugify'
 import { EQUIPEMENTS, REGLES_OPTIONS } from '@/lib/equipements'
+import { applyWatermark } from '@/lib/watermark'
 
 type Visite = {
   id: string
@@ -232,7 +233,9 @@ export default function BiensPage() {
         .replace(/[^a-zA-Z0-9._-]/g, '_')                  // replace unsafe chars
         .toLowerCase()
       const path = `${Date.now()}-${safeName}`
-      const { data, error } = await supabase.storage.from('biens-photos').upload(path, file)
+      let fileToUpload: File | Blob = file
+      try { fileToUpload = await applyWatermark(file) } catch { /* fallback sans watermark */ }
+      const { data, error } = await supabase.storage.from('biens-photos').upload(path, fileToUpload, { contentType: fileToUpload.type })
       if (error) {
         console.error('Upload error:', error)
         setUploadError(`Erreur : ${error.message}`)
