@@ -91,10 +91,9 @@ export default function SettingsPage() {
         const path = url.split(`/${bucket}/`)[1]
         if (!path) throw new Error('path introuvable')
 
-        const res = await fetch(url)
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const blob = await res.blob()
-        const file = new File([blob], path, { type: blob.type || 'image/jpeg' })
+        const { data: dlBlob, error: dlError } = await supabase.storage.from(bucket).download(path)
+        if (dlError || !dlBlob) throw dlError ?? new Error('Download failed')
+        const file = new File([dlBlob], path, { type: dlBlob.type || 'image/jpeg' })
 
         const watermarked = await applyWatermark(file)
 
