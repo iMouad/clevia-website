@@ -92,12 +92,11 @@ export default function ReservationsPage() {
 
   async function handleSave() {
     setSaving(true)
-    const payload = { ...editing }
-    delete (payload as any).biens
+    const { id, created_at, biens, ...fields } = editing as any
     if (editing.id) {
-      await supabase.from('reservations').update(payload).eq('id', editing.id)
+      await supabase.from('reservations').update(fields).eq('id', editing.id)
     } else {
-      await supabase.from('reservations').insert(payload)
+      await supabase.from('reservations').insert(fields)
     }
     setSaving(false); closeModal(); fetchData()
   }
