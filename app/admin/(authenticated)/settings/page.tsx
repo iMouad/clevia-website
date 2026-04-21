@@ -83,10 +83,20 @@ export default function SettingsPage() {
       for (const url of b.photos ?? []) { if (url) jobs.push({ bucket: 'vente-photos', url }) }
     }
 
+    const UNSUPPORTED_EXT = ['heic', 'heif', 'tiff', 'tif', 'bmp']
+
     setWmTotal(jobs.length)
-    let done = 0, errors = 0
+    let done = 0, errors = 0, skipped = 0
 
     for (const { bucket, url } of jobs) {
+      const ext = url.split('.').pop()?.toLowerCase() ?? ''
+      if (UNSUPPORTED_EXT.includes(ext)) {
+        skipped++
+        done++
+        setWmDone(done)
+        continue
+      }
+
       try {
         const path = url.split(`/${bucket}/`)[1]
         if (!path) throw new Error('path introuvable')
@@ -109,11 +119,11 @@ export default function SettingsPage() {
       setWmDone(done)
     }
 
-    setWmResult(
-      errors === 0
-        ? `✓ ${done} photo(s) watermarkée(s) avec succès.`
-        : `${done - errors} photo(s) watermarkée(s), ${errors} erreur(s).`
-    )
+    const ok = done - errors - skipped
+    const parts = [`✓ ${ok} photo(s) watermarkée(s)`]
+    if (skipped > 0) parts.push(`${skipped} ignorée(s) (HEIC/format non supporté)`)
+    if (errors > 0) parts.push(`${errors} erreur(s)`)
+    setWmResult(parts.join(' · '))
     setWatermarking(false)
   }
 
