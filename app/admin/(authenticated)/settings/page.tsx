@@ -109,7 +109,7 @@ export default function SettingsPage() {
 
         const { error } = await supabase.storage
           .from(bucket)
-          .upload(path, watermarked, { upsert: true, contentType: watermarked.type })
+          .upload(path, watermarked, { upsert: true, contentType: watermarked.type, cacheControl: '60' })
         if (error) throw error
       } catch (e) {
         console.warn('Watermark échoué :', url, e)

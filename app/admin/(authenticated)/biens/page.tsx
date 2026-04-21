@@ -235,7 +235,7 @@ export default function BiensPage() {
       const path = `${Date.now()}-${safeName}`
       let fileToUpload: File | Blob = file
       try { fileToUpload = await applyWatermark(file) } catch { /* fallback sans watermark */ }
-      const { data, error } = await supabase.storage.from('biens-photos').upload(path, fileToUpload, { contentType: fileToUpload.type })
+      const { data, error } = await supabase.storage.from('biens-photos').upload(path, fileToUpload, { contentType: fileToUpload.type, cacheControl: '60' })
       if (error) {
         console.error('Upload error:', error)
         setUploadError(`Erreur : ${error.message}`)

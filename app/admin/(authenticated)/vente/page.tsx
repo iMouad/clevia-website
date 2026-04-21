@@ -181,7 +181,7 @@ export default function AdminVentePage() {
       const path = `${Date.now()}-${safeName}`
       let fileToUpload: File | Blob = file
       try { fileToUpload = await applyWatermark(file) } catch { /* fallback sans watermark */ }
-      const { data, error } = await supabase.storage.from('vente-photos').upload(path, fileToUpload, { contentType: fileToUpload.type })
+      const { data, error } = await supabase.storage.from('vente-photos').upload(path, fileToUpload, { contentType: fileToUpload.type, cacheControl: '60' })
       if (error || !data) { setUploadError(`Erreur upload : ${error?.message}`); break }
       const { data: { publicUrl } } = supabase.storage.from('vente-photos').getPublicUrl(data.path)
       uploaded.push(publicUrl)
