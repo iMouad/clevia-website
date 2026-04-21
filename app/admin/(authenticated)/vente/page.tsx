@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase'
+import AdminSelect from '@/components/admin/AdminSelect'
 import { getEquipementsForCategorie } from '@/lib/equipements-vente'
 import { generateVenteSlug } from '@/lib/slugify'
 
@@ -583,18 +584,16 @@ export default function AdminVentePage() {
                     </div>
                     <div>
                       <label className={labelClass} style={{ fontFamily: 'var(--font-dm-sans)' }}>Catégorie *</label>
-                      <select className={inputClass} style={{ fontFamily: 'var(--font-dm-sans)' }} value={form.categorie} onChange={(e) => setForm((f) => ({ ...f, categorie: e.target.value as Categorie, equipements: [], sous_type: null }))}>
+                      <AdminSelect value={form.categorie} onChange={(e) => setForm((f) => ({ ...f, categorie: e.target.value as Categorie, equipements: [], sous_type: null }))}>
                         {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                      </select>
+                      </AdminSelect>
                     </div>
                   </div>
                   {form.categorie === 'Terrain' && (
                     <div className="flex flex-col gap-3">
                       <div>
                         <label className={labelClass} style={{ fontFamily: 'var(--font-dm-sans)' }}>Type de terrain</label>
-                        <select
-                          className={inputClass}
-                          style={{ fontFamily: 'var(--font-dm-sans)' }}
+                        <AdminSelect
                           value={['Lot villa', 'Lot ferme', 'Lot habitation'].includes(form.sous_type ?? '') ? 'Lotissement' : (form.sous_type ?? '')}
                           onChange={(e) => {
                             const val = e.target.value
@@ -604,21 +603,19 @@ export default function AdminVentePage() {
                           <option value="">-- Sélectionner --</option>
                           <option value="Terrain agricole">Terrain agricole</option>
                           <option value="Lotissement">Lotissement</option>
-                        </select>
+                        </AdminSelect>
                       </div>
                       {['Lot villa', 'Lot ferme', 'Lot habitation'].includes(form.sous_type ?? '') && (
                         <div>
                           <label className={labelClass} style={{ fontFamily: 'var(--font-dm-sans)' }}>Type de lot</label>
-                          <select
-                            className={inputClass}
-                            style={{ fontFamily: 'var(--font-dm-sans)' }}
+                          <AdminSelect
                             value={form.sous_type ?? ''}
                             onChange={(e) => setForm((f) => ({ ...f, sous_type: e.target.value }))}
                           >
                             <option value="Lot villa">Lot villa</option>
                             <option value="Lot ferme">Lot ferme</option>
                             <option value="Lot habitation">Lot habitation</option>
-                          </select>
+                          </AdminSelect>
                         </div>
                       )}
                     </div>

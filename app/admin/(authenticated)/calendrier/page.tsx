@@ -8,6 +8,7 @@ import {
 } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { createClient } from '@/lib/supabase'
+import AdminSelect from '@/components/admin/AdminSelect'
 
 type Bien = { id: string; nom: string }
 
@@ -215,16 +216,11 @@ export default function CalendrierPage() {
         <label className="block text-xs font-medium text-brun-mid uppercase tracking-wide mb-2" style={{ fontFamily: 'var(--font-dm-sans)' }}>
           Bien sélectionné
         </label>
-        <select
-          className="w-full border border-brun/20 rounded-xl px-4 py-3 text-sm text-brun focus:outline-none focus:border-terra"
-          style={{ fontFamily: 'var(--font-dm-sans)' }}
-          value={selectedId}
-          onChange={(e) => setSelectedId(e.target.value)}
-        >
+        <AdminSelect value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>
           {biens.map((b) => (
             <option key={b.id} value={b.id}>{b.nom}</option>
           ))}
-        </select>
+        </AdminSelect>
       </div>
 
       {selectedId && (

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import { createClient } from '@/lib/supabase'
+import AdminSelect from '@/components/admin/AdminSelect'
 
 type Reservation = {
   id: string
@@ -125,14 +126,14 @@ export default function ReservationsPage() {
 
       {/* Filters */}
       <div className="flex gap-3 mb-5 flex-wrap">
-        <select className="border border-brun/20 rounded-xl px-3 py-2 text-sm text-brun-mid focus:outline-none focus:border-terra" value={filterStatut} onChange={(e) => setFilterStatut(e.target.value)}>
+        <AdminSelect className="!py-2 !px-3" value={filterStatut} onChange={(e) => setFilterStatut(e.target.value)}>
           <option value="">Tous statuts</option>
           {Object.entries(STATUT_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-        </select>
-        <select className="border border-brun/20 rounded-xl px-3 py-2 text-sm text-brun-mid focus:outline-none focus:border-terra" value={filterPlatf} onChange={(e) => setFilterPlatf(e.target.value)}>
+        </AdminSelect>
+        <AdminSelect className="!py-2 !px-3" value={filterPlatf} onChange={(e) => setFilterPlatf(e.target.value)}>
           <option value="">Toutes plateformes</option>
           {PLATF.map((p) => <option key={p}>{p}</option>)}
-        </select>
+        </AdminSelect>
         <span className="self-center text-xs text-brun-mid/60">{filtered.length} réservation(s)</span>
       </div>
 
@@ -267,10 +268,10 @@ export default function ReservationsPage() {
         <div className="p-5 flex flex-col gap-4 max-h-[70vh] overflow-y-auto">
           <div>
             <label className={labelClass}>Bien</label>
-            <select className={inputClass} value={editing.bien_id ?? ''} onChange={(e) => setEditing((p) => ({ ...p, bien_id: e.target.value || null }))}>
+            <AdminSelect value={editing.bien_id ?? ''} onChange={(e) => setEditing((p) => ({ ...p, bien_id: e.target.value || null }))}>
               <option value="">— Sélectionner —</option>
               {biens.map((b) => <option key={b.id} value={b.id}>{b.nom}</option>)}
-            </select>
+            </AdminSelect>
           </div>
           <div>
             <label className={labelClass}>Nom voyageur *</label>
@@ -302,15 +303,15 @@ export default function ReservationsPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={labelClass}>Plateforme</label>
-              <select className={inputClass} value={editing.plateforme ?? 'Airbnb'} onChange={(e) => setEditing((p) => ({ ...p, plateforme: e.target.value }))}>
+              <AdminSelect value={editing.plateforme ?? 'Airbnb'} onChange={(e) => setEditing((p) => ({ ...p, plateforme: e.target.value }))}>
                 {PLATF.map((p) => <option key={p}>{p}</option>)}
-              </select>
+              </AdminSelect>
             </div>
             <div>
               <label className={labelClass}>Statut</label>
-              <select className={inputClass} value={editing.statut ?? 'confirmee'} onChange={(e) => setEditing((p) => ({ ...p, statut: e.target.value }))}>
+              <AdminSelect value={editing.statut ?? 'confirmee'} onChange={(e) => setEditing((p) => ({ ...p, statut: e.target.value }))}>
                 {Object.entries(STATUT_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-              </select>
+              </AdminSelect>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -320,10 +321,10 @@ export default function ReservationsPage() {
             </div>
             <div>
               <label className={labelClass}>Taux commission (%)</label>
-              <select className={inputClass} value={editing.taux_commission ?? 20} onChange={(e) => setEditing((p) => ({ ...p, taux_commission: Number(e.target.value) }))}>
+              <AdminSelect value={editing.taux_commission ?? 20} onChange={(e) => setEditing((p) => ({ ...p, taux_commission: Number(e.target.value) }))}>
                 <option value={20}>20%</option>
                 <option value={25}>25%</option>
-              </select>
+              </AdminSelect>
             </div>
           </div>
           {editing.montant && (

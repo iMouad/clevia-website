@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import AdminSelect from '@/components/admin/AdminSelect'
 import { generateLocationSlug } from '@/lib/slugify'
 import { EQUIPEMENTS, REGLES_OPTIONS } from '@/lib/equipements'
 
@@ -632,9 +633,9 @@ export default function BiensPage() {
             </div>
             <div>
               <label className={labelClass}>Type</label>
-              <select className={inputClass} value={editing.type ?? 'Appartement'} onChange={(e) => setEditing((p) => ({ ...p, type: e.target.value }))}>
+              <AdminSelect value={editing.type ?? 'Appartement'} onChange={(e) => setEditing((p) => ({ ...p, type: e.target.value }))}>
                 {TYPE_OPTIONS.map((t) => <option key={t}>{t}</option>)}
-              </select>
+              </AdminSelect>
             </div>
           </div>
 
@@ -676,9 +677,9 @@ export default function BiensPage() {
             </div>
             <div>
               <label className={labelClass}>Statut</label>
-              <select className={inputClass} value={editing.statut ?? 'actif'} onChange={(e) => setEditing((p) => ({ ...p, statut: e.target.value as any }))}>
+              <AdminSelect value={editing.statut ?? 'actif'} onChange={(e) => setEditing((p) => ({ ...p, statut: e.target.value as any }))}>
                 {STATUT_OPTIONS.map((s) => <option key={s} value={s}>{STATUT_LABELS[s]}</option>)}
-              </select>
+              </AdminSelect>
             </div>
           </div>
 
