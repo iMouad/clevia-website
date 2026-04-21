@@ -202,6 +202,7 @@ export default function CalendrierPage() {
     Airbnb:  '#FF5A5F',
     Booking: '#003580',
     Avito:   '#E07A2F',
+    Facebook: '#1877F2',
     Direct:  '#6B4C35',
   }
 

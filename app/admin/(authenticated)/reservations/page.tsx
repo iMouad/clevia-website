@@ -28,7 +28,7 @@ const EMPTY_RES: Partial<Reservation> = {
   voyageur_nom: '', voyageur_email: '', voyageur_phone: '', date_arrivee: '', date_depart: '',
   plateforme: 'Airbnb', montant: null, taux_commission: 20, statut: 'confirmee', notes: '',
 }
-const PLATF = ['Airbnb', 'Booking', 'Avito', 'Direct']
+const PLATF = ['Airbnb', 'Booking', 'Avito', 'Facebook', 'Direct']
 const STATUT_LABELS: Record<string, string> = { confirmee: 'Confirmée', annulee: 'Annulée', terminee: 'Terminée' }
 const STATUT_COLORS: Record<string, string> = {
   confirmee: 'bg-green-100 text-green-700',
@@ -39,6 +39,7 @@ const PLATF_COLORS: Record<string, string> = {
   Airbnb: 'bg-rose-100 text-rose-600',
   Booking: 'bg-blue-100 text-blue-600',
   Avito: 'bg-orange-100 text-orange-600',
+  Facebook: 'bg-blue-100 text-blue-700',
   Direct: 'bg-green-100 text-green-700',
 }
 
