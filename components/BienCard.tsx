@@ -73,7 +73,7 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
   const isDisponible = bien.disponible !== false
 
   return (
-    <div className="bg-white rounded-2xl overflow-hidden border border-brun/8 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col group">
+    <div className="h-full bg-white rounded-2xl overflow-hidden border border-brun/8 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col group">
 
       {/* ── Photo Carousel ── */}
       <div
