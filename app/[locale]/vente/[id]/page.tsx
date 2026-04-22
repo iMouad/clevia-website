@@ -108,7 +108,8 @@ export default async function VenteDetailPage({ params }: Props) {
   const whatsappMsg = encodeURIComponent(
     `Bonjour, je suis intéressé(e) par le bien "${data.titre}"${data.reference ? ` (Réf: ${data.reference})` : ''}. Pouvez-vous me contacter pour plus d'informations ?`
   )
-  const whatsappNum = data.telephone.replace(/\D/g, '')
+  const rawNum = data.telephone.replace(/\D/g, '')
+  const whatsappNum = rawNum.startsWith('212') ? rawNum : '212' + rawNum.replace(/^0/, '')
 
   // JSON-LD
   const jsonLd = {
