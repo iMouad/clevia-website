@@ -52,6 +52,7 @@ export default async function AdminDashboard() {
     { data: lastContacts },
     { count: vuesLocation },
     { count: vuesVente },
+    { count: whatsappClicsMois },
   ] = await Promise.all([
     supabase.from('biens').select('*', { count: 'exact', head: true }).eq('statut', 'actif'),
     supabase.from('reservations').select('*', { count: 'exact', head: true }).gte('created_at', monthStart).eq('statut', 'confirmee'),
@@ -59,6 +60,7 @@ export default async function AdminDashboard() {
     supabase.from('contacts').select('*').eq('traite', false).order('created_at', { ascending: false }).limit(5),
     supabase.from('biens_visites').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
     supabase.from('vente_visites').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
+    supabase.from('vente_whatsapp_clicks').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
   ])
 
   // Calcul revenus et taux d'occupation
@@ -73,6 +75,13 @@ export default async function AdminDashboard() {
   const tauxOccupation = biensActifs
     ? Math.round((totalNuits / (biensActifs * 30)) * 100)
     : 0
+
+  // 5 derniers clics WhatsApp
+  const { data: lastWhatsappClics } = await supabase
+    .from('vente_whatsapp_clicks')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(5)
 
   // 5 dernières réservations
   const { data: lastReservations } = await supabase
@@ -107,6 +116,7 @@ export default async function AdminDashboard() {
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
         <StatCard label="Vues location ce mois" value={vuesLocation ?? 0} sub="pages biens à louer" color="brun-mid" />
         <StatCard label="Vues vente ce mois" value={vuesVente ?? 0} sub="pages biens à vendre" color="brun-mid" />
+        <StatCard label="Clics WhatsApp ce mois" value={whatsappClicsMois ?? 0} sub="intérêts biens à vendre" color="terra" />
       </div>
 
       <div className="grid xl:grid-cols-2 gap-6">
@@ -188,6 +198,47 @@ export default async function AdminDashboard() {
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      {/* Derniers clics WhatsApp */}
+      <div className="mt-6 bg-white rounded-2xl border border-brun/10 overflow-hidden">
+        <div className="px-6 py-4 border-b border-brun/8 flex items-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#25D366">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.554 4.103 1.523 5.828L.057 23.143l5.462-1.432A11.942 11.942 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.89 0-3.66-.518-5.172-1.418l-.371-.218-3.843 1.008 1.027-3.736-.241-.386A9.937 9.937 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
+          </svg>
+          <h2 className="text-base font-medium text-brun">Derniers clics WhatsApp — Biens à vendre</h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-brun/4">
+              <tr>
+                {['Date', 'Bien', 'Téléphone', 'Appareil'].map((h) => (
+                  <th key={h} className="px-4 py-3 text-left text-xs text-brun-mid uppercase tracking-wide font-medium">
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-brun/5">
+              {(lastWhatsappClics ?? []).map((c: any) => (
+                <tr key={c.id} className="hover:bg-creme/40 transition-colors">
+                  <td className="px-4 py-3 text-brun-mid">{format(new Date(c.created_at), 'dd/MM/yy HH:mm')}</td>
+                  <td className="px-4 py-3 text-brun font-medium">{c.bien_titre ?? '—'}</td>
+                  <td className="px-4 py-3 text-brun-mid">{c.telephone ?? '—'}</td>
+                  <td className="px-4 py-3 text-brun-mid capitalize">{c.appareil ?? '—'}</td>
+                </tr>
+              ))}
+              {!lastWhatsappClics?.length && (
+                <tr>
+                  <td colSpan={4} className="px-4 py-8 text-center text-brun-mid/50 text-sm">
+                    Aucun clic WhatsApp pour le moment
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
