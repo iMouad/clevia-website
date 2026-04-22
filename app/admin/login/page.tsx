@@ -106,7 +106,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-brun-mid/40 text-xs mt-6">
-          © 2025 Clévia Conciergerie
+          © 2026 Clévia Immobilier - Conciergerie
         </p>
       </div>
     </div>

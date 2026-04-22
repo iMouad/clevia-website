@@ -4,7 +4,7 @@ import CityLandingPage, { CITY_CONFIGS } from '@/components/CityLandingPage'
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: 'Conciergerie Airbnb à Benslimane — Clévia',
-    description: 'Clévia Conciergerie gère votre bien à Benslimane : mise en ligne Airbnb & Booking, accueil voyageurs, ménage, clé en main. Estimation gratuite.',
+    description: 'Clévia Immobilier - Conciergerie gère votre bien à Benslimane : mise en ligne Airbnb & Booking, accueil voyageurs, ménage, clé en main. Estimation gratuite.',
     keywords: ['conciergerie Benslimane', 'gestion location Benslimane', 'Airbnb Benslimane', 'location courte durée Benslimane'],
     alternates: {
       canonical: 'https://www.cleviamaroc.com/fr/benslimane',

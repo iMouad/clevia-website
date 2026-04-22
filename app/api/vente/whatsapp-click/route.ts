@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
               <p style="margin: 8px 0 0; font-size: 14px; color: #6B4C35;"><strong>Localisation :</strong> ${ville_geo ? `${ville_geo}, ${pays}` : (pays ?? 'Inconnue')}</p>
               <p style="margin: 8px 0 0; font-size: 14px; color: #6B4C35;"><strong>Heure :</strong> ${heure}</p>
             </div>
-            <p style="font-size: 12px; color: #A07850;">— Clévia Conciergerie</p>
+            <p style="font-size: 12px; color: #A07850;">— Clévia Immobilier - Conciergerie</p>
           </div>
         `,
       })

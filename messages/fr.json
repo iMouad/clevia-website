@@ -14,11 +14,11 @@
   },
   "whatsapp": {
     "aria": "Contacter Clévia sur WhatsApp",
-    "message": "Bonjour, je souhaite en savoir plus sur la gestion de mon bien avec Clévia Conciergerie."
+    "message": "Bonjour, je souhaite en savoir plus sur la gestion de mon bien avec Clévia Immobilier - Conciergerie."
   },
   "simulateur": {
     "meta": {
-      "title": "Simulateur de revenus — Clévia Conciergerie",
+      "title": "Simulateur de revenus — Clévia Immobilier - Conciergerie",
       "description": "Estimez combien peut rapporter votre bien à Mohammedia, Mansouria, Bouznika ou Benslimane en location courte durée sur Airbnb, Booking et Avito."
     },
     "hero": {
@@ -42,7 +42,7 @@
     }
   },
   "hero": {
-    "tag": "Conciergerie · Maroc",
+    "tag": "Immobilier · Conciergerie · Maroc",
     "title": "Votre bien,",
     "titleEmphasis": "notre priorité",
     "subtitle": "Nous gérons vos locations courte durée sur Airbnb, Booking et Avito — de la mise en ligne jusqu'à l'accueil des voyageurs.",
@@ -267,7 +267,7 @@
   },
   "footer": {
     "tagline": "Votre bien, notre priorité.",
-    "description": "Conciergerie de location courte durée à Mohammedia · Mansouria · Bouznika · Benslimane · Maroc.",
+    "description": "Immobilier & Conciergerie de location courte durée à Mohammedia · Mansouria · Bouznika · Benslimane · Maroc.",
     "links": {
       "title": "Pages",
       "services": "Services",
@@ -281,7 +281,7 @@
     "social": {
       "title": "Suivez-nous"
     },
-    "copyright": "© 2026 Clévia Conciergerie · Maroc"
+    "copyright": "© 2026 Clévia Immobilier - Conciergerie · Maroc"
   },
   "calculator": {
     "tag": "Simulateur",

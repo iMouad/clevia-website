@@ -44,8 +44,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: {
-      template: '%s | Clévia Conciergerie',
-      default: 'Clévia Conciergerie · Maroc',
+      template: '%s | Clévia Immobilier - Conciergerie',
+      default: 'Clévia Immobilier - Conciergerie · Maroc',
     },
     description: t('subtitle'),
     icons: {
@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       apple: '/icon.svg',
     },
     openGraph: {
-      siteName: 'Clévia Conciergerie',
+      siteName: 'Clévia Immobilier - Conciergerie',
       locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_US' : 'fr_MA',
       type: 'website',
     },

@@ -17,7 +17,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: 'hero' })
   const siteUrl = 'https://www.cleviamaroc.com'
   return {
-    title: 'Clévia Conciergerie · Maroc',
+    title: 'Clévia Immobilier - Conciergerie · Maroc',
     description: t('subtitle'),
     openGraph: { url: `${siteUrl}/${locale}` },
     alternates: {
@@ -136,7 +136,7 @@ export default function HomePage() {
   const localBusinessJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
-    name: 'Clévia Conciergerie',
+    name: 'Clévia Immobilier - Conciergerie',
     description: 'Conciergerie de location courte durée à Mansouria-Mohammedia, Maroc. Gestion complète de votre bien sur Airbnb, Booking et Avito.',
     url: 'https://www.cleviamaroc.com',
     logo: 'https://www.cleviamaroc.com/logo.svg',

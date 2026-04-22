@@ -18,7 +18,7 @@ export async function generateMetadata({
       title: t('title'),
       description: t('description'),
       url: `/${locale}/simulateur`,
-      siteName: 'Clévia Conciergerie',
+      siteName: 'Clévia Immobilier - Conciergerie',
       locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_US' : 'fr_MA',
       type: 'website',
     },

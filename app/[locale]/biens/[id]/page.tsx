@@ -28,18 +28,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   // Description toujours définie
   const ville = (data.ville as string | null) ?? 'Maroc'
-  const fallbackDesc = `Location courte durée à ${ville}, géré par Clévia Conciergerie. Réservez sur Airbnb, Booking ou contactez-nous directement.`
+  const fallbackDesc = `Location courte durée à ${ville}, géré par Clévia Immobilier - Conciergerie. Réservez sur Airbnb, Booking ou contactez-nous directement.`
   const ogDescription = (data.description as string | null)?.slice(0, 160) ?? fallbackDesc
 
   const slugOrId = (data as any).slug || id
   return {
-    title: `${data.nom} — Clévia Conciergerie`,
+    title: `${data.nom} — Clévia Immobilier - Conciergerie`,
     description: ogDescription,
     openGraph: {
       title: ogTitle,
       description: ogDescription,
       url: `${siteUrl}/${locale}/biens/${slugOrId}`,
-      siteName: 'Clévia Conciergerie',
+      siteName: 'Clévia Immobilier - Conciergerie',
       locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_US' : 'fr_MA',
       type: 'website',
       images: mainPhoto
@@ -120,7 +120,7 @@ export default async function BienDetailPage({ params }: Props) {
     '@context': 'https://schema.org',
     '@type': 'LodgingBusiness',
     name: bien.nom,
-    description: bien.description ?? `Location courte durée à ${bien.ville ?? 'Maroc'}, géré par Clévia Conciergerie.`,
+    description: bien.description ?? `Location courte durée à ${bien.ville ?? 'Maroc'}, géré par Clévia Immobilier - Conciergerie.`,
     url: `${siteUrl}/${locale}/biens/${id}`,
     image: photos.slice(0, 5),
     address: {
@@ -147,7 +147,7 @@ export default async function BienDetailPage({ params }: Props) {
   }
 
   const whatsappMsg = encodeURIComponent(
-    `Bonjour, je suis intéressé(e) par le bien "${bien.nom}" sur Clévia Conciergerie. Pouvez-vous me donner plus d'informations ?`
+    `Bonjour, je suis intéressé(e) par le bien "${bien.nom}" sur Clévia Immobilier - Conciergerie. Pouvez-vous me donner plus d'informations ?`
   )
   const contactLink = `/contact?bien=${encodeURIComponent(bien.nom)}`
 

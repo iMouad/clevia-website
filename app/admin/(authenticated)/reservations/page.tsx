@@ -195,7 +195,7 @@ export default function ReservationsPage() {
       @media print{@page{margin:1.5cm}body{padding:0}}
     </style></head><body>
       <div class="header">
-        <div class="logo">CLÉVIA CONCIERGERIE</div>
+        <div class="logo">CLÉVIA IMMOBILIER - CONCIERGERIE</div>
         <h1>${titre}</h1>
         <div class="subtitle">Généré le ${format(new Date(), 'dd/MM/yyyy')} · ${daysInMonth} jours dans le mois</div>
       </div>
@@ -219,7 +219,7 @@ export default function ReservationsPage() {
           </tr>
         </tbody>
       </table>
-      <div class="footer">Clévia Conciergerie · Mansouria-Mohammedia, Maroc · cleviamaroc.com</div>
+      <div class="footer">Clévia Immobilier - Conciergerie · Mansouria-Mohammedia, Maroc · cleviamaroc.com</div>
       <script>window.onload=function(){window.print()}</script>
     </body></html>`
     const w = window.open('', '_blank', 'width=900,height=700')

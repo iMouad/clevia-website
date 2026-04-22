@@ -14,11 +14,11 @@
   },
   "whatsapp": {
     "aria": "Contact Clévia on WhatsApp",
-    "message": "Hello, I would like to know more about managing my property with Clévia Conciergerie."
+    "message": "Hello, I would like to know more about managing my property with Clévia Immobilier - Conciergerie."
   },
   "simulateur": {
     "meta": {
-      "title": "Revenue Estimator — Clévia Conciergerie",
+      "title": "Revenue Estimator — Clévia Immobilier - Conciergerie",
       "description": "Estimate how much your property in Mohammedia, Mansouria, Bouznika or Benslimane can earn through short-term rental on Airbnb, Booking and Avito."
     },
     "hero": {
@@ -281,7 +281,7 @@
     "social": {
       "title": "Follow us"
     },
-    "copyright": "© 2026 Clévia Conciergerie · Morocco"
+    "copyright": "© 2026 Clévia Immobilier - Conciergerie · Morocco"
   },
   "calculator": {
     "tag": "Revenue estimator",

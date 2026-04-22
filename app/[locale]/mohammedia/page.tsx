@@ -4,7 +4,7 @@ import CityLandingPage, { CITY_CONFIGS } from '@/components/CityLandingPage'
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: 'Conciergerie Airbnb à Mohammedia — Clévia',
-    description: 'Clévia Conciergerie gère votre bien à Mohammedia : mise en ligne Airbnb & Booking, accueil voyageurs, ménage, clé en main. Estimation gratuite.',
+    description: 'Clévia Immobilier - Conciergerie gère votre bien à Mohammedia : mise en ligne Airbnb & Booking, accueil voyageurs, ménage, clé en main. Estimation gratuite.',
     keywords: ['conciergerie Mohammedia', 'gestion location Mohammedia', 'Airbnb Mohammedia', 'location courte durée Mohammedia'],
     alternates: {
       canonical: 'https://www.cleviamaroc.com/fr/mohammedia',

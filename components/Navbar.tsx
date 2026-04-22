@@ -67,7 +67,7 @@ export default function Navbar() {
           <Link href="/" className="flex-shrink-0">
             <Image
               src="/logo.svg"
-              alt="Clévia Conciergerie"
+              alt="Clévia Immobilier - Conciergerie"
               width={130}
               height={37}
               priority
