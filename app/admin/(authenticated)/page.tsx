@@ -125,14 +125,26 @@ export default async function AdminDashboard() {
           <div className="px-6 py-4 border-b border-brun/8">
             <h2 className="text-base font-medium text-brun">Dernières réservations</h2>
           </div>
-          <div className="overflow-x-auto">
+          {/* Mobile */}
+          <div className="lg:hidden divide-y divide-brun/5">
+            {(lastReservations ?? []).map((r: any) => (
+              <div key={r.id} className="px-4 py-3 flex flex-col gap-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium text-brun text-sm">{r.voyageur_nom}</span>
+                  <StatusBadge statut={r.statut} />
+                </div>
+                <span className="text-xs text-brun-mid/70">{r.biens?.nom ?? '—'} · {format(new Date(r.date_arrivee), 'dd/MM/yy')}</span>
+              </div>
+            ))}
+            {!lastReservations?.length && <p className="px-4 py-8 text-center text-brun-mid/50 text-sm">Aucune réservation</p>}
+          </div>
+          {/* Desktop */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-brun/4">
                 <tr>
                   {['Voyageur', 'Bien', 'Arrivée', 'Statut'].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left text-xs text-brun-mid uppercase tracking-wide font-medium">
-                      {h}
-                    </th>
+                    <th key={h} className="px-4 py-3 text-left text-xs text-brun-mid uppercase tracking-wide font-medium">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -141,20 +153,12 @@ export default async function AdminDashboard() {
                   <tr key={r.id} className="hover:bg-creme/40 transition-colors">
                     <td className="px-4 py-3 text-brun font-medium">{r.voyageur_nom}</td>
                     <td className="px-4 py-3 text-brun-mid">{r.biens?.nom ?? '—'}</td>
-                    <td className="px-4 py-3 text-brun-mid">
-                      {format(new Date(r.date_arrivee), 'dd/MM/yy')}
-                    </td>
-                    <td className="px-4 py-3">
-                      <StatusBadge statut={r.statut} />
-                    </td>
+                    <td className="px-4 py-3 text-brun-mid">{format(new Date(r.date_arrivee), 'dd/MM/yy')}</td>
+                    <td className="px-4 py-3"><StatusBadge statut={r.statut} /></td>
                   </tr>
                 ))}
                 {!lastReservations?.length && (
-                  <tr>
-                    <td colSpan={4} className="px-4 py-8 text-center text-brun-mid/50 text-sm">
-                      Aucune réservation
-                    </td>
-                  </tr>
+                  <tr><td colSpan={4} className="px-4 py-8 text-center text-brun-mid/50 text-sm">Aucune réservation</td></tr>
                 )}
               </tbody>
             </table>
@@ -166,34 +170,40 @@ export default async function AdminDashboard() {
           <div className="px-6 py-4 border-b border-brun/8">
             <h2 className="text-base font-medium text-brun">Demandes non traitées</h2>
           </div>
-          <div className="overflow-x-auto">
+          {/* Mobile */}
+          <div className="lg:hidden divide-y divide-brun/5">
+            {(lastContacts ?? []).map((c: any) => (
+              <div key={c.id} className="px-4 py-3 flex flex-col gap-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium text-brun text-sm">{c.nom ?? '—'}</span>
+                  <span className="text-xs text-brun-mid/60">{format(new Date(c.created_at), 'dd/MM/yy')}</span>
+                </div>
+                <span className="text-xs text-brun-mid/70">{c.telephone ?? '—'}{c.ville_bien ? ` · ${c.ville_bien}` : ''}</span>
+              </div>
+            ))}
+            {!lastContacts?.length && <p className="px-4 py-8 text-center text-brun-mid/50 text-sm">Aucune demande en attente</p>}
+          </div>
+          {/* Desktop */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-brun/4">
                 <tr>
                   {['Date', 'Nom', 'Téléphone', 'Ville'].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left text-xs text-brun-mid uppercase tracking-wide font-medium">
-                      {h}
-                    </th>
+                    <th key={h} className="px-4 py-3 text-left text-xs text-brun-mid uppercase tracking-wide font-medium">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-brun/5">
                 {(lastContacts ?? []).map((c: any) => (
                   <tr key={c.id} className="hover:bg-creme/40 transition-colors">
-                    <td className="px-4 py-3 text-brun-mid">
-                      {format(new Date(c.created_at), 'dd/MM/yy')}
-                    </td>
+                    <td className="px-4 py-3 text-brun-mid">{format(new Date(c.created_at), 'dd/MM/yy')}</td>
                     <td className="px-4 py-3 text-brun font-medium">{c.nom ?? '—'}</td>
                     <td className="px-4 py-3 text-brun-mid">{c.telephone ?? '—'}</td>
                     <td className="px-4 py-3 text-brun-mid">{c.ville_bien ?? '—'}</td>
                   </tr>
                 ))}
                 {!lastContacts?.length && (
-                  <tr>
-                    <td colSpan={4} className="px-4 py-8 text-center text-brun-mid/50 text-sm">
-                      Aucune demande en attente
-                    </td>
-                  </tr>
+                  <tr><td colSpan={4} className="px-4 py-8 text-center text-brun-mid/50 text-sm">Aucune demande en attente</td></tr>
                 )}
               </tbody>
             </table>
@@ -215,14 +225,26 @@ export default async function AdminDashboard() {
             Voir tout →
           </a>
         </div>
-        <div className="overflow-x-auto">
+        {/* Mobile */}
+        <div className="lg:hidden divide-y divide-brun/5">
+          {(lastWhatsappClics ?? []).map((c: any) => (
+            <div key={c.id} className="px-4 py-3 flex flex-col gap-1">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-medium text-brun text-sm">{c.bien_titre ?? '—'}</span>
+                <span className="text-xs text-brun-mid/60 capitalize">{c.appareil ?? '—'}</span>
+              </div>
+              <span className="text-xs text-brun-mid/70">{c.telephone ?? '—'} · {format(new Date(c.created_at), 'dd/MM/yy HH:mm')}</span>
+            </div>
+          ))}
+          {!lastWhatsappClics?.length && <p className="px-4 py-8 text-center text-brun-mid/50 text-sm">Aucun clic WhatsApp pour le moment</p>}
+        </div>
+        {/* Desktop */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-brun/4">
               <tr>
                 {['Date', 'Bien', 'Téléphone', 'Appareil'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-xs text-brun-mid uppercase tracking-wide font-medium">
-                    {h}
-                  </th>
+                  <th key={h} className="px-4 py-3 text-left text-xs text-brun-mid uppercase tracking-wide font-medium">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -236,11 +258,7 @@ export default async function AdminDashboard() {
                 </tr>
               ))}
               {!lastWhatsappClics?.length && (
-                <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-brun-mid/50 text-sm">
-                    Aucun clic WhatsApp pour le moment
-                  </td>
-                </tr>
+                <tr><td colSpan={4} className="px-4 py-8 text-center text-brun-mid/50 text-sm">Aucun clic WhatsApp pour le moment</td></tr>
               )}
             </tbody>
           </table>

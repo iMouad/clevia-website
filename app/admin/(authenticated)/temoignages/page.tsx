@@ -123,7 +123,37 @@ export default function TemoignagesAdminPage() {
 
       {/* Table */}
       <div className="bg-white rounded-2xl border border-brun/10 overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile */}
+        <div className="lg:hidden divide-y divide-brun/5">
+          {loading ? (
+            <p className="px-4 py-10 text-center text-brun-mid/50 text-sm">Chargement…</p>
+          ) : !temoignages.length ? (
+            <p className="px-4 py-10 text-center text-brun-mid/50 text-sm">Aucun témoignage</p>
+          ) : temoignages.map((t) => (
+            <div key={t.id} className="px-4 py-4 flex flex-col gap-2">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-medium text-brun text-sm">{t.nom}</span>
+                  <span className="text-xs text-brun-mid/60">{[t.ville, t.type_bien].filter(Boolean).join(' · ') || '—'}</span>
+                </div>
+                <button
+                  onClick={() => toggleActif(t.id, t.actif)}
+                  className={`relative flex-shrink-0 w-10 h-5 rounded-full transition-colors ${t.actif ? 'bg-green-400' : 'bg-gray-200'}`}
+                >
+                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${t.actif ? 'left-5' : 'left-0.5'}`} />
+                </button>
+              </div>
+              <Stars note={t.note} />
+              <p className="text-xs text-brun-mid/80 line-clamp-2">{t.message}</p>
+              <div className="flex items-center gap-3 pt-1">
+                <button onClick={() => openEdit(t)} className="text-terra text-xs font-medium underline underline-offset-2">Modifier</button>
+                <button onClick={() => handleDelete(t.id)} className="text-red-400 text-xs font-medium underline underline-offset-2">Supprimer</button>
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Desktop */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-brun/4">
               <tr>
@@ -143,9 +173,7 @@ export default function TemoignagesAdminPage() {
                   <td className="px-4 py-3 text-brun-mid">{t.ville ?? '—'}</td>
                   <td className="px-4 py-3 text-brun-mid">{t.type_bien ?? '—'}</td>
                   <td className="px-4 py-3"><Stars note={t.note} /></td>
-                  <td className="px-4 py-3 text-brun-mid max-w-xs">
-                    <p className="truncate">{t.message}</p>
-                  </td>
+                  <td className="px-4 py-3 text-brun-mid max-w-xs"><p className="truncate">{t.message}</p></td>
                   <td className="px-4 py-3">
                     <button
                       onClick={() => toggleActif(t.id, t.actif)}
