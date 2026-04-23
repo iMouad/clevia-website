@@ -11,11 +11,29 @@ type Props = { params: Promise<{ locale: string }> }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'vente' })
+  const supabase = await createClient()
+  const { data: firstBien } = await supabase
+    .from('biens_vente')
+    .select('photos')
+    .eq('statut', 'a_vendre')
+    .not('photos', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single()
+  const ogImage = (firstBien?.photos as string[] | null)?.[0] ?? null
+  const siteUrl = 'https://www.cleviamaroc.com'
   return {
     title: `${t('title')} · Clévia`,
     description: t('subtitle'),
-    alternates: { canonical: `/${locale}/vente` },
-    openGraph: { url: `/${locale}/vente` },
+    alternates: { canonical: `${siteUrl}/${locale}/vente` },
+    openGraph: {
+      title: `${t('title')} · Clévia`,
+      description: t('subtitle'),
+      url: `${siteUrl}/${locale}/vente`,
+      type: 'website',
+      siteName: 'Clévia Immobilier - Conciergerie',
+      ...(ogImage ? { images: [{ url: ogImage, width: 1200, height: 630 }] } : {}),
+    },
   }
 }
 
