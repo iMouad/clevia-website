@@ -294,7 +294,7 @@ export default function VenteGrid({ biens, filterAllLabel, filterVendusLabel, ca
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((bien) => (
-            <AnimateIn key={bien.id}>
+            <AnimateIn key={bien.id} className="h-full">
               <BienVenteCard bien={bien} />
             </AnimateIn>
           ))}

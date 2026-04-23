@@ -63,7 +63,7 @@ export default function BienVenteCard({ bien }: { bien: BienVente }) {
   }
 
   return (
-    <div className="bg-white border border-brun/10 rounded-2xl overflow-hidden hover:-translate-y-1 hover:shadow-lg transition-all duration-200 flex flex-col">
+    <div className="bg-white border border-brun/10 rounded-2xl overflow-hidden hover:-translate-y-1 hover:shadow-lg transition-all duration-200 flex flex-col h-full">
 
       {/* ── Photo carousel ── */}
       <div
