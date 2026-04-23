@@ -32,6 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: `${data.titre} · Clévia`,
       description: desc,
+      type: 'website',
       ...(image ? { images: [{ url: image, width: 1200, height: 630 }] } : {}),
       url: `${siteUrl}/${locale}/vente/${slugOrId}`,
     },
