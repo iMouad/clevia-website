@@ -433,7 +433,7 @@ export default function AdminVentePage() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <p className="font-medium text-brun truncate max-w-[160px]">{b.titre}</p>
+                        <p className="font-medium text-brun truncate max-w-[160px]" title={b.titre}>{b.titre}</p>
                         {b.reference && <p className="text-xs text-brun-mid/40">Réf. {b.reference}</p>}
                       </td>
                       <td className="px-4 py-3 text-brun-mid/70">{b.categorie}</td>
