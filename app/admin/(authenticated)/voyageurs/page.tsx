@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { createClient } from '@supabase/supabase-js'
 import { format } from 'date-fns'
+import ExportCsvButton from './ExportCsvButton'
 
 function getAdminSupabase() {
   return createClient(
@@ -27,13 +28,14 @@ export default async function VoyageursPage() {
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-3xl text-brun" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
             Voyageurs
           </h1>
           <p className="text-brun-mid text-sm mt-1">{voyageurs?.length ?? 0} voyageur(s) enregistré(s)</p>
         </div>
+        <ExportCsvButton voyageurs={voyageurs ?? []} />
       </div>
 
       {/* Mobile */}
