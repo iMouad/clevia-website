@@ -50,6 +50,18 @@ const NAV = [
     ),
   },
   {
+    href: '/admin/voyageurs',
+    label: 'Voyageurs',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <circle cx="9" cy="8" r="3" />
+        <path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" />
+        <circle cx="17" cy="8" r="3" />
+        <path d="M21 21v-2a4 4 0 00-3-3.87" />
+      </svg>
+    ),
+  },
+  {
     href: '/admin/reservations',
     label: 'Réservations',
     icon: (

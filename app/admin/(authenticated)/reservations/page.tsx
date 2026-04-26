@@ -96,14 +96,54 @@ export default function ReservationsPage() {
   function openEdit(r: Reservation) { setEditing({ ...r }); setModalOpen(true) }
   function closeModal() { setModalOpen(false); setEditing(EMPTY_RES) }
 
+  async function syncVoyageur(res: Partial<Reservation>, isNew: boolean) {
+    if (!res.voyageur_nom) return
+    const phone = res.voyageur_phone?.trim() || null
+    const email = res.voyageur_email?.trim() || null
+    const source = res.plateforme || null
+
+    if (phone) {
+      const { data: existing } = await supabase
+        .from('voyageurs')
+        .select('id, sources, nb_reservations')
+        .eq('telephone', phone)
+        .maybeSingle()
+
+      if (existing) {
+        const sources: string[] = existing.sources ?? []
+        if (source && !sources.includes(source)) sources.push(source)
+        await supabase.from('voyageurs').update({
+          nom: res.voyageur_nom,
+          ...(email && { email }),
+          sources,
+          ...(isNew && { nb_reservations: (existing.nb_reservations ?? 1) + 1 }),
+          updated_at: new Date().toISOString(),
+        }).eq('id', existing.id)
+        return
+      }
+    }
+
+    if (isNew) {
+      await supabase.from('voyageurs').insert({
+        nom: res.voyageur_nom,
+        email,
+        telephone: phone,
+        sources: source ? [source] : [],
+        nb_reservations: 1,
+      })
+    }
+  }
+
   async function handleSave() {
     setSaving(true)
     const { id, created_at, biens: _b, ...fields } = editing as any
+    const isNew = !editing.id
     if (editing.id) {
       await supabase.from('reservations').update(fields).eq('id', editing.id)
     } else {
       await supabase.from('reservations').insert(fields)
     }
+    await syncVoyageur(editing, isNew)
     setSaving(false); closeModal(); fetchData()
   }
 
