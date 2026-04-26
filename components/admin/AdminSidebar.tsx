@@ -206,7 +206,7 @@ export default function AdminSidebar() {
         <div className="px-6 py-6 border-b border-creme/10">
           <Image src="/logo-light.svg" alt="Clévia" width={130} height={37} />
         </div>
-        <nav className="flex-1 px-3 py-4 overflow-y-auto flex flex-col gap-1">
+        <nav className="flex-1 px-3 py-4 overflow-y-auto flex flex-col gap-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-creme/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-creme/40">
           <NavLinks />
         </nav>
       </aside>
@@ -259,7 +259,7 @@ export default function AdminSidebar() {
             </div>
 
             {/* Nav links */}
-            <nav className="flex-1 px-3 py-4 overflow-y-auto flex flex-col">
+            <nav className="flex-1 px-3 py-4 overflow-y-auto flex flex-col [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-creme/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-creme/40">
               <NavLinks />
             </nav>
           </div>
