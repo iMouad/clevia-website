@@ -57,8 +57,8 @@ export default async function AdminDashboard() {
     { count: whatsappClicsMois },
   ] = await Promise.all([
     supabase.from('biens').select('*', { count: 'exact', head: true }).eq('statut', 'actif'),
-    supabase.from('reservations').select('*', { count: 'exact', head: true }).gte('created_at', monthStart).eq('statut', 'confirmee'),
-    supabase.from('reservations').select('date_arrivee,date_depart,montant').gte('created_at', monthStart).eq('statut', 'confirmee'),
+    supabase.from('reservations').select('*', { count: 'exact', head: true }).gte('created_at', monthStart).in('statut', ['confirmee', 'terminee']),
+    supabase.from('reservations').select('date_arrivee,date_depart,montant,taux_commission').gte('created_at', monthStart).in('statut', ['confirmee', 'terminee']),
     supabase.from('contacts').select('*').eq('traite', false).order('created_at', { ascending: false }).limit(5),
     supabase.from('biens_visites').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
     supabase.from('vente_visites').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
@@ -67,9 +67,12 @@ export default async function AdminDashboard() {
 
   // Calcul revenus et taux d'occupation
   let revenusTotal = 0
+  let commissionsTotal = 0
   let totalNuits = 0
   for (const r of reservationsData ?? []) {
-    revenusTotal += Number(r.montant ?? 0)
+    const montant = Number(r.montant ?? 0)
+    revenusTotal += montant
+    commissionsTotal += montant * (Number(r.taux_commission ?? 0) / 100)
     const d1 = new Date(r.date_arrivee)
     const d2 = new Date(r.date_depart)
     totalNuits += Math.max(0, Math.round((d2.getTime() - d1.getTime()) / 86400000))
@@ -106,16 +109,22 @@ export default async function AdminDashboard() {
       {/* Stats */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
         <StatCard label="Biens actifs" value={biensActifs ?? 0} sub="en gestion" />
-        <StatCard label="Réservations ce mois" value={reservationsMois ?? 0} sub="confirmées ce mois" />
+        <StatCard label="Réservations ce mois" value={reservationsMois ?? 0} sub="confirmées + terminées" />
         <StatCard label="Taux d'occupation" value={`${tauxOccupation}%`} sub="sur 30 jours" color="brun-mid" />
         <StatCard
           label="Revenus ce mois"
           value={`${revenusTotal.toLocaleString('fr-MA')} MAD`}
-          sub="hors commission"
+          sub="montant total voyageurs"
           color="terra"
         />
       </div>
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+        <StatCard
+          label="Commissions ce mois"
+          value={`${Math.round(commissionsTotal).toLocaleString('fr-MA')} MAD`}
+          sub="part Clévia"
+          color="terra"
+        />
         <StatCard label="Vues location ce mois" value={vuesLocation ?? 0} sub="pages biens à louer" color="brun-mid" />
         <StatCard label="Vues vente ce mois" value={vuesVente ?? 0} sub="pages biens à vendre" color="brun-mid" />
         <StatCard label="Clics WhatsApp ce mois" value={whatsappClicsMois ?? 0} sub="intérêts biens à vendre" color="terra" />
