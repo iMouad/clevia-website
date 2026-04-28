@@ -73,6 +73,7 @@ export default function ReservationsPage() {
   const [rapportMois, setRapportMois] = useState(new Date().getMonth() + 1)
   const [rapportAnnee, setRapportAnnee] = useState(new Date().getFullYear())
   const [rapportGenere, setRapportGenere] = useState(false)
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false)
 
   async function fetchData() {
     const [{ data: resData }, { data: bienData }] = await Promise.all([
@@ -84,7 +85,12 @@ export default function ReservationsPage() {
     setLoading(false)
   }
 
-  useEffect(() => { fetchData() }, [])
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsSuperAdmin(user?.app_metadata?.role !== 'admin')
+    })
+    fetchData()
+  }, [])
 
   const filtered = rows.filter((r) => {
     if (filterStatut && r.statut !== filterStatut) return false
@@ -154,22 +160,29 @@ export default function ReservationsPage() {
   }
 
   function exportCSV() {
-    const headers = ['Voyageur', 'Email', 'Téléphone', 'Bien', 'Arrivée', 'Départ', 'Nuits', 'Plateforme', 'Montant MAD', 'Commission MAD', 'Taux %', 'Statut', 'Notes']
-    const csvRows = filtered.map((r) => [
-      r.voyageur_nom,
-      r.voyageur_email ?? '',
-      r.voyageur_phone ?? '',
-      (r as any).biens?.nom ?? '',
-      r.date_arrivee,
-      r.date_depart,
-      nuits(r.date_arrivee, r.date_depart),
-      r.plateforme ?? '',
-      r.montant ?? '',
-      r.montant ? (r.montant * r.taux_commission / 100).toFixed(2) : '',
-      r.taux_commission,
-      STATUT_LABELS[r.statut] ?? r.statut,
-      r.notes ?? '',
-    ])
+    const headers = isSuperAdmin
+      ? ['Voyageur', 'Email', 'Téléphone', 'Bien', 'Arrivée', 'Départ', 'Nuits', 'Plateforme', 'Montant MAD', 'Commission MAD', 'Taux %', 'Statut', 'Notes']
+      : ['Voyageur', 'Email', 'Bien', 'Arrivée', 'Départ', 'Nuits', 'Plateforme', 'Statut', 'Notes']
+    const csvRows = filtered.map((r) => {
+      const row: (string | number | null)[] = [
+        r.voyageur_nom,
+        r.voyageur_email ?? '',
+        ...(isSuperAdmin ? [r.voyageur_phone ?? ''] : []),
+        (r as any).biens?.nom ?? '',
+        r.date_arrivee,
+        r.date_depart,
+        nuits(r.date_arrivee, r.date_depart),
+        r.plateforme ?? '',
+        ...(isSuperAdmin ? [
+          r.montant ?? '',
+          r.montant ? (r.montant * r.taux_commission / 100).toFixed(2) : '',
+          r.taux_commission,
+        ] : []),
+        STATUT_LABELS[r.statut] ?? r.statut,
+        r.notes ?? '',
+      ]
+      return row
+    })
     const csv = [headers, ...csvRows]
       .map((row) => row.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(','))
       .join('\n')
@@ -285,13 +298,15 @@ export default function ReservationsPage() {
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" strokeLinecap="round" strokeLinejoin="round" /></svg>
             Export CSV
           </button>
-          <button
-            onClick={() => { setRapportOpen(true); setRapportGenere(false) }}
-            className="flex items-center gap-2 border border-brun/20 text-brun-mid text-sm font-medium rounded-full px-4 py-2.5 hover:border-terra hover:text-terra transition-all"
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="2" /><path d="M9 7h6M9 11h6M9 15h4" strokeLinecap="round" /></svg>
-            Rapport
-          </button>
+          {isSuperAdmin && (
+            <button
+              onClick={() => { setRapportOpen(true); setRapportGenere(false) }}
+              className="flex items-center gap-2 border border-brun/20 text-brun-mid text-sm font-medium rounded-full px-4 py-2.5 hover:border-terra hover:text-terra transition-all"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="2" /><path d="M9 7h6M9 11h6M9 15h4" strokeLinecap="round" /></svg>
+              Rapport
+            </button>
+          )}
           <button onClick={openAdd} className="flex items-center gap-2 bg-terra text-creme text-sm font-medium rounded-full px-5 py-2.5 hover:bg-brun transition-all">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
             Ajouter
@@ -339,18 +354,20 @@ export default function ReservationsPage() {
                 {r.plateforme ?? '—'}
               </span>
             </div>
-            <div className="flex items-center gap-3 mb-3">
-              {r.montant ? (
-                <>
-                  <span className="text-sm font-medium text-brun" style={{ fontFamily: 'var(--font-dm-sans)' }}>{r.montant} MAD</span>
-                  <span className="text-xs text-terra" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                    {r.taux_commission === 0 ? 'Sans commission' : `Commission : ${(r.montant * r.taux_commission / 100).toFixed(0)} MAD`}
-                  </span>
-                </>
-              ) : (
-                <span className="text-sm text-brun-mid/40">Montant —</span>
-              )}
-            </div>
+            {isSuperAdmin && (
+              <div className="flex items-center gap-3 mb-3">
+                {r.montant ? (
+                  <>
+                    <span className="text-sm font-medium text-brun" style={{ fontFamily: 'var(--font-dm-sans)' }}>{r.montant} MAD</span>
+                    <span className="text-xs text-terra" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                      {r.taux_commission === 0 ? 'Sans commission' : `Commission : ${(r.montant * r.taux_commission / 100).toFixed(0)} MAD`}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-sm text-brun-mid/40">Montant —</span>
+                )}
+              </div>
+            )}
             <div className="flex gap-3 pt-3 border-t border-brun/8">
               <button onClick={() => openEdit(r)} className="flex-1 flex items-center justify-center gap-1.5 bg-terra/10 text-terra text-sm font-medium rounded-xl py-2 hover:bg-terra/20 transition-all" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
@@ -371,16 +388,20 @@ export default function ReservationsPage() {
           <table className="w-full text-sm">
             <thead className="bg-brun/4">
               <tr>
-                {['Voyageur', 'Bien', 'Arrivée', 'Départ', 'Nuits', 'Plateforme', 'Montant', 'Commission', 'Statut', ''].map((h) => (
+                {[
+                  'Voyageur', 'Bien', 'Arrivée', 'Départ', 'Nuits', 'Plateforme',
+                  ...(isSuperAdmin ? ['Montant', 'Commission'] : []),
+                  'Statut', '',
+                ].map((h) => (
                   <th key={h} className="px-3 py-3 text-left text-xs text-brun-mid uppercase tracking-wide font-medium whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-brun/5">
               {loading ? (
-                <tr><td colSpan={10} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
+                <tr><td colSpan={isSuperAdmin ? 10 : 8} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
               ) : !filtered.length ? (
-                <tr><td colSpan={10} className="px-4 py-10 text-center text-brun-mid/50">Aucune réservation</td></tr>
+                <tr><td colSpan={isSuperAdmin ? 10 : 8} className="px-4 py-10 text-center text-brun-mid/50">Aucune réservation</td></tr>
               ) : filtered.map((r) => (
                 <tr key={r.id} className="hover:bg-creme/40 transition-colors">
                   <td className="px-3 py-3 text-brun font-medium whitespace-nowrap">{r.voyageur_nom}</td>
@@ -393,14 +414,18 @@ export default function ReservationsPage() {
                       {r.plateforme ?? '—'}
                     </span>
                   </td>
-                  <td className="px-3 py-3 text-brun-mid whitespace-nowrap">{r.montant ? `${r.montant} MAD` : '—'}</td>
-                  <td className="px-3 py-3 font-medium text-terra whitespace-nowrap">
-                    {r.montant
-                      ? r.taux_commission === 0
-                        ? <span className="text-brun-mid/40 font-normal text-xs">Sans</span>
-                        : `${(r.montant * r.taux_commission / 100).toFixed(0)} MAD`
-                      : '—'}
-                  </td>
+                  {isSuperAdmin && (
+                    <>
+                      <td className="px-3 py-3 text-brun-mid whitespace-nowrap">{r.montant ? `${r.montant} MAD` : '—'}</td>
+                      <td className="px-3 py-3 font-medium text-terra whitespace-nowrap">
+                        {r.montant
+                          ? r.taux_commission === 0
+                            ? <span className="text-brun-mid/40 font-normal text-xs">Sans</span>
+                            : `${(r.montant * r.taux_commission / 100).toFixed(0)} MAD`
+                          : '—'}
+                      </td>
+                    </>
+                  )}
                   <td className="px-3 py-3">
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUT_COLORS[r.statut]}`}>{STATUT_LABELS[r.statut] ?? r.statut}</span>
                   </td>
@@ -476,39 +501,43 @@ export default function ReservationsPage() {
               </AdminSelect>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={labelClass}>Montant (MAD)</label>
-              <input type="number" min={0} className={inputClass} value={editing.montant ?? ''} onChange={(e) => setEditing((p) => ({ ...p, montant: Number(e.target.value) || null }))} placeholder="1500" />
-            </div>
-            <div>
-              <label className={labelClass}>Commission (%)</label>
-              <div className="flex gap-1.5 mb-1.5">
-                {[0, 20, 25].map((v) => (
-                  <button key={v} type="button"
-                    onClick={() => setEditing((p) => ({ ...p, taux_commission: v }))}
-                    className={`text-xs rounded-lg px-2.5 py-1 font-medium transition-all ${editing.taux_commission === v ? 'bg-terra text-creme' : 'bg-brun/8 text-brun-mid hover:bg-terra/20'}`}
-                  >
-                    {v === 0 ? 'Sans' : `${v}%`}
-                  </button>
-                ))}
+          {isSuperAdmin && (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelClass}>Montant (MAD)</label>
+                  <input type="number" min={0} className={inputClass} value={editing.montant ?? ''} onChange={(e) => setEditing((p) => ({ ...p, montant: Number(e.target.value) || null }))} placeholder="1500" />
+                </div>
+                <div>
+                  <label className={labelClass}>Commission (%)</label>
+                  <div className="flex gap-1.5 mb-1.5">
+                    {[0, 20, 25].map((v) => (
+                      <button key={v} type="button"
+                        onClick={() => setEditing((p) => ({ ...p, taux_commission: v }))}
+                        className={`text-xs rounded-lg px-2.5 py-1 font-medium transition-all ${editing.taux_commission === v ? 'bg-terra text-creme' : 'bg-brun/8 text-brun-mid hover:bg-terra/20'}`}
+                      >
+                        {v === 0 ? 'Sans' : `${v}%`}
+                      </button>
+                    ))}
+                  </div>
+                  <input
+                    type="number" min={0} max={100} step={0.5}
+                    className={inputClass}
+                    value={editing.taux_commission ?? ''}
+                    onChange={(e) => setEditing((p) => ({ ...p, taux_commission: Number(e.target.value) }))}
+                    placeholder="Taux %"
+                  />
+                </div>
               </div>
-              <input
-                type="number" min={0} max={100} step={0.5}
-                className={inputClass}
-                value={editing.taux_commission ?? ''}
-                onChange={(e) => setEditing((p) => ({ ...p, taux_commission: Number(e.target.value) }))}
-                placeholder="Taux %"
-              />
-            </div>
-          </div>
-          {editing.montant != null && editing.montant > 0 && (
-            <div className="bg-terra/10 rounded-xl px-4 py-3 text-sm">
-              {editing.taux_commission === 0
-                ? <span className="text-brun-mid">Sans commission</span>
-                : <><span className="text-brun-mid">Commission ({editing.taux_commission}%) : </span><span className="text-terra font-medium">{commission} MAD</span></>
-              }
-            </div>
+              {editing.montant != null && editing.montant > 0 && (
+                <div className="bg-terra/10 rounded-xl px-4 py-3 text-sm">
+                  {editing.taux_commission === 0
+                    ? <span className="text-brun-mid">Sans commission</span>
+                    : <><span className="text-brun-mid">Commission ({editing.taux_commission}%) : </span><span className="text-terra font-medium">{commission} MAD</span></>
+                  }
+                </div>
+              )}
+            </>
           )}
           <div>
             <label className={labelClass}>Notes</label>

@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { createClient } from '@supabase/supabase-js'
+import { createClient as createServerClient } from '@/lib/supabase/server'
 import { format } from 'date-fns'
 import ExportCsvButton from './ExportCsvButton'
 
@@ -21,6 +22,10 @@ const PLATF_COLORS: Record<string, string> = {
 
 export default async function VoyageursPage() {
   const supabase = getAdminSupabase()
+  const serverClient = await createServerClient()
+  const { data: { user } } = await serverClient.auth.getUser()
+  const isSuperAdmin = user?.app_metadata?.role !== 'admin'
+
   const { data: voyageurs } = await supabase
     .from('voyageurs')
     .select('*')
@@ -50,7 +55,9 @@ export default async function VoyageursPage() {
                 {v.nb_reservations} rés.
               </span>
             </div>
-            <p className="text-xs text-brun-mid/60 mb-2">{v.telephone ?? '—'} {v.email ? `· ${v.email}` : ''}</p>
+            <p className="text-xs text-brun-mid/60 mb-2">
+              {isSuperAdmin ? (v.telephone ?? '—') : '•••••••••'}{v.email ? ` · ${v.email}` : ''}
+            </p>
             <div className="flex flex-wrap gap-1">
               {(v.sources as string[])?.map((s: string) => (
                 <span key={s} className={`text-xs px-2 py-0.5 rounded-full font-medium ${PLATF_COLORS[s] ?? 'bg-gray-100 text-gray-500'}`}>{s}</span>
@@ -77,7 +84,7 @@ export default async function VoyageursPage() {
               ) : voyageurs.map((v: any) => (
                 <tr key={v.id} className="hover:bg-creme/40 transition-colors">
                   <td className="px-4 py-3 text-brun font-medium">{v.nom}</td>
-                  <td className="px-4 py-3 text-brun-mid">{v.telephone ?? '—'}</td>
+                  <td className="px-4 py-3 text-brun-mid">{isSuperAdmin ? (v.telephone ?? '—') : '•••••••••'}</td>
                   <td className="px-4 py-3 text-brun-mid">{v.email ?? '—'}</td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1">
