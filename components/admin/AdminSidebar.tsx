@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -131,13 +131,13 @@ export default function AdminSidebar() {
   const router = useRouter()
   const supabase = createClient()
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [isSuperAdmin, setIsSuperAdmin] = useState(true)
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false)
 
-  useState(() => {
+  useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       setIsSuperAdmin(user?.app_metadata?.role !== 'admin')
     })
-  })
+  }, [])
 
   async function handleLogout() {
     await supabase.auth.signOut()
