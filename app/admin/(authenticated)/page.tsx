@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { createClient } from '@supabase/supabase-js'
+import { createClient as createServerClient } from '@/lib/supabase/server'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
@@ -45,6 +46,10 @@ function StatusBadge({ statut }: { statut: string }) {
 export default async function AdminDashboard() {
   const supabase = getAdminSupabase()
   const now = new Date()
+
+  const serverClient = await createServerClient()
+  const { data: { user } } = await serverClient.auth.getUser()
+  const isSuperAdmin = user?.app_metadata?.role !== 'admin'
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
 
   const [
@@ -111,20 +116,24 @@ export default async function AdminDashboard() {
         <StatCard label="Biens actifs" value={biensActifs ?? 0} sub="en gestion" />
         <StatCard label="Réservations ce mois" value={reservationsMois ?? 0} sub="confirmées + terminées" />
         <StatCard label="Taux d'occupation" value={`${tauxOccupation}%`} sub="sur 30 jours" color="brun-mid" />
-        <StatCard
-          label="Revenus ce mois"
-          value={`${revenusTotal.toLocaleString('fr-MA')} MAD`}
-          sub="montant total voyageurs"
-          color="terra"
-        />
+        {isSuperAdmin && (
+          <StatCard
+            label="Revenus ce mois"
+            value={`${revenusTotal.toLocaleString('fr-MA')} MAD`}
+            sub="montant total voyageurs"
+            color="terra"
+          />
+        )}
       </div>
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
-        <StatCard
-          label="Commissions ce mois"
-          value={`${Math.round(commissionsTotal).toLocaleString('fr-MA')} MAD`}
-          sub="part Clévia"
-          color="terra"
-        />
+        {isSuperAdmin && (
+          <StatCard
+            label="Commissions ce mois"
+            value={`${Math.round(commissionsTotal).toLocaleString('fr-MA')} MAD`}
+            sub="part Clévia"
+            color="terra"
+          />
+        )}
         <StatCard label="Vues location ce mois" value={vuesLocation ?? 0} sub="pages biens à louer" color="brun-mid" />
         <StatCard label="Vues vente ce mois" value={vuesVente ?? 0} sub="pages biens à vendre" color="brun-mid" />
         <StatCard label="Clics WhatsApp ce mois" value={whatsappClicsMois ?? 0} sub="intérêts biens à vendre" color="terra" />

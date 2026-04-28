@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
+import { createClient } from '@/lib/supabase'
 
 type AdminUser = {
   id: string
@@ -13,6 +15,7 @@ type AdminUser = {
 }
 
 export default function AdminUsersPage() {
+  const router = useRouter()
   const [users, setUsers] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
   const [email, setEmail] = useState('')
@@ -26,11 +29,22 @@ export default function AdminUsersPage() {
     if (res.ok) {
       const data = await res.json()
       setUsers(data.users ?? [])
+    } else {
+      router.replace('/admin')
     }
     setLoading(false)
   }
 
-  useEffect(() => { fetchUsers() }, [])
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.app_metadata?.role === 'admin') {
+        router.replace('/admin')
+      } else {
+        fetchUsers()
+      }
+    })
+  }, [])
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
