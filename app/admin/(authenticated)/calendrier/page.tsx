@@ -3,8 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   format, startOfMonth, endOfMonth, eachDayOfInterval,
-  getDay, addMonths, subMonths, isBefore, startOfToday,
-  eachDayOfInterval as eachDay, parseISO,
+  getDay, addMonths, subMonths, isBefore, startOfToday, parseISO,
 } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { createClient } from '@/lib/supabase'
@@ -39,15 +38,22 @@ function getMonday(day: number) {
   return day === 0 ? 6 : day - 1
 }
 
-function expandReservationDates(reservations: { date_arrivee: string; date_depart: string }[]): Set<string> {
+type ResInfo = { voyageur_nom: string; plateforme: string | null }
+
+function expandReservationDates(reservations: { date_arrivee: string; date_depart: string; voyageur_nom?: string; plateforme?: string | null }[]) {
   const dates = new Set<string>()
+  const map: Record<string, ResInfo> = {}
   for (const r of reservations) {
     try {
-      const days = eachDay({ start: parseISO(r.date_arrivee), end: parseISO(r.date_depart) })
-      days.forEach((d) => dates.add(format(d, 'yyyy-MM-dd')))
+      const days = eachDayOfInterval({ start: parseISO(r.date_arrivee), end: parseISO(r.date_depart) })
+      days.forEach((d) => {
+        const key = format(d, 'yyyy-MM-dd')
+        dates.add(key)
+        if (r.voyageur_nom) map[key] = { voyageur_nom: r.voyageur_nom, plateforme: r.plateforme ?? null }
+      })
     } catch {}
   }
-  return dates
+  return { dates, map }
 }
 
 export default function CalendrierPage() {
@@ -58,17 +64,22 @@ export default function CalendrierPage() {
   const [selectedId, setSelectedId] = useState<string>('')
   const [month, setMonth] = useState(new Date())
   const [reservationDates, setReservationDates] = useState<Set<string>>(new Set())
+  const [resDateMap, setResDateMap] = useState<Record<string, { voyageur_nom: string; plateforme: string | null }>>({})
   const [blockedDates, setBlockedDates] = useState<Set<string>>(new Set())
   const [upcomingRes, setUpcomingRes] = useState<Reservation[]>([])
   const [ownerToken, setOwnerToken] = useState<string | null>(null)
   const [nomProprio, setNomProprio] = useState('')
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false)
   const [loadingCal, setLoadingCal] = useState(false)
   const [loadingToken, setLoadingToken] = useState(false)
   const [copied, setCopied] = useState(false)
   const [toggling, setToggling] = useState<string | null>(null)
 
-  // Fetch biens
+  // Fetch biens + role
   useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsSuperAdmin(user?.app_metadata?.role !== 'admin')
+    })
     supabase.from('biens').select('id, nom').eq('statut', 'actif').order('nom')
       .then(({ data }) => {
         setBiens(data ?? [])
@@ -81,15 +92,16 @@ export default function CalendrierPage() {
     if (!selectedId) return
     setLoadingCal(true)
     const start = format(startOfMonth(month), 'yyyy-MM-dd')
-    const end = format(endOfMonth(month), 'yyyy-MM-dd')
+    const nextMonthEnd = format(endOfMonth(addMonths(month, 1)), 'yyyy-MM-dd')
+    const end = nextMonthEnd
     const todayStr = format(today, 'yyyy-MM-dd')
     const in60days = format(new Date(Date.now() + 60 * 86400000), 'yyyy-MM-dd')
 
     const [{ data: resData }, { data: blockedData }, { data: upcomingData }] = await Promise.all([
       supabase.from('reservations')
-        .select('date_arrivee, date_depart')
+        .select('id, voyageur_nom, date_arrivee, date_depart, plateforme')
         .eq('bien_id', selectedId)
-        .eq('statut', 'confirmee')
+        .in('statut', ['confirmee', 'terminee'])
         .lte('date_arrivee', end)
         .gte('date_depart', start),
       supabase.from('blocked_dates')
@@ -107,7 +119,9 @@ export default function CalendrierPage() {
         .limit(10),
     ])
 
-    setReservationDates(expandReservationDates(resData ?? []))
+    const { dates: resDates, map: resMap } = expandReservationDates(resData ?? [])
+    setReservationDates(resDates)
+    setResDateMap(resMap)
     setBlockedDates(new Set((blockedData ?? []).map((d) => d.date)))
     setUpcomingRes(upcomingData ?? [])
     setLoadingCal(false)
@@ -161,7 +175,8 @@ export default function CalendrierPage() {
 
   function copyCode() {
     if (!ownerToken) return
-    navigator.clipboard.writeText(ownerToken)
+    const text = `Votre code d'accès au calendrier Clévia : ${ownerToken}\nConsultez vos réservations sur : ${SITE_URL}/calendrier`
+    navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -191,12 +206,13 @@ export default function CalendrierPage() {
 
   // Stats occupation du mois affiché
   const daysInMonth = days.length
-  const reservedNights = days.filter((d) => {
+  const reservedNights = days.filter((d) => reservationDates.has(format(d, 'yyyy-MM-dd'))).length
+  const blockedNights = days.filter((d) => {
     const str = format(d, 'yyyy-MM-dd')
-    return reservationDates.has(str) || blockedDates.has(str)
+    return blockedDates.has(str) && !reservationDates.has(str)
   }).length
   const occupancyPct = daysInMonth > 0 ? Math.round((reservedNights / daysInMonth) * 100) : 0
-  const freeNights = daysInMonth - reservedNights
+  const freeNights = daysInMonth - reservedNights - blockedNights
 
   const PLAT_COLORS: Record<string, string> = {
     Airbnb:  '#FF5A5F',
@@ -228,11 +244,12 @@ export default function CalendrierPage() {
         <>
           {/* Stats occupation du mois */}
           {!loadingCal && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
               {[
-                { label: 'Nuits réservées', value: reservedNights, icon: '🔴', color: '#FEE2E2', textColor: '#DC2626' },
-                { label: 'Nuits libres', value: freeNights, icon: '🟢', color: '#DCFCE7', textColor: '#15803D' },
-                { label: 'Taux d\'occupation', value: `${occupancyPct}%`, icon: '📊', color: '#FEF9F6', textColor: '#C97B4B' },
+                { label: 'Nuits réservées', value: reservedNights, color: '#FEE2E2', textColor: '#DC2626' },
+                { label: 'Nuits bloquées', value: blockedNights, color: '#FEF3C7', textColor: '#D97706' },
+                { label: 'Nuits libres', value: freeNights, color: '#DCFCE7', textColor: '#15803D' },
+                { label: 'Taux d\'occupation', value: `${occupancyPct}%`, color: '#FEF9F6', textColor: '#C97B4B' },
               ].map(({ label, value, color, textColor }) => (
                 <div key={label} className="bg-white rounded-2xl border border-brun/10 p-4 text-center">
                   <p className="text-2xl font-semibold mt-1" style={{ color: textColor, fontFamily: 'var(--font-dm-sans)' }}>{value}</p>
@@ -293,23 +310,31 @@ export default function CalendrierPage() {
                   const isToday = dateStr === format(today, 'yyyy-MM-dd')
                   const isToggling = toggling === dateStr
                   const clickable = status === 'available' || status === 'blocked'
+                  const resInfo = resDateMap[dateStr]
 
                   return (
                     <button
                       key={dateStr}
                       disabled={!clickable || !!toggling}
                       onClick={() => clickable && handleDayClick(dateStr)}
-                      className={`relative aspect-square rounded-xl flex items-center justify-center text-sm font-medium transition-all duration-150 ${isToggling ? 'opacity-50' : ''}`}
+                      title={resInfo ? `${resInfo.voyageur_nom}${resInfo.plateforme ? ` (${resInfo.plateforme})` : ''}` : status === 'blocked' ? 'Bloqué — cliquer pour débloquer' : undefined}
+                      className={`group relative aspect-square rounded-xl flex flex-col items-center justify-center text-sm font-medium transition-all duration-150 ${isToggling ? 'opacity-50' : ''}`}
                       style={{
                         backgroundColor: style.bg,
                         color: style.text,
                         cursor: style.cursor,
                         fontFamily: 'var(--font-dm-sans)',
-                        outline: isToday ? '2px solid #C97B4B' : 'none',
+                        outline: isToday ? '2.5px solid #C97B4B' : 'none',
                         outlineOffset: '-2px',
                       }}
                     >
                       {format(date, 'd')}
+                      {isToday && <span className="absolute -bottom-0.5 w-1.5 h-1.5 rounded-full bg-terra" />}
+                      {resInfo && status === 'reservation' && (
+                        <span className="absolute opacity-0 group-hover:opacity-100 transition-opacity -top-8 left-1/2 -translate-x-1/2 bg-brun text-creme text-[10px] px-2 py-1 rounded-lg whitespace-nowrap z-10 pointer-events-none shadow-lg">
+                          {resInfo.voyageur_nom}
+                        </span>
+                      )}
                     </button>
                   )
                 })}
@@ -336,6 +361,46 @@ export default function CalendrierPage() {
               ))}
             </div>
           </div>
+
+          {/* Mini aperçu mois suivant */}
+          {!loadingCal && (() => {
+            const nextMonth = addMonths(month, 1)
+            const nFirst = startOfMonth(nextMonth)
+            const nLast = endOfMonth(nextMonth)
+            const nDays = eachDayOfInterval({ start: nFirst, end: nLast })
+            const nStartPad = getMonday(getDay(nFirst))
+            return (
+              <div className="bg-white rounded-2xl border border-brun/10 p-5 mb-6">
+                <h3 className="text-base text-brun mb-3 text-center capitalize" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
+                  {format(nextMonth, 'MMMM yyyy', { locale: fr })}
+                </h3>
+                <div className="grid grid-cols-7 gap-0.5">
+                  {DAYS.map((d) => (
+                    <div key={d} className="text-center text-[10px] text-brun-mid/40 py-1" style={{ fontFamily: 'var(--font-dm-sans)' }}>{d}</div>
+                  ))}
+                  {Array.from({ length: nStartPad }).map((_, i) => <div key={`ns${i}`} />)}
+                  {nDays.map((date) => {
+                    const dateStr = format(date, 'yyyy-MM-dd')
+                    const hasRes = reservationDates.has(dateStr)
+                    const isPast = isBefore(date, today)
+                    return (
+                      <div
+                        key={dateStr}
+                        className="aspect-square rounded-lg flex items-center justify-center text-[11px]"
+                        style={{
+                          backgroundColor: isPast ? '#F3F4F6' : hasRes ? '#FEE2E2' : '#DCFCE7',
+                          color: isPast ? '#9CA3AF' : hasRes ? '#DC2626' : '#15803D',
+                          fontFamily: 'var(--font-dm-sans)',
+                        }}
+                      >
+                        {format(date, 'd')}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })()}
 
           {/* Accès propriétaire */}
           <div className="bg-white rounded-2xl border border-brun/10 p-6">
@@ -401,14 +466,14 @@ export default function CalendrierPage() {
                     {copied ? (
                       <>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5" strokeLinecap="round" /></svg>
-                        Code copié !
+                        Copié !
                       </>
                     ) : (
                       <>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                           <rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
                         </svg>
-                        Copier le code
+                        Copier code + lien
                       </>
                     )}
                   </button>
@@ -466,7 +531,7 @@ export default function CalendrierPage() {
                         </span>
                       )}
                       {/* Montant */}
-                      {r.montant && (
+                      {isSuperAdmin && r.montant && (
                         <span className="text-sm font-semibold text-brun flex-shrink-0" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                           {r.montant.toLocaleString('fr-FR')} MAD
                         </span>
