@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, Fragment, useCallback } from 'react'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
@@ -159,17 +159,42 @@ export default function BiensPage() {
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [generatingSlugs, setGeneratingSlugs] = useState(false)
   const [slugsResult, setSlugsResult] = useState<string | null>(null)
+  const [search, setSearch] = useState('')
+  const [filtreStatut, setFiltreStatut] = useState<string>('tous')
+  const [sortCol, setSortCol] = useState<string>('created_at')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const [resCount, setResCount] = useState<Record<string, number>>({})
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  async function fetchBiens() {
-    const [{ data: biensData }, { data: visitesData }] = await Promise.all([
+  function showToast(message: string, type: 'success' | 'error' = 'success') {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 3000)
+  }
+
+  function toggleSort(col: string) {
+    if (sortCol === col) setSortDir((d) => d === 'asc' ? 'desc' : 'asc')
+    else { setSortCol(col); setSortDir('asc') }
+  }
+
+  function sortIcon(col: string) {
+    if (sortCol !== col) return '↕'
+    return sortDir === 'asc' ? '↑' : '↓'
+  }
+
+  const fetchBiens = useCallback(async () => {
+    const [{ data: biensData }, { data: visitesData }, { data: resData }] = await Promise.all([
       supabase.from('biens').select('*').order('created_at', { ascending: false }),
       supabase.from('biens_visites').select('*').order('created_at', { ascending: false }),
+      supabase.from('reservations').select('bien_id').in('statut', ['confirmee', 'terminee']),
     ])
     setBiens(biensData ?? [])
     setVisites(visitesData ?? [])
+    const counts: Record<string, number> = {}
+    ;(resData ?? []).forEach((r) => { counts[r.bien_id] = (counts[r.bien_id] ?? 0) + 1 })
+    setResCount(counts)
     setLoading(false)
-  }
+  }, [])
 
   useEffect(() => { fetchBiens() }, [])
 
@@ -178,26 +203,46 @@ export default function BiensPage() {
   function closeModal() { setModalOpen(false); setEditing(EMPTY) }
 
   async function handleSave() {
+    const nom = (editing.nom ?? '').trim()
+    if (!nom) { showToast('Le nom du bien est obligatoire.', 'error'); return }
     setSaving(true)
-    const payload = { ...editing, updated_at: new Date().toISOString() }
-    if (editing.id) {
-      const slug = (editing as any).slug || generateLocationSlug(editing.nom ?? '', editing.ville ?? null, editing.id)
-      await supabase.from('biens').update({ ...payload, slug }).eq('id', editing.id)
-    } else {
-      const { data: inserted } = await supabase.from('biens').insert(editing).select('id, nom, ville').single()
-      if (inserted) {
-        const slug = generateLocationSlug(inserted.nom, inserted.ville, inserted.id)
-        await supabase.from('biens').update({ slug }).eq('id', inserted.id)
+    try {
+      const payload = { ...editing, nom, updated_at: new Date().toISOString() }
+      if (editing.id) {
+        const slug = (editing as any).slug || generateLocationSlug(nom, editing.ville ?? null, editing.id)
+        const { error } = await supabase.from('biens').update({ ...payload, slug }).eq('id', editing.id)
+        if (error) throw error
+        showToast('Bien modifié avec succès.')
+      } else {
+        const { data: inserted, error } = await supabase.from('biens').insert(payload).select('id, nom, ville').single()
+        if (error) throw error
+        if (inserted) {
+          const slug = generateLocationSlug(inserted.nom, inserted.ville, inserted.id)
+          await supabase.from('biens').update({ slug }).eq('id', inserted.id)
+        }
+        showToast('Bien ajouté avec succès.')
       }
+      closeModal()
+      fetchBiens()
+    } catch (err: any) {
+      showToast(`Erreur : ${err.message ?? 'Échec de la sauvegarde'}`, 'error')
     }
     setSaving(false)
-    closeModal()
-    fetchBiens()
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Supprimer ce bien ?')) return
-    await supabase.from('biens').delete().eq('id', id)
+    const bien = biens.find((b) => b.id === id)
+    const count = resCount[id] ?? 0
+    const msg = count > 0
+      ? `Ce bien a ${count} réservation(s). Supprimer quand même ?`
+      : 'Supprimer ce bien ?'
+    if (!confirm(msg)) return
+    const { error } = await supabase.from('biens').delete().eq('id', id)
+    if (error) {
+      showToast(`Erreur : ${error.message}`, 'error')
+      return
+    }
+    showToast(`${bien?.nom ?? 'Bien'} supprimé.`)
     fetchBiens()
   }
 
@@ -317,6 +362,31 @@ export default function BiensPage() {
     return { total: v.length, parSource, parAppareil, days7 }
   }
 
+  const biensFiltered = biens
+    .filter((b) => {
+      if (filtreStatut !== 'tous' && b.statut !== filtreStatut) return false
+      if (search) {
+        const q = search.toLowerCase()
+        return (b.nom?.toLowerCase().includes(q) || b.ville?.toLowerCase().includes(q) || b.type?.toLowerCase().includes(q))
+      }
+      return true
+    })
+    .sort((a, b) => {
+      let va: any, vb: any
+      switch (sortCol) {
+        case 'nom': va = a.nom?.toLowerCase() ?? ''; vb = b.nom?.toLowerCase() ?? ''; break
+        case 'ville': va = a.ville?.toLowerCase() ?? ''; vb = b.ville?.toLowerCase() ?? ''; break
+        case 'prix_nuit': va = a.prix_nuit ?? 0; vb = b.prix_nuit ?? 0; break
+        case 'vues': va = visitesParBien(a.id).length; vb = visitesParBien(b.id).length; break
+        case 'reservations': va = resCount[a.id] ?? 0; vb = resCount[b.id] ?? 0; break
+        case 'statut': va = a.statut; vb = b.statut; break
+        default: va = a.created_at; vb = b.created_at; break
+      }
+      if (va < vb) return sortDir === 'asc' ? -1 : 1
+      if (va > vb) return sortDir === 'asc' ? 1 : -1
+      return 0
+    })
+
   const inputClass = 'w-full border border-brun/20 rounded-xl px-3 py-2.5 text-sm text-brun focus:outline-none focus:border-terra focus:ring-1 focus:ring-terra transition-colors'
   const labelClass = 'block text-xs font-medium text-brun-mid mb-1.5 uppercase tracking-wide'
 
@@ -347,15 +417,47 @@ export default function BiensPage() {
         </div>
       )}
 
-      {/* Filtre période */}
-      <div className="flex gap-2 mb-4">
-        {(['7j', '30j', 'tout'] as const).map((p) => (
-          <button key={p} onClick={() => setPeriode(p)}
-            className={`text-sm font-medium rounded-full px-4 py-1.5 transition-all ${periode === p ? 'bg-terra text-creme' : 'border border-brun/20 text-brun-mid hover:border-terra hover:text-terra'}`}
-            style={{ fontFamily: 'var(--font-dm-sans)' }}>
-            {p === 'tout' ? 'Tout' : p === '7j' ? '7 jours' : '30 jours'}
-          </button>
-        ))}
+      {/* Toast */}
+      {toast && (
+        <div className={`fixed top-6 right-6 z-[100] px-5 py-3 rounded-xl shadow-lg text-sm font-medium transition-all ${toast.type === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}
+          style={{ fontFamily: 'var(--font-dm-sans)' }}>
+          {toast.message}
+        </div>
+      )}
+
+      {/* Recherche + Filtre statut + Filtre période */}
+      <div className="flex flex-wrap gap-3 mb-4 items-center">
+        <div className="relative flex-1 min-w-[200px]">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-brun-mid/40" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
+          </svg>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher un bien…"
+            className="w-full border border-brun/20 rounded-xl pl-10 pr-4 py-2.5 text-sm text-brun focus:outline-none focus:border-terra"
+            style={{ fontFamily: 'var(--font-dm-sans)' }}
+          />
+        </div>
+        <div className="flex gap-1.5">
+          {['tous', ...STATUT_OPTIONS].map((s) => (
+            <button key={s} onClick={() => setFiltreStatut(s)}
+              className={`text-sm font-medium rounded-full px-4 py-2 transition-all ${filtreStatut === s ? 'bg-terra text-creme' : 'border border-brun/20 text-brun-mid hover:border-terra hover:text-terra'}`}
+              style={{ fontFamily: 'var(--font-dm-sans)' }}>
+              {s === 'tous' ? 'Tous' : STATUT_LABELS[s]}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-1.5">
+          {(['7j', '30j', 'tout'] as const).map((p) => (
+            <button key={p} onClick={() => setPeriode(p)}
+              className={`text-xs font-medium rounded-full px-3 py-2 transition-all ${periode === p ? 'bg-brun text-creme' : 'border border-brun/15 text-brun-mid/60 hover:border-brun hover:text-brun'}`}
+              style={{ fontFamily: 'var(--font-dm-sans)' }}>
+              {p === 'tout' ? 'Tout' : p === '7j' ? '7j' : '30j'}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Stats globales */}
@@ -378,9 +480,9 @@ export default function BiensPage() {
       <div className="lg:hidden flex flex-col gap-3">
         {loading ? (
           <p className="text-center py-10 text-brun-mid/50 text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>Chargement…</p>
-        ) : !biens.length ? (
-          <p className="text-center py-10 text-brun-mid/50 text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>Aucun bien. Cliquez sur "Ajouter".</p>
-        ) : biens.map((b) => (
+        ) : !biensFiltered.length ? (
+          <p className="text-center py-10 text-brun-mid/50 text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>{biens.length ? 'Aucun résultat.' : 'Aucun bien. Cliquez sur "Ajouter".'}</p>
+        ) : biensFiltered.map((b) => (
           <div key={b.id} className="bg-white rounded-2xl border border-brun/10 p-4 flex gap-3">
             {/* Photo */}
             <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-brun/5 flex-shrink-0">
@@ -410,6 +512,9 @@ export default function BiensPage() {
                 )}
                 <span className="text-xs text-terra" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                   {visitesParBien(b.id).length} vues
+                </span>
+                <span className="text-xs text-brun-mid/60" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                  {resCount[b.id] ?? 0} rés.
                 </span>
               </div>
               {/* Plateformes */}
@@ -459,20 +564,37 @@ export default function BiensPage() {
           <table className="w-full text-sm">
             <thead className="bg-brun/4">
               <tr>
-                {['', 'Nom', 'Ville', 'Type', 'Prix/nuit', 'Statut', 'Dispo', 'Vues', 'Plateformes', 'Actions'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-xs text-brun-mid uppercase tracking-wide font-medium">{h}</th>
+                <th className="px-3 py-3 text-left text-xs text-brun-mid uppercase tracking-wide font-medium w-14"></th>
+                {[
+                  { key: 'nom', label: 'Nom' },
+                  { key: 'ville', label: 'Ville' },
+                  { key: '', label: 'Type' },
+                  { key: 'prix_nuit', label: 'Prix/nuit' },
+                  { key: 'statut', label: 'Statut' },
+                  { key: '', label: 'Dispo' },
+                  { key: 'vues', label: 'Vues' },
+                  { key: 'reservations', label: 'Rés.' },
+                  { key: '', label: 'Plateformes' },
+                  { key: '', label: 'Actions' },
+                ].map(({ key, label }) => (
+                  <th key={label}
+                    className={`px-4 py-3 text-left text-xs text-brun-mid uppercase tracking-wide font-medium ${key ? 'cursor-pointer hover:text-terra select-none' : ''}`}
+                    onClick={() => key && toggleSort(key)}
+                    style={{ fontFamily: 'var(--font-dm-sans)' }}
+                  >
+                    {label} {key && <span className="text-[10px] ml-0.5 opacity-50">{sortIcon(key)}</span>}
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-brun/5">
               {loading ? (
-                <tr><td colSpan={9} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
-              ) : !biens.length ? (
-                <tr><td colSpan={10} className="px-4 py-10 text-center text-brun-mid/50">Aucun bien</td></tr>
-
-              ) : biens.map((b) => (
-                <>
-                  <tr key={b.id} className="hover:bg-creme/40 transition-colors">
+                <tr><td colSpan={11} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
+              ) : !biensFiltered.length ? (
+                <tr><td colSpan={11} className="px-4 py-10 text-center text-brun-mid/50">{biens.length ? 'Aucun résultat.' : 'Aucun bien'}</td></tr>
+              ) : biensFiltered.map((b) => (
+                <Fragment key={b.id}>
+                  <tr className="hover:bg-creme/40 transition-colors">
                     <td className="px-3 py-2">
                       <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-brun/5 flex-shrink-0">
                         {(b.photos ?? []).length > 0 ? (
@@ -511,6 +633,11 @@ export default function BiensPage() {
                       </button>
                     </td>
                     <td className="px-4 py-3">
+                      <span className="text-sm text-brun font-medium" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                        {resCount[b.id] ?? 0}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
                       <PlatformIcons b={b} />
                     </td>
                     <td className="px-4 py-3">
@@ -533,7 +660,7 @@ export default function BiensPage() {
                     const stats = getStatsBien(b.id)
                     return (
                       <tr key={`stats-${b.id}`}>
-                        <td colSpan={10} className="px-6 pb-4 pt-2 bg-creme/60">
+                        <td colSpan={11} className="px-6 pb-4 pt-2 bg-creme/60">
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                               <p className="text-xs font-medium text-brun-mid/50 uppercase tracking-wide mb-2">7 derniers jours</p>
@@ -584,7 +711,7 @@ export default function BiensPage() {
                       </tr>
                     )
                   })()}
-                </>
+                </Fragment>
               ))}
             </tbody>
           </table>
