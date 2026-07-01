@@ -68,6 +68,9 @@ export default function ReservationsPage() {
   const [saving, setSaving] = useState(false)
   const [filterStatut, setFilterStatut] = useState('')
   const [filterPlatf, setFilterPlatf] = useState('')
+  const [filterBien, setFilterBien] = useState('')
+  const [filterMois, setFilterMois] = useState('')
+  const [toast, setToast] = useState('')
   const [rapportOpen, setRapportOpen] = useState(false)
   const [rapportBienId, setRapportBienId] = useState('')
   const [rapportMois, setRapportMois] = useState(new Date().getMonth() + 1)
@@ -95,6 +98,15 @@ export default function ReservationsPage() {
   const filtered = rows.filter((r) => {
     if (filterStatut && r.statut !== filterStatut) return false
     if (filterPlatf && r.plateforme !== filterPlatf) return false
+    if (filterBien && r.bien_id !== filterBien) return false
+    if (filterMois) {
+      const [y, m] = filterMois.split('-').map(Number)
+      const mStart = new Date(y, m - 1, 1)
+      const mEnd = new Date(y, m, 0)
+      const d1 = new Date(r.date_arrivee)
+      const d2 = new Date(r.date_depart)
+      if (d2 <= mStart || d1 > mEnd) return false
+    }
     return true
   })
 
@@ -141,6 +153,9 @@ export default function ReservationsPage() {
   }
 
   async function handleSave() {
+    if (!editing.bien_id) { setToast('Veuillez sélectionner un bien'); setTimeout(() => setToast(''), 3000); return }
+    if (!editing.date_arrivee || !editing.date_depart) { setToast('Les dates sont obligatoires'); setTimeout(() => setToast(''), 3000); return }
+    if (editing.date_depart <= editing.date_arrivee) { setToast('La date de départ doit être après l\'arrivée'); setTimeout(() => setToast(''), 3000); return }
     setSaving(true)
     const { id, created_at, biens: _b, ...fields } = editing as any
     const isNew = !editing.id
@@ -151,6 +166,8 @@ export default function ReservationsPage() {
     }
     await syncVoyageur(editing, isNew)
     setSaving(false); closeModal(); fetchData()
+    setToast(isNew ? 'Réservation ajoutée' : 'Réservation modifiée')
+    setTimeout(() => setToast(''), 3000)
   }
 
   async function handleDelete(id: string) {
@@ -198,13 +215,23 @@ export default function ReservationsPage() {
   function computeRapport() {
     const bien = biens.find((b) => b.id === rapportBienId)
     if (!bien) return null
+    const daysInMonth = new Date(rapportAnnee, rapportMois, 0).getDate()
+    const mStart = new Date(rapportAnnee, rapportMois - 1, 1)
+    const mEnd = new Date(rapportAnnee, rapportMois, 0)
     const resRapport = rows.filter((r) => {
       if (r.bien_id !== rapportBienId) return false
-      const d = new Date(r.date_arrivee)
-      return d.getMonth() + 1 === rapportMois && d.getFullYear() === rapportAnnee
+      const d1 = new Date(r.date_arrivee)
+      const d2 = new Date(r.date_depart)
+      return d2 > mStart && d1 <= mEnd
     })
-    const daysInMonth = new Date(rapportAnnee, rapportMois, 0).getDate()
-    const totalNuits = resRapport.reduce((s, r) => s + nuits(r.date_arrivee, r.date_depart), 0)
+    let totalNuits = 0
+    for (const r of resRapport) {
+      const d1 = new Date(r.date_arrivee)
+      const d2 = new Date(r.date_depart)
+      const cs = d1 < mStart ? mStart : d1
+      const ce = d2 > mEnd ? mEnd : d2
+      totalNuits += Math.max(0, Math.round((ce.getTime() - cs.getTime()) / 86400000))
+    }
     const totalMontant = resRapport.reduce((s, r) => s + (r.montant ?? 0), 0)
     const totalCommission = resRapport.reduce((s, r) => s + (r.montant ? r.montant * r.taux_commission / 100 : 0), 0)
     const tauxOccupation = daysInMonth > 0 ? Math.round((totalNuits / daysInMonth) * 100) : 0
@@ -314,8 +341,19 @@ export default function ReservationsPage() {
         </div>
       </div>
 
+      {/* Toast */}
+      {toast && (
+        <div className="fixed top-4 right-4 z-[60] bg-brun text-creme text-sm font-medium px-5 py-3 rounded-xl shadow-lg animate-[fadeIn_0.2s]">
+          {toast}
+        </div>
+      )}
+
       {/* Filters */}
       <div className="flex gap-3 mb-5 flex-wrap">
+        <AdminSelect className="!py-2 !px-3" value={filterBien} onChange={(e) => setFilterBien(e.target.value)}>
+          <option value="">Tous les biens</option>
+          {biens.map((b) => <option key={b.id} value={b.id}>{b.nom}</option>)}
+        </AdminSelect>
         <AdminSelect className="!py-2 !px-3" value={filterStatut} onChange={(e) => setFilterStatut(e.target.value)}>
           <option value="">Tous statuts</option>
           {Object.entries(STATUT_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
@@ -324,6 +362,20 @@ export default function ReservationsPage() {
           <option value="">Toutes plateformes</option>
           {PLATF.map((p) => <option key={p}>{p}</option>)}
         </AdminSelect>
+        <input
+          type="month"
+          className="border border-brun/20 rounded-xl px-3 py-2 text-sm text-brun focus:outline-none focus:border-terra focus:ring-1 focus:ring-terra transition-colors"
+          value={filterMois}
+          onChange={(e) => setFilterMois(e.target.value)}
+        />
+        {(filterBien || filterStatut || filterPlatf || filterMois) && (
+          <button
+            onClick={() => { setFilterBien(''); setFilterStatut(''); setFilterPlatf(''); setFilterMois('') }}
+            className="text-xs text-terra hover:text-brun transition-colors self-center underline underline-offset-2"
+          >
+            Réinitialiser
+          </button>
+        )}
         <span className="self-center text-xs text-brun-mid/60">{filtered.length} réservation(s)</span>
       </div>
 
