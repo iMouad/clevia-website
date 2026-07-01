@@ -78,7 +78,12 @@ export default function ReservationsPage() {
   const [filterPlatf, setFilterPlatf] = useState('')
   const [filterBien, setFilterBien] = useState('')
   const [filterMois, setFilterMois] = useState('')
+  const [search, setSearch] = useState('')
+  const [sortCol, setSortCol] = useState<string>('date_arrivee')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const [page, setPage] = useState(1)
   const [toast, setToast] = useState('')
+  const PER_PAGE = 20
   const [rapportOpen, setRapportOpen] = useState(false)
   const [rapportBienId, setRapportBienId] = useState('')
   const [rapportMois, setRapportMois] = useState(new Date().getMonth() + 1)
@@ -107,6 +112,13 @@ export default function ReservationsPage() {
     if (filterStatut && r.statut !== filterStatut) return false
     if (filterPlatf && r.plateforme !== filterPlatf) return false
     if (filterBien && r.bien_id !== filterBien) return false
+    if (search) {
+      const q = search.toLowerCase()
+      const match = r.voyageur_nom.toLowerCase().includes(q)
+        || (r.intermediaire?.toLowerCase().includes(q))
+        || (r.voyageur_phone?.toLowerCase().includes(q))
+      if (!match) return false
+    }
     if (filterMois) {
       const [y, m] = filterMois.split('-').map(Number)
       const mStart = new Date(y, m - 1, 1)
@@ -116,7 +128,36 @@ export default function ReservationsPage() {
       if (d2 <= mStart || d1 > mEnd) return false
     }
     return true
+  }).sort((a, b) => {
+    let va: any, vb: any
+    switch (sortCol) {
+      case 'voyageur_nom': va = a.voyageur_nom.toLowerCase(); vb = b.voyageur_nom.toLowerCase(); break
+      case 'bien': va = (a as any).biens?.nom?.toLowerCase() ?? ''; vb = (b as any).biens?.nom?.toLowerCase() ?? ''; break
+      case 'date_arrivee': va = a.date_arrivee; vb = b.date_arrivee; break
+      case 'date_depart': va = a.date_depart; vb = b.date_depart; break
+      case 'nuits': va = nuits(a.date_arrivee, a.date_depart); vb = nuits(b.date_arrivee, b.date_depart); break
+      case 'plateforme': va = a.plateforme ?? ''; vb = b.plateforme ?? ''; break
+      case 'montant': va = a.montant ?? 0; vb = b.montant ?? 0; break
+      case 'commission': va = calcCommission(a); vb = calcCommission(b); break
+      case 'statut': va = a.statut; vb = b.statut; break
+      default: va = a.date_arrivee; vb = b.date_arrivee
+    }
+    if (va < vb) return sortDir === 'asc' ? -1 : 1
+    if (va > vb) return sortDir === 'asc' ? 1 : -1
+    return 0
   })
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE))
+  const safePage = Math.min(page, totalPages)
+  const paginated = filtered.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE)
+
+  function toggleSort(col: string) {
+    if (sortCol === col) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortCol(col); setSortDir('desc') }
+    setPage(1)
+  }
+
+  const sortIcon = (col: string) => sortCol === col ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ''
 
   function openAdd() { setEditing({ ...EMPTY_RES, bien_id: biens[0]?.id ?? null }); setModalOpen(true) }
   function openEdit(r: Reservation) { setEditing({ ...r }); setModalOpen(true) }
@@ -160,10 +201,13 @@ export default function ReservationsPage() {
     }
   }
 
+  function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(''), 3000) }
+
   async function handleSave() {
-    if (!editing.bien_id) { setToast('Veuillez sélectionner un bien'); setTimeout(() => setToast(''), 3000); return }
-    if (!editing.date_arrivee || !editing.date_depart) { setToast('Les dates sont obligatoires'); setTimeout(() => setToast(''), 3000); return }
-    if (editing.date_depart <= editing.date_arrivee) { setToast('La date de départ doit être après l\'arrivée'); setTimeout(() => setToast(''), 3000); return }
+    if (!editing.voyageur_nom?.trim()) { showToast('Le nom du voyageur est obligatoire'); return }
+    if (!editing.bien_id) { showToast('Veuillez sélectionner un bien'); return }
+    if (!editing.date_arrivee || !editing.date_depart) { showToast('Les dates sont obligatoires'); return }
+    if (editing.date_depart <= editing.date_arrivee) { showToast('La date de départ doit être après l\'arrivée'); return }
     setSaving(true)
     const { id, created_at, biens: _b, ...fields } = editing as any
     const isNew = !editing.id
@@ -174,14 +218,14 @@ export default function ReservationsPage() {
     }
     await syncVoyageur(editing, isNew)
     setSaving(false); closeModal(); fetchData()
-    setToast(isNew ? 'Réservation ajoutée' : 'Réservation modifiée')
-    setTimeout(() => setToast(''), 3000)
+    showToast(isNew ? 'Réservation ajoutée' : 'Réservation modifiée')
   }
 
   async function handleDelete(id: string) {
     if (!confirm('Supprimer cette réservation ?')) return
     await supabase.from('reservations').delete().eq('id', id)
     fetchData()
+    showToast('Réservation supprimée')
   }
 
   function exportCSV() {
@@ -256,7 +300,7 @@ export default function ReservationsPage() {
         <td>${format(new Date(r.date_arrivee), 'dd/MM/yyyy')}</td>
         <td>${format(new Date(r.date_depart), 'dd/MM/yyyy')}</td>
         <td style="text-align:center">${nuits(r.date_arrivee, r.date_depart)}</td>
-        <td>${r.voyageur_nom}</td>
+        <td>${r.voyageur_nom}${r.intermediaire ? `<br><span style="font-size:10px;color:#A07850">via ${r.intermediaire}</span>` : ''}</td>
         <td>${r.plateforme ?? '—'}</td>
         <td>${r.montant ? r.montant.toLocaleString('fr-MA') + ' MAD' : '—'}</td>
         <td>${r.montant ? Math.round(calcCommission(r)).toLocaleString('fr-MA') + ' MAD' : '—'}</td>
@@ -357,15 +401,24 @@ export default function ReservationsPage() {
 
       {/* Filters */}
       <div className="flex gap-3 mb-5 flex-wrap">
-        <AdminSelect className="!py-2 !px-3" value={filterBien} onChange={(e) => setFilterBien(e.target.value)}>
+        <div className="relative">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-brun-mid/40" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" strokeLinecap="round" /></svg>
+          <input
+            className="border border-brun/20 rounded-xl pl-8 pr-3 py-2 text-sm text-brun focus:outline-none focus:border-terra focus:ring-1 focus:ring-terra transition-colors w-48"
+            placeholder="Rechercher..."
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+          />
+        </div>
+        <AdminSelect className="!py-2 !px-3" value={filterBien} onChange={(e) => { setFilterBien(e.target.value); setPage(1) }}>
           <option value="">Tous les biens</option>
           {biens.map((b) => <option key={b.id} value={b.id}>{b.nom}</option>)}
         </AdminSelect>
-        <AdminSelect className="!py-2 !px-3" value={filterStatut} onChange={(e) => setFilterStatut(e.target.value)}>
+        <AdminSelect className="!py-2 !px-3" value={filterStatut} onChange={(e) => { setFilterStatut(e.target.value); setPage(1) }}>
           <option value="">Tous statuts</option>
           {Object.entries(STATUT_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
         </AdminSelect>
-        <AdminSelect className="!py-2 !px-3" value={filterPlatf} onChange={(e) => setFilterPlatf(e.target.value)}>
+        <AdminSelect className="!py-2 !px-3" value={filterPlatf} onChange={(e) => { setFilterPlatf(e.target.value); setPage(1) }}>
           <option value="">Toutes plateformes</option>
           {PLATF.map((p) => <option key={p}>{p}</option>)}
         </AdminSelect>
@@ -373,11 +426,11 @@ export default function ReservationsPage() {
           type="month"
           className="border border-brun/20 rounded-xl px-3 py-2 text-sm text-brun focus:outline-none focus:border-terra focus:ring-1 focus:ring-terra transition-colors"
           value={filterMois}
-          onChange={(e) => setFilterMois(e.target.value)}
+          onChange={(e) => { setFilterMois(e.target.value); setPage(1) }}
         />
-        {(filterBien || filterStatut || filterPlatf || filterMois) && (
+        {(filterBien || filterStatut || filterPlatf || filterMois || search) && (
           <button
-            onClick={() => { setFilterBien(''); setFilterStatut(''); setFilterPlatf(''); setFilterMois('') }}
+            onClick={() => { setFilterBien(''); setFilterStatut(''); setFilterPlatf(''); setFilterMois(''); setSearch(''); setPage(1) }}
             className="text-xs text-terra hover:text-brun transition-colors self-center underline underline-offset-2"
           >
             Réinitialiser
@@ -392,7 +445,7 @@ export default function ReservationsPage() {
           <p className="text-center py-10 text-brun-mid/50 text-sm">Chargement…</p>
         ) : !filtered.length ? (
           <p className="text-center py-10 text-brun-mid/50 text-sm">Aucune réservation</p>
-        ) : filtered.map((r) => (
+        ) : paginated.map((r) => (
           <div key={r.id} className="bg-white rounded-2xl border border-brun/10 p-4">
             <div className="flex items-center justify-between gap-2 mb-1">
               <div className="truncate">
@@ -451,11 +504,26 @@ export default function ReservationsPage() {
             <thead className="bg-brun/4">
               <tr>
                 {[
-                  'Voyageur', 'Bien', 'Arrivée', 'Départ', 'Nuits', 'Plateforme',
-                  ...(isSuperAdmin ? ['Montant', 'Commission'] : []),
-                  'Statut', '',
-                ].map((h) => (
-                  <th key={h} className="px-3 py-3 text-left text-xs text-brun-mid uppercase tracking-wide font-medium whitespace-nowrap">{h}</th>
+                  { label: 'Voyageur', col: 'voyageur_nom' },
+                  { label: 'Bien', col: 'bien' },
+                  { label: 'Arrivée', col: 'date_arrivee' },
+                  { label: 'Départ', col: 'date_depart' },
+                  { label: 'Nuits', col: 'nuits' },
+                  { label: 'Plateforme', col: 'plateforme' },
+                  ...(isSuperAdmin ? [
+                    { label: 'Montant', col: 'montant' },
+                    { label: 'Commission', col: 'commission' },
+                  ] : []),
+                  { label: 'Statut', col: 'statut' },
+                  { label: '', col: '' },
+                ].map(({ label, col }) => (
+                  <th
+                    key={label || '_actions'}
+                    className={`px-3 py-3 text-left text-xs text-brun-mid uppercase tracking-wide font-medium whitespace-nowrap ${col ? 'cursor-pointer hover:text-terra select-none' : ''}`}
+                    onClick={() => col && toggleSort(col)}
+                  >
+                    {label}{sortIcon(col)}
+                  </th>
                 ))}
               </tr>
             </thead>
@@ -464,7 +532,7 @@ export default function ReservationsPage() {
                 <tr><td colSpan={isSuperAdmin ? 10 : 8} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
               ) : !filtered.length ? (
                 <tr><td colSpan={isSuperAdmin ? 10 : 8} className="px-4 py-10 text-center text-brun-mid/50">Aucune réservation</td></tr>
-              ) : filtered.map((r) => (
+              ) : paginated.map((r) => (
                 <tr key={r.id} className="hover:bg-creme/40 transition-colors">
                   <td className="px-3 py-3 whitespace-nowrap">
                     <span className="text-brun font-medium">{r.voyageur_nom}</span>
@@ -506,6 +574,51 @@ export default function ReservationsPage() {
           </table>
         </div>
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-4 px-1">
+          <span className="text-xs text-brun-mid/60">
+            {(safePage - 1) * PER_PAGE + 1}–{Math.min(safePage * PER_PAGE, filtered.length)} sur {filtered.length}
+          </span>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={safePage <= 1}
+              className="px-3 py-1.5 text-xs rounded-lg border border-brun/15 text-brun-mid hover:bg-creme disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            >
+              ← Précédent
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(p => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
+              .reduce<(number | '...')[]>((acc, p, i, arr) => {
+                if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push('...')
+                acc.push(p)
+                return acc
+              }, [])
+              .map((p, i) =>
+                p === '...' ? (
+                  <span key={`dots-${i}`} className="px-1 text-xs text-brun-mid/40">…</span>
+                ) : (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p as number)}
+                    className={`w-8 h-8 text-xs rounded-lg transition-all ${safePage === p ? 'bg-terra text-creme' : 'border border-brun/15 text-brun-mid hover:bg-creme'}`}
+                  >
+                    {p}
+                  </button>
+                )
+              )}
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={safePage >= totalPages}
+              className="px-3 py-1.5 text-xs rounded-lg border border-brun/15 text-brun-mid hover:bg-creme disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            >
+              Suivant →
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Modal réservation */}
       <Modal open={modalOpen} onClose={closeModal}>
