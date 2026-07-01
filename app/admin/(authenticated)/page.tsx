@@ -50,7 +50,8 @@ export default async function AdminDashboard() {
   const serverClient = await createServerClient()
   const { data: { user } } = await serverClient.auth.getUser()
   const isSuperAdmin = user?.app_metadata?.role !== 'admin'
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
+  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
 
   const [
     { count: biensActifs },
@@ -62,15 +63,17 @@ export default async function AdminDashboard() {
     { count: whatsappClicsMois },
   ] = await Promise.all([
     supabase.from('biens').select('*', { count: 'exact', head: true }).eq('statut', 'actif'),
-    supabase.from('reservations').select('*', { count: 'exact', head: true }).gte('created_at', monthStart).in('statut', ['confirmee', 'terminee']),
-    supabase.from('reservations').select('date_arrivee,date_depart,montant,taux_commission').gte('created_at', monthStart).in('statut', ['confirmee', 'terminee']),
+    supabase.from('reservations').select('*', { count: 'exact', head: true }).gt('date_depart', monthStart).lte('date_arrivee', monthEnd).in('statut', ['confirmee', 'terminee']),
+    supabase.from('reservations').select('date_arrivee,date_depart,montant,taux_commission').gt('date_depart', monthStart).lte('date_arrivee', monthEnd).in('statut', ['confirmee', 'terminee']),
     supabase.from('contacts').select('*').eq('traite', false).order('created_at', { ascending: false }).limit(5),
     supabase.from('biens_visites').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
     supabase.from('vente_visites').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
     supabase.from('vente_whatsapp_clicks').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
   ])
 
-  // Calcul revenus et taux d'occupation
+  // Calcul revenus et taux d'occupation (nuits clampées au mois en cours)
+  const mStart = new Date(now.getFullYear(), now.getMonth(), 1)
+  const mEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0)
   let revenusTotal = 0
   let commissionsTotal = 0
   let totalNuits = 0
@@ -80,7 +83,9 @@ export default async function AdminDashboard() {
     commissionsTotal += montant * (Number(r.taux_commission ?? 0) / 100)
     const d1 = new Date(r.date_arrivee)
     const d2 = new Date(r.date_depart)
-    totalNuits += Math.max(0, Math.round((d2.getTime() - d1.getTime()) / 86400000))
+    const clampedStart = d1 < mStart ? mStart : d1
+    const clampedEnd = d2 > mEnd ? mEnd : d2
+    totalNuits += Math.max(0, Math.round((clampedEnd.getTime() - clampedStart.getTime()) / 86400000))
   }
   const tauxOccupation = biensActifs
     ? Math.round((totalNuits / (biensActifs * 30)) * 100)
@@ -93,11 +98,11 @@ export default async function AdminDashboard() {
     .order('created_at', { ascending: false })
     .limit(5)
 
-  // 5 dernières réservations
+  // 5 dernières réservations (triées par date d'arrivée)
   const { data: lastReservations } = await supabase
     .from('reservations')
     .select('*, biens(nom)')
-    .order('created_at', { ascending: false })
+    .order('date_arrivee', { ascending: false })
     .limit(5)
 
   return (
