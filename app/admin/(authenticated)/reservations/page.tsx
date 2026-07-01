@@ -96,6 +96,15 @@ export default function ReservationsPage() {
       supabase.from('reservations').select('*, biens(nom)').order('date_arrivee', { ascending: false }),
       supabase.from('biens').select('id, nom').eq('statut', 'actif'),
     ])
+    const today = new Date().toISOString().split('T')[0]
+    const aTerminer = (resData ?? []).filter(r => r.statut === 'confirmee' && r.date_depart <= today)
+    if (aTerminer.length > 0) {
+      await supabase
+        .from('reservations')
+        .update({ statut: 'terminee' })
+        .in('id', aTerminer.map(r => r.id))
+      for (const r of aTerminer) r.statut = 'terminee'
+    }
     setRows(resData ?? [])
     setBiens(bienData ?? [])
     setLoading(false)
@@ -208,6 +217,17 @@ export default function ReservationsPage() {
     if (!editing.bien_id) { showToast('Veuillez sélectionner un bien'); return }
     if (!editing.date_arrivee || !editing.date_depart) { showToast('Les dates sont obligatoires'); return }
     if (editing.date_depart <= editing.date_arrivee) { showToast('La date de départ doit être après l\'arrivée'); return }
+    const chevauchement = rows.find((r) =>
+      r.id !== editing.id
+      && r.bien_id === editing.bien_id
+      && r.statut !== 'annulee'
+      && r.date_arrivee < editing.date_depart!
+      && r.date_depart > editing.date_arrivee!
+    )
+    if (chevauchement) {
+      const ok = confirm(`Attention : cette réservation chevauche celle de ${chevauchement.voyageur_nom} (${format(new Date(chevauchement.date_arrivee), 'dd/MM')} → ${format(new Date(chevauchement.date_depart), 'dd/MM')}). Continuer quand même ?`)
+      if (!ok) return
+    }
     setSaving(true)
     const { id, created_at, biens: _b, ...fields } = editing as any
     const isNew = !editing.id
@@ -361,6 +381,13 @@ export default function ReservationsPage() {
   const commissionVal = calcCommission(editing)
   const commission = commissionVal > 0 ? commissionVal.toFixed(2) : '—'
 
+  const today = new Date().toISOString().split('T')[0]
+  function isEnCours(r: Reservation) { return r.statut === 'confirmee' && r.date_arrivee <= today && r.date_depart > today }
+
+  const totNuits = filtered.reduce((s, r) => s + nuits(r.date_arrivee, r.date_depart), 0)
+  const totMontant = filtered.reduce((s, r) => s + (r.montant ?? 0), 0)
+  const totCommission = filtered.reduce((s, r) => s + calcCommission(r), 0)
+
   const inputClass = 'w-full border border-brun/20 rounded-xl px-3 py-2.5 text-sm text-brun focus:outline-none focus:border-terra focus:ring-1 focus:ring-terra transition-colors'
   const labelClass = 'block text-xs font-medium text-brun-mid mb-1.5 uppercase tracking-wide'
 
@@ -446,10 +473,13 @@ export default function ReservationsPage() {
         ) : !filtered.length ? (
           <p className="text-center py-10 text-brun-mid/50 text-sm">Aucune réservation</p>
         ) : paginated.map((r) => (
-          <div key={r.id} className="bg-white rounded-2xl border border-brun/10 p-4">
+          <div key={r.id} className={`rounded-2xl border p-4 ${isEnCours(r) ? 'bg-green-50/60 border-green-300' : 'bg-white border-brun/10'}`}>
             <div className="flex items-center justify-between gap-2 mb-1">
               <div className="truncate">
-                <p className="font-medium text-brun text-sm truncate" style={{ fontFamily: 'var(--font-dm-sans)' }}>{r.voyageur_nom}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="font-medium text-brun text-sm truncate" style={{ fontFamily: 'var(--font-dm-sans)' }}>{r.voyageur_nom}</p>
+                  {isEnCours(r) && <span className="text-[9px] bg-green-500 text-white px-1.5 py-0.5 rounded-full font-medium shrink-0">En cours</span>}
+                </div>
                 {r.intermediaire && <p className="text-[10px] text-brun-mid/50" style={{ fontFamily: 'var(--font-dm-sans)' }}>via {r.intermediaire}</p>}
               </div>
               <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${STATUT_COLORS[r.statut]}`}>
@@ -533,9 +563,12 @@ export default function ReservationsPage() {
               ) : !filtered.length ? (
                 <tr><td colSpan={isSuperAdmin ? 10 : 8} className="px-4 py-10 text-center text-brun-mid/50">Aucune réservation</td></tr>
               ) : paginated.map((r) => (
-                <tr key={r.id} className="hover:bg-creme/40 transition-colors">
+                <tr key={r.id} className={`transition-colors ${isEnCours(r) ? 'bg-green-50/60 border-l-2 border-l-green-400' : 'hover:bg-creme/40'}`}>
                   <td className="px-3 py-3 whitespace-nowrap">
-                    <span className="text-brun font-medium">{r.voyageur_nom}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-brun font-medium">{r.voyageur_nom}</span>
+                      {isEnCours(r) && <span className="text-[9px] bg-green-500 text-white px-1.5 py-0.5 rounded-full font-medium">En cours</span>}
+                    </div>
                     {r.intermediaire && <span className="block text-[10px] text-brun-mid/50">via {r.intermediaire}</span>}
                   </td>
                   <td className="px-3 py-3 text-brun-mid">{(r as any).biens?.nom ?? '—'}</td>
@@ -571,6 +604,22 @@ export default function ReservationsPage() {
                 </tr>
               ))}
             </tbody>
+            {filtered.length > 0 && (
+              <tfoot className="bg-brun/4 border-t-2 border-brun/15">
+                <tr>
+                  <td className="px-3 py-3 text-brun font-semibold text-sm" colSpan={4}>Total ({filtered.length} résa{filtered.length > 1 ? 's' : ''})</td>
+                  <td className="px-3 py-3 text-center text-brun font-semibold text-sm">{totNuits}</td>
+                  <td className="px-3 py-3"></td>
+                  {isSuperAdmin && (
+                    <>
+                      <td className="px-3 py-3 text-brun font-semibold text-sm whitespace-nowrap">{totMontant.toLocaleString('fr-MA')} MAD</td>
+                      <td className="px-3 py-3 font-semibold text-terra text-sm whitespace-nowrap">{Math.round(totCommission).toLocaleString('fr-MA')} MAD</td>
+                    </>
+                  )}
+                  <td className="px-3 py-3" colSpan={2}></td>
+                </tr>
+              </tfoot>
+            )}
           </table>
         </div>
       </div>
