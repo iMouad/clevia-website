@@ -54,7 +54,7 @@ export default async function AdminDashboard() {
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
 
   const [
-    { count: biensActifs },
+    { data: biensActifsData, count: biensActifs },
     { count: reservationsMois },
     { data: reservationsData },
     { data: lastContacts },
@@ -62,9 +62,9 @@ export default async function AdminDashboard() {
     { count: vuesVente },
     { count: whatsappClicsMois },
   ] = await Promise.all([
-    supabase.from('biens').select('*', { count: 'exact', head: true }).eq('statut', 'actif'),
+    supabase.from('biens').select('id,nom', { count: 'exact' }).eq('statut', 'actif'),
     supabase.from('reservations').select('*', { count: 'exact', head: true }).gt('date_depart', monthStart).lte('date_arrivee', monthEnd).in('statut', ['confirmee', 'terminee']),
-    supabase.from('reservations').select('date_arrivee,date_depart,montant,taux_commission').gt('date_depart', monthStart).lte('date_arrivee', monthEnd).in('statut', ['confirmee', 'terminee']),
+    supabase.from('reservations').select('bien_id,date_arrivee,date_depart,montant,taux_commission').gt('date_depart', monthStart).lte('date_arrivee', monthEnd).in('statut', ['confirmee', 'terminee']),
     supabase.from('contacts').select('*').eq('traite', false).order('created_at', { ascending: false }).limit(5),
     supabase.from('biens_visites').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
     supabase.from('vente_visites').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
@@ -90,6 +90,21 @@ export default async function AdminDashboard() {
   const tauxOccupation = biensActifs
     ? Math.round((totalNuits / (biensActifs * 30)) * 100)
     : 0
+
+  // Occupation par bien
+  const occupationParBien = (biensActifsData ?? []).map((bien: any) => {
+    const resaBien = (reservationsData ?? []).filter((r: any) => r.bien_id === bien.id)
+    let nuits = 0
+    for (const r of resaBien) {
+      const d1 = new Date(r.date_arrivee)
+      const d2 = new Date(r.date_depart)
+      const cs = d1 < mStart ? mStart : d1
+      const ce = d2 > mEnd ? mEnd : d2
+      nuits += Math.max(0, Math.round((ce.getTime() - cs.getTime()) / 86400000))
+    }
+    const taux = Math.round((nuits / 30) * 100)
+    return { id: bien.id, nom: bien.nom, nuits, taux, reservations: resaBien.length }
+  })
 
   // 5 derniers clics WhatsApp
   const { data: lastWhatsappClics } = await supabase
@@ -142,6 +157,38 @@ export default async function AdminDashboard() {
         <StatCard label="Vues location ce mois" value={vuesLocation ?? 0} sub="pages biens à louer" color="brun-mid" />
         <StatCard label="Vues vente ce mois" value={vuesVente ?? 0} sub="pages biens à vendre" color="brun-mid" />
         <StatCard label="Clics WhatsApp ce mois" value={whatsappClicsMois ?? 0} sub="intérêts biens à vendre" color="terra" />
+      </div>
+
+      {/* Occupation par bien */}
+      <div className="bg-white rounded-2xl border border-brun/10 overflow-hidden mb-6">
+        <div className="px-6 py-4 border-b border-brun/8">
+          <h2 className="text-base font-medium text-brun">Occupation par bien — ce mois</h2>
+        </div>
+        <div className="divide-y divide-brun/5">
+          {occupationParBien.map((b: any) => (
+            <div key={b.id} className="px-6 py-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-brun truncate mr-4">{b.nom}</span>
+                <div className="flex items-center gap-3 shrink-0">
+                  <span className="text-xs text-brun-mid/60">{b.nuits} nuit{b.nuits > 1 ? 's' : ''} · {b.reservations} résa{b.reservations > 1 ? 's' : ''}</span>
+                  <span className="text-sm font-medium text-terra min-w-[3rem] text-right">{b.taux}%</span>
+                </div>
+              </div>
+              <div className="w-full bg-brun/5 rounded-full h-2.5">
+                <div
+                  className="h-2.5 rounded-full transition-all duration-500"
+                  style={{
+                    width: `${Math.min(b.taux, 100)}%`,
+                    backgroundColor: b.taux >= 50 ? '#22c55e' : b.taux >= 25 ? '#C97B4B' : '#ef4444',
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+          {!occupationParBien.length && (
+            <p className="px-6 py-8 text-center text-brun-mid/50 text-sm">Aucun bien actif</p>
+          )}
+        </div>
       </div>
 
       <div className="grid xl:grid-cols-2 gap-6">
