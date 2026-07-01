@@ -43,11 +43,19 @@ type ResInfo = { voyageur_nom: string; plateforme: string | null }
 function expandReservationDates(reservations: { date_arrivee: string; date_depart: string; voyageur_nom?: string; plateforme?: string | null }[]) {
   const dates = new Set<string>()
   const map: Record<string, ResInfo> = {}
+  const arrivalDates = new Set<string>()
+  const lastNightDates = new Set<string>()
   for (const r of reservations) {
     try {
+      const arrival = parseISO(r.date_arrivee)
       const depart = parseISO(r.date_depart)
       const lastNight = new Date(depart.getTime() - 86400000)
-      const days = eachDayOfInterval({ start: parseISO(r.date_arrivee), end: lastNight })
+      if (lastNight < arrival) continue
+      const arrivalStr = format(arrival, 'yyyy-MM-dd')
+      const lastNightStr = format(lastNight, 'yyyy-MM-dd')
+      arrivalDates.add(arrivalStr)
+      lastNightDates.add(lastNightStr)
+      const days = eachDayOfInterval({ start: arrival, end: lastNight })
       days.forEach((d) => {
         const key = format(d, 'yyyy-MM-dd')
         dates.add(key)
@@ -55,7 +63,7 @@ function expandReservationDates(reservations: { date_arrivee: string; date_depar
       })
     } catch {}
   }
-  return { dates, map }
+  return { dates, map, arrivalDates, lastNightDates }
 }
 
 export default function CalendrierPage() {
@@ -67,6 +75,8 @@ export default function CalendrierPage() {
   const [month, setMonth] = useState(new Date())
   const [reservationDates, setReservationDates] = useState<Set<string>>(new Set())
   const [resDateMap, setResDateMap] = useState<Record<string, { voyageur_nom: string; plateforme: string | null }>>({})
+  const [arrivalDates, setArrivalDates] = useState<Set<string>>(new Set())
+  const [lastNightDates, setLastNightDates] = useState<Set<string>>(new Set())
   const [blockedDates, setBlockedDates] = useState<Set<string>>(new Set())
   const [upcomingRes, setUpcomingRes] = useState<Reservation[]>([])
   const [ownerToken, setOwnerToken] = useState<string | null>(null)
@@ -114,16 +124,18 @@ export default function CalendrierPage() {
       supabase.from('reservations')
         .select('id, voyageur_nom, date_arrivee, date_depart, plateforme, montant, statut')
         .eq('bien_id', selectedId)
-        .eq('statut', 'confirmee')
+        .in('statut', ['confirmee', 'terminee'])
         .gte('date_depart', todayStr)
         .lte('date_arrivee', in60days)
         .order('date_arrivee', { ascending: true })
         .limit(10),
     ])
 
-    const { dates: resDates, map: resMap } = expandReservationDates(resData ?? [])
+    const { dates: resDates, map: resMap, arrivalDates: arrivals, lastNightDates: lastNights } = expandReservationDates(resData ?? [])
     setReservationDates(resDates)
     setResDateMap(resMap)
+    setArrivalDates(arrivals)
+    setLastNightDates(lastNights)
     setBlockedDates(new Set((blockedData ?? []).map((d) => d.date)))
     setUpcomingRes(upcomingData ?? [])
     setLoadingCal(false)
@@ -197,11 +209,11 @@ export default function CalendrierPage() {
     return 'available'
   }
 
-  const statusStyle: Record<string, { bg: string; text: string; cursor: string }> = {
-    past:        { bg: '#F3F4F6', text: '#9CA3AF', cursor: 'default' },
-    reservation: { bg: '#FEE2E2', text: '#DC2626', cursor: 'default' },
-    blocked:     { bg: '#FEF3C7', text: '#D97706', cursor: 'pointer' },
-    available:   { bg: '#DCFCE7', text: '#15803D', cursor: 'pointer' },
+  const statusStyle: Record<string, { bg: string; text: string; cursor: string; border?: string }> = {
+    past:        { bg: '#F9FAFB', text: '#C0C5CC', cursor: 'default' },
+    reservation: { bg: '#C97B4B', text: '#FFFFFF', cursor: 'default' },
+    blocked:     { bg: '#FEF3C7', text: '#92400E', cursor: 'pointer', border: '1px solid #F59E0B40' },
+    available:   { bg: '#ECFDF5', text: '#065F46', cursor: 'pointer', border: '1px solid #10B98120' },
   }
 
   const selectedBien = biens.find((b) => b.id === selectedId)
@@ -248,10 +260,10 @@ export default function CalendrierPage() {
           {!loadingCal && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
               {[
-                { label: 'Nuits réservées', value: reservedNights, color: '#FEE2E2', textColor: '#DC2626' },
-                { label: 'Nuits bloquées', value: blockedNights, color: '#FEF3C7', textColor: '#D97706' },
-                { label: 'Nuits libres', value: freeNights, color: '#DCFCE7', textColor: '#15803D' },
-                { label: 'Taux d\'occupation', value: `${occupancyPct}%`, color: '#FEF9F6', textColor: '#C97B4B' },
+                { label: 'Nuits réservées', value: reservedNights, color: '#C97B4B', textColor: '#C97B4B' },
+                { label: 'Nuits bloquées', value: blockedNights, color: '#F59E0B', textColor: '#92400E' },
+                { label: 'Nuits libres', value: freeNights, color: '#10B981', textColor: '#065F46' },
+                { label: 'Taux d\'occupation', value: `${occupancyPct}%`, color: '#2C1A0E', textColor: '#2C1A0E' },
               ].map(({ label, value, color, textColor }) => (
                 <div key={label} className="bg-white rounded-2xl border border-brun/10 p-4 text-center">
                   <p className="text-2xl font-semibold mt-1" style={{ color: textColor, fontFamily: 'var(--font-dm-sans)' }}>{value}</p>
@@ -266,12 +278,21 @@ export default function CalendrierPage() {
           <div className="bg-white rounded-2xl border border-brun/10 p-6 mb-6">
             {/* Navigation mois */}
             <div className="flex items-center justify-between mb-6">
-              <button onClick={() => setMonth((m) => subMonths(m, 1))}
-                className="w-9 h-9 rounded-full border border-brun/15 flex items-center justify-center hover:border-terra hover:text-terra transition-all">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-              </button>
+              <div className="flex items-center gap-2">
+                <button onClick={() => setMonth((m) => subMonths(m, 1))}
+                  className="w-9 h-9 rounded-full border border-brun/15 flex items-center justify-center hover:border-terra hover:text-terra transition-all">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                </button>
+                {format(month, 'yyyy-MM') !== format(today, 'yyyy-MM') && (
+                  <button onClick={() => setMonth(new Date())}
+                    className="text-xs font-medium text-terra border border-terra/30 rounded-full px-3 py-1.5 hover:bg-terra hover:text-white transition-all"
+                    style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                    Aujourd&apos;hui
+                  </button>
+                )}
+              </div>
               <h2 className="text-xl text-brun capitalize" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
                 {format(month, 'MMMM yyyy', { locale: fr })}
               </h2>
@@ -313,28 +334,35 @@ export default function CalendrierPage() {
                   const isToggling = toggling === dateStr
                   const clickable = status === 'available' || status === 'blocked'
                   const resInfo = resDateMap[dateStr]
+                  const isArrival = arrivalDates.has(dateStr) && status === 'reservation'
+                  const isLastNight = lastNightDates.has(dateStr) && status === 'reservation'
 
                   return (
                     <button
                       key={dateStr}
                       disabled={!clickable || !!toggling}
                       onClick={() => clickable && handleDayClick(dateStr)}
-                      title={resInfo ? `${resInfo.voyageur_nom}${resInfo.plateforme ? ` (${resInfo.plateforme})` : ''}` : status === 'blocked' ? 'Bloqué — cliquer pour débloquer' : undefined}
-                      className={`group relative aspect-square rounded-xl flex flex-col items-center justify-center text-sm font-medium transition-all duration-150 ${isToggling ? 'opacity-50' : ''}`}
+                      title={resInfo ? `${resInfo.voyageur_nom}${resInfo.plateforme ? ` (${resInfo.plateforme})` : ''}${isArrival ? ' — Check-in' : ''}${isLastNight ? ' — Dernière nuit' : ''}` : status === 'blocked' ? 'Bloqué — cliquer pour débloquer' : undefined}
+                      className={`group relative aspect-square rounded-xl flex flex-col items-center justify-center text-sm font-medium transition-all duration-150 ${isToggling ? 'opacity-50' : ''} ${clickable ? 'hover:scale-105 hover:shadow-md' : ''}`}
                       style={{
-                        backgroundColor: style.bg,
+                        backgroundColor: isArrival ? '#A0623A' : style.bg,
                         color: style.text,
                         cursor: style.cursor,
                         fontFamily: 'var(--font-dm-sans)',
-                        outline: isToday ? '2.5px solid #C97B4B' : 'none',
-                        outlineOffset: '-2px',
+                        border: isToday ? '2.5px solid #2C1A0E' : (style.border ?? 'none'),
                       }}
                     >
                       {format(date, 'd')}
-                      {isToday && <span className="absolute -bottom-0.5 w-1.5 h-1.5 rounded-full bg-terra" />}
+                      {isArrival && (
+                        <span className="absolute top-0.5 right-1 text-[8px] text-white/80 font-bold leading-none">IN</span>
+                      )}
+                      {isLastNight && (
+                        <span className="absolute bottom-0.5 right-1 text-[8px] text-white/80 font-bold leading-none">OUT</span>
+                      )}
+                      {isToday && <span className="absolute -bottom-0.5 w-1.5 h-1.5 rounded-full bg-brun" />}
                       {resInfo && status === 'reservation' && (
-                        <span className="absolute opacity-0 group-hover:opacity-100 transition-opacity -top-8 left-1/2 -translate-x-1/2 bg-brun text-creme text-[10px] px-2 py-1 rounded-lg whitespace-nowrap z-10 pointer-events-none shadow-lg">
-                          {resInfo.voyageur_nom}
+                        <span className="absolute opacity-0 group-hover:opacity-100 transition-opacity -top-9 left-1/2 -translate-x-1/2 bg-brun text-creme text-[10px] px-2.5 py-1.5 rounded-lg whitespace-nowrap z-10 pointer-events-none shadow-lg">
+                          {resInfo.voyageur_nom}{resInfo.plateforme ? ` · ${resInfo.plateforme}` : ''}
                         </span>
                       )}
                     </button>
@@ -349,16 +377,17 @@ export default function CalendrierPage() {
             )}
 
             {/* Légende */}
-            <div className="flex flex-wrap gap-4 mt-6 pt-5 border-t border-brun/8">
+            <div className="flex flex-wrap gap-x-5 gap-y-2 mt-6 pt-5 border-t border-brun/8">
               {[
-                { color: '#DCFCE7', text: '#15803D', label: 'Disponible (cliquer pour bloquer)' },
-                { color: '#FEF3C7', text: '#D97706', label: 'Bloqué manuellement (cliquer pour débloquer)' },
-                { color: '#FEE2E2', text: '#DC2626', label: 'Réservation enregistrée' },
-                { color: '#F3F4F6', text: '#9CA3AF', label: 'Passé' },
-              ].map(({ color, text, label }) => (
-                <div key={label} className="flex items-center gap-2">
-                  <span className="w-4 h-4 rounded-md flex-shrink-0" style={{ backgroundColor: color, border: `1px solid ${text}30` }} />
-                  <span className="text-xs text-brun-mid/70" style={{ fontFamily: 'var(--font-dm-sans)' }}>{label}</span>
+                { color: '#ECFDF5', border: '#10B98140', label: 'Disponible' },
+                { color: '#FEF3C7', border: '#F59E0B40', label: 'Bloqué' },
+                { color: '#C97B4B', border: '#C97B4B', label: 'Réservé' },
+                { color: '#A0623A', border: '#A0623A', label: 'Check-in' },
+                { color: '#F9FAFB', border: '#C0C5CC40', label: 'Passé' },
+              ].map(({ color, border, label }) => (
+                <div key={label} className="flex items-center gap-1.5">
+                  <span className="w-3.5 h-3.5 rounded-md flex-shrink-0" style={{ backgroundColor: color, border: `1px solid ${border}` }} />
+                  <span className="text-[11px] text-brun-mid/60" style={{ fontFamily: 'var(--font-dm-sans)' }}>{label}</span>
                 </div>
               ))}
             </div>
@@ -384,14 +413,15 @@ export default function CalendrierPage() {
                   {nDays.map((date) => {
                     const dateStr = format(date, 'yyyy-MM-dd')
                     const hasRes = reservationDates.has(dateStr)
+                    const isBlocked = blockedDates.has(dateStr) && !hasRes
                     const isPast = isBefore(date, today)
                     return (
                       <div
                         key={dateStr}
                         className="aspect-square rounded-lg flex items-center justify-center text-[11px]"
                         style={{
-                          backgroundColor: isPast ? '#F3F4F6' : hasRes ? '#FEE2E2' : '#DCFCE7',
-                          color: isPast ? '#9CA3AF' : hasRes ? '#DC2626' : '#15803D',
+                          backgroundColor: isPast ? '#F9FAFB' : hasRes ? '#C97B4B' : isBlocked ? '#FEF3C7' : '#ECFDF5',
+                          color: isPast ? '#C0C5CC' : hasRes ? '#FFFFFF' : isBlocked ? '#92400E' : '#065F46',
                           fontFamily: 'var(--font-dm-sans)',
                         }}
                       >
@@ -495,55 +525,115 @@ export default function CalendrierPage() {
             )}
           </div>
 
-          {/* Réservations à venir — 60 jours */}
-          <div className="bg-white rounded-2xl border border-brun/10 p-6 mt-6">
-            <h3 className="text-xl text-brun mb-4" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
-              Réservations à venir — {selectedBien?.nom}
-            </h3>
-            {upcomingRes.length === 0 ? (
-              <p className="text-sm text-brun-mid/40 text-center py-6" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                Aucune réservation confirmée dans les 60 prochains jours.
-              </p>
-            ) : (
-              <div className="flex flex-col gap-3">
-                {upcomingRes.map((r) => {
-                  const arrivee = parseISO(r.date_arrivee)
-                  const depart = parseISO(r.date_depart)
-                  const nuits = Math.round((depart.getTime() - arrivee.getTime()) / 86400000)
-                  const platColor = PLAT_COLORS[r.plateforme ?? 'Direct'] ?? '#6B4C35'
-                  return (
-                    <div key={r.id} className="flex items-center gap-4 p-4 rounded-xl border border-brun/8 hover:bg-creme/40 transition-colors">
-                      {/* Dates */}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-brun truncate" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                          {r.voyageur_nom}
-                        </p>
-                        <p className="text-xs text-brun-mid/60 mt-0.5" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                          {format(arrivee, 'd MMM', { locale: fr })} → {format(depart, 'd MMM yyyy', { locale: fr })}
-                          {' · '}{nuits} nuit{nuits > 1 ? 's' : ''}
-                        </p>
+          {/* Réservations en cours & à venir — 60 jours */}
+          {(() => {
+            const todayStr = format(today, 'yyyy-MM-dd')
+            const enCours = upcomingRes.filter((r) => r.date_arrivee <= todayStr && r.date_depart > todayStr)
+            const aVenir = upcomingRes.filter((r) => r.date_arrivee > todayStr)
+            return (
+              <div className="bg-white rounded-2xl border border-brun/10 p-6 mt-6">
+                <h3 className="text-xl text-brun mb-4" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
+                  Réservations — {selectedBien?.nom}
+                </h3>
+                {upcomingRes.length === 0 ? (
+                  <p className="text-sm text-brun-mid/40 text-center py-6" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                    Aucune réservation dans les 60 prochains jours.
+                  </p>
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    {enCours.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                          <p className="text-xs font-semibold text-green-700 uppercase tracking-wider" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                            En cours
+                          </p>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          {enCours.map((r) => {
+                            const arrivee = parseISO(r.date_arrivee)
+                            const depart = parseISO(r.date_depart)
+                            const nuits = Math.round((depart.getTime() - arrivee.getTime()) / 86400000)
+                            const nuitsRestantes = Math.round((depart.getTime() - today.getTime()) / 86400000)
+                            const platColor = PLAT_COLORS[r.plateforme ?? 'Direct'] ?? '#6B4C35'
+                            return (
+                              <div key={r.id} className="flex items-center gap-4 p-4 rounded-xl border-2 border-green-200 bg-green-50/50">
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-brun truncate" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                                    {r.voyageur_nom}
+                                  </p>
+                                  <p className="text-xs text-brun-mid/60 mt-0.5" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                                    {format(arrivee, 'd MMM', { locale: fr })} → {format(depart, 'd MMM yyyy', { locale: fr })}
+                                    {' · '}{nuits} nuit{nuits > 1 ? 's' : ''}
+                                    {' · '}<span className="text-green-700 font-medium">Check-out dans {nuitsRestantes}j</span>
+                                  </p>
+                                </div>
+                                {r.plateforme && (
+                                  <span className="text-xs font-medium text-white px-2.5 py-1 rounded-full flex-shrink-0"
+                                    style={{ backgroundColor: platColor, fontFamily: 'var(--font-dm-sans)' }}>
+                                    {r.plateforme}
+                                  </span>
+                                )}
+                                {isSuperAdmin && r.montant && (
+                                  <span className="text-sm font-semibold text-brun flex-shrink-0" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                                    {r.montant.toLocaleString('fr-FR')} MAD
+                                  </span>
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
                       </div>
-                      {/* Plateforme */}
-                      {r.plateforme && (
-                        <span
-                          className="text-xs font-medium text-white px-2.5 py-1 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: platColor, fontFamily: 'var(--font-dm-sans)' }}
-                        >
-                          {r.plateforme}
-                        </span>
-                      )}
-                      {/* Montant */}
-                      {isSuperAdmin && r.montant && (
-                        <span className="text-sm font-semibold text-brun flex-shrink-0" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                          {r.montant.toLocaleString('fr-FR')} MAD
-                        </span>
-                      )}
-                    </div>
-                  )
-                })}
+                    )}
+                    {aVenir.length > 0 && (
+                      <div>
+                        {enCours.length > 0 && (
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="w-2 h-2 rounded-full bg-terra" />
+                            <p className="text-xs font-semibold text-terra uppercase tracking-wider" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                              À venir
+                            </p>
+                          </div>
+                        )}
+                        <div className="flex flex-col gap-2">
+                          {aVenir.map((r) => {
+                            const arrivee = parseISO(r.date_arrivee)
+                            const depart = parseISO(r.date_depart)
+                            const nuits = Math.round((depart.getTime() - arrivee.getTime()) / 86400000)
+                            const platColor = PLAT_COLORS[r.plateforme ?? 'Direct'] ?? '#6B4C35'
+                            return (
+                              <div key={r.id} className="flex items-center gap-4 p-4 rounded-xl border border-brun/8 hover:bg-creme/40 transition-colors">
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-brun truncate" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                                    {r.voyageur_nom}
+                                  </p>
+                                  <p className="text-xs text-brun-mid/60 mt-0.5" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                                    {format(arrivee, 'd MMM', { locale: fr })} → {format(depart, 'd MMM yyyy', { locale: fr })}
+                                    {' · '}{nuits} nuit{nuits > 1 ? 's' : ''}
+                                  </p>
+                                </div>
+                                {r.plateforme && (
+                                  <span className="text-xs font-medium text-white px-2.5 py-1 rounded-full flex-shrink-0"
+                                    style={{ backgroundColor: platColor, fontFamily: 'var(--font-dm-sans)' }}>
+                                    {r.plateforme}
+                                  </span>
+                                )}
+                                {isSuperAdmin && r.montant && (
+                                  <span className="text-sm font-semibold text-brun flex-shrink-0" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                                    {r.montant.toLocaleString('fr-FR')} MAD
+                                  </span>
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            )
+          })()}
         </>
       )}
     </div>
