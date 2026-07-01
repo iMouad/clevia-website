@@ -16,6 +16,8 @@ type Reservation = {
   plateforme: string | null
   montant: number | null
   taux_commission: number
+  commission_fixe: number | null
+  intermediaire: string | null
   statut: string
   notes: string | null
   created_at: string
@@ -26,7 +28,7 @@ type Bien = { id: string; nom: string }
 
 const EMPTY_RES: Partial<Reservation> = {
   voyageur_nom: '', voyageur_email: '', voyageur_phone: '', date_arrivee: '', date_depart: '',
-  plateforme: 'Airbnb', montant: null, taux_commission: 20, statut: 'confirmee', notes: '',
+  plateforme: 'Airbnb', montant: null, taux_commission: 20, commission_fixe: null, intermediaire: null, statut: 'confirmee', notes: '',
 }
 const PLATF = ['Airbnb', 'Booking', 'Avito', 'Facebook', 'Direct']
 const STATUT_LABELS: Record<string, string> = { confirmee: 'Confirmée', annulee: 'Annulée', terminee: 'Terminée' }
@@ -47,6 +49,12 @@ const MOIS_FR = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet
 function nuits(d1: string, d2: string) {
   if (!d1 || !d2) return 0
   return Math.max(0, Math.round((new Date(d2).getTime() - new Date(d1).getTime()) / 86400000))
+}
+
+function calcCommission(r: { montant?: number | null; taux_commission?: number; commission_fixe?: number | null }) {
+  if (r.commission_fixe != null && r.commission_fixe > 0) return r.commission_fixe
+  if (r.montant && r.taux_commission) return r.montant * r.taux_commission / 100
+  return 0
 }
 
 function Modal({ open, onClose, children }: { open: boolean; onClose: () => void; children: React.ReactNode }) {
@@ -178,11 +186,12 @@ export default function ReservationsPage() {
 
   function exportCSV() {
     const headers = isSuperAdmin
-      ? ['Voyageur', 'Email', 'Téléphone', 'Bien', 'Arrivée', 'Départ', 'Nuits', 'Plateforme', 'Montant MAD', 'Commission MAD', 'Taux %', 'Statut', 'Notes']
-      : ['Voyageur', 'Email', 'Bien', 'Arrivée', 'Départ', 'Nuits', 'Plateforme', 'Statut', 'Notes']
+      ? ['Voyageur', 'Intermédiaire', 'Email', 'Téléphone', 'Bien', 'Arrivée', 'Départ', 'Nuits', 'Plateforme', 'Montant MAD', 'Commission MAD', 'Statut', 'Notes']
+      : ['Voyageur', 'Intermédiaire', 'Email', 'Bien', 'Arrivée', 'Départ', 'Nuits', 'Plateforme', 'Statut', 'Notes']
     const csvRows = filtered.map((r) => {
       const row: (string | number | null)[] = [
         r.voyageur_nom,
+        r.intermediaire ?? '',
         r.voyageur_email ?? '',
         ...(isSuperAdmin ? [r.voyageur_phone ?? ''] : []),
         (r as any).biens?.nom ?? '',
@@ -192,8 +201,7 @@ export default function ReservationsPage() {
         r.plateforme ?? '',
         ...(isSuperAdmin ? [
           r.montant ?? '',
-          r.montant ? (r.montant * r.taux_commission / 100).toFixed(2) : '',
-          r.taux_commission,
+          r.montant ? calcCommission(r).toFixed(2) : '',
         ] : []),
         STATUT_LABELS[r.statut] ?? r.statut,
         r.notes ?? '',
@@ -233,7 +241,7 @@ export default function ReservationsPage() {
       totalNuits += Math.max(0, Math.round((ce.getTime() - cs.getTime()) / 86400000))
     }
     const totalMontant = resRapport.reduce((s, r) => s + (r.montant ?? 0), 0)
-    const totalCommission = resRapport.reduce((s, r) => s + (r.montant ? r.montant * r.taux_commission / 100 : 0), 0)
+    const totalCommission = resRapport.reduce((s, r) => s + calcCommission(r), 0)
     const tauxOccupation = daysInMonth > 0 ? Math.round((totalNuits / daysInMonth) * 100) : 0
     return { bien, resRapport, totalNuits, totalMontant, totalCommission, tauxOccupation, daysInMonth }
   }
@@ -251,7 +259,7 @@ export default function ReservationsPage() {
         <td>${r.voyageur_nom}</td>
         <td>${r.plateforme ?? '—'}</td>
         <td>${r.montant ? r.montant.toLocaleString('fr-MA') + ' MAD' : '—'}</td>
-        <td>${r.montant && r.taux_commission ? Math.round(r.montant * r.taux_commission / 100).toLocaleString('fr-MA') + ' MAD' : '—'}</td>
+        <td>${r.montant ? Math.round(calcCommission(r)).toLocaleString('fr-MA') + ' MAD' : '—'}</td>
         <td>${STATUT_LABELS[r.statut] ?? r.statut}</td>
       </tr>`).join('')
     const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>${titre}</title><style>
@@ -306,9 +314,8 @@ export default function ReservationsPage() {
     if (w) { w.document.write(html); w.document.close() }
   }
 
-  const commission = editing.montant && editing.taux_commission
-    ? (editing.montant * editing.taux_commission / 100).toFixed(2)
-    : '—'
+  const commissionVal = calcCommission(editing)
+  const commission = commissionVal > 0 ? commissionVal.toFixed(2) : '—'
 
   const inputClass = 'w-full border border-brun/20 rounded-xl px-3 py-2.5 text-sm text-brun focus:outline-none focus:border-terra focus:ring-1 focus:ring-terra transition-colors'
   const labelClass = 'block text-xs font-medium text-brun-mid mb-1.5 uppercase tracking-wide'
@@ -388,7 +395,10 @@ export default function ReservationsPage() {
         ) : filtered.map((r) => (
           <div key={r.id} className="bg-white rounded-2xl border border-brun/10 p-4">
             <div className="flex items-center justify-between gap-2 mb-1">
-              <p className="font-medium text-brun text-sm truncate" style={{ fontFamily: 'var(--font-dm-sans)' }}>{r.voyageur_nom}</p>
+              <div className="truncate">
+                <p className="font-medium text-brun text-sm truncate" style={{ fontFamily: 'var(--font-dm-sans)' }}>{r.voyageur_nom}</p>
+                {r.intermediaire && <p className="text-[10px] text-brun-mid/50" style={{ fontFamily: 'var(--font-dm-sans)' }}>via {r.intermediaire}</p>}
+              </div>
               <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${STATUT_COLORS[r.statut]}`}>
                 {STATUT_LABELS[r.statut] ?? r.statut}
               </span>
@@ -412,7 +422,7 @@ export default function ReservationsPage() {
                   <>
                     <span className="text-sm font-medium text-brun" style={{ fontFamily: 'var(--font-dm-sans)' }}>{r.montant} MAD</span>
                     <span className="text-xs text-terra" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                      {r.taux_commission === 0 ? 'Sans commission' : `Commission : ${(r.montant * r.taux_commission / 100).toFixed(0)} MAD`}
+                      {calcCommission(r) === 0 ? 'Sans commission' : `Commission : ${calcCommission(r).toFixed(0)} MAD`}
                     </span>
                   </>
                 ) : (
@@ -456,7 +466,10 @@ export default function ReservationsPage() {
                 <tr><td colSpan={isSuperAdmin ? 10 : 8} className="px-4 py-10 text-center text-brun-mid/50">Aucune réservation</td></tr>
               ) : filtered.map((r) => (
                 <tr key={r.id} className="hover:bg-creme/40 transition-colors">
-                  <td className="px-3 py-3 text-brun font-medium whitespace-nowrap">{r.voyageur_nom}</td>
+                  <td className="px-3 py-3 whitespace-nowrap">
+                    <span className="text-brun font-medium">{r.voyageur_nom}</span>
+                    {r.intermediaire && <span className="block text-[10px] text-brun-mid/50">via {r.intermediaire}</span>}
+                  </td>
                   <td className="px-3 py-3 text-brun-mid">{(r as any).biens?.nom ?? '—'}</td>
                   <td className="px-3 py-3 text-brun-mid whitespace-nowrap">{format(new Date(r.date_arrivee), 'dd/MM/yy')}</td>
                   <td className="px-3 py-3 text-brun-mid whitespace-nowrap">{format(new Date(r.date_depart), 'dd/MM/yy')}</td>
@@ -471,9 +484,9 @@ export default function ReservationsPage() {
                       <td className="px-3 py-3 text-brun-mid whitespace-nowrap">{r.montant ? `${r.montant} MAD` : '—'}</td>
                       <td className="px-3 py-3 font-medium text-terra whitespace-nowrap">
                         {r.montant
-                          ? r.taux_commission === 0
+                          ? calcCommission(r) === 0
                             ? <span className="text-brun-mid/40 font-normal text-xs">Sans</span>
-                            : `${(r.montant * r.taux_commission / 100).toFixed(0)} MAD`
+                            : `${calcCommission(r).toFixed(0)} MAD`
                           : '—'}
                       </td>
                     </>
@@ -561,36 +574,58 @@ export default function ReservationsPage() {
                   <input type="number" min={0} className={inputClass} value={editing.montant ?? ''} onChange={(e) => setEditing((p) => ({ ...p, montant: Number(e.target.value) || null }))} placeholder="1500" />
                 </div>
                 <div>
-                  <label className={labelClass}>Commission (%)</label>
+                  <label className={labelClass}>Commission</label>
                   <div className="flex gap-1.5 mb-1.5">
                     {[0, 20, 25].map((v) => (
                       <button key={v} type="button"
-                        onClick={() => setEditing((p) => ({ ...p, taux_commission: v }))}
-                        className={`text-xs rounded-lg px-2.5 py-1 font-medium transition-all ${editing.taux_commission === v ? 'bg-terra text-creme' : 'bg-brun/8 text-brun-mid hover:bg-terra/20'}`}
+                        onClick={() => setEditing((p) => ({ ...p, taux_commission: v, commission_fixe: null }))}
+                        className={`text-xs rounded-lg px-2.5 py-1 font-medium transition-all ${editing.commission_fixe == null && editing.taux_commission === v ? 'bg-terra text-creme' : 'bg-brun/8 text-brun-mid hover:bg-terra/20'}`}
                       >
                         {v === 0 ? 'Sans' : `${v}%`}
                       </button>
                     ))}
+                    <button type="button"
+                      onClick={() => setEditing((p) => ({ ...p, commission_fixe: p.commission_fixe ?? 0, taux_commission: 0 }))}
+                      className={`text-xs rounded-lg px-2.5 py-1 font-medium transition-all ${editing.commission_fixe != null ? 'bg-terra text-creme' : 'bg-brun/8 text-brun-mid hover:bg-terra/20'}`}
+                    >
+                      Fixe
+                    </button>
                   </div>
-                  <input
-                    type="number" min={0} max={100} step={0.5}
-                    className={inputClass}
-                    value={editing.taux_commission ?? ''}
-                    onChange={(e) => setEditing((p) => ({ ...p, taux_commission: Number(e.target.value) }))}
-                    placeholder="Taux %"
-                  />
+                  {editing.commission_fixe != null ? (
+                    <input
+                      type="number" min={0}
+                      className={inputClass}
+                      value={editing.commission_fixe ?? ''}
+                      onChange={(e) => setEditing((p) => ({ ...p, commission_fixe: Number(e.target.value) || null }))}
+                      placeholder="Montant fixe en MAD"
+                    />
+                  ) : (
+                    <input
+                      type="number" min={0} max={100} step={0.5}
+                      className={inputClass}
+                      value={editing.taux_commission ?? ''}
+                      onChange={(e) => setEditing((p) => ({ ...p, taux_commission: Number(e.target.value) }))}
+                      placeholder="Taux %"
+                    />
+                  )}
                 </div>
               </div>
               {editing.montant != null && editing.montant > 0 && (
                 <div className="bg-terra/10 rounded-xl px-4 py-3 text-sm">
-                  {editing.taux_commission === 0
+                  {commissionVal === 0
                     ? <span className="text-brun-mid">Sans commission</span>
-                    : <><span className="text-brun-mid">Commission ({editing.taux_commission}%) : </span><span className="text-terra font-medium">{commission} MAD</span></>
+                    : editing.commission_fixe != null
+                      ? <><span className="text-brun-mid">Commission fixe : </span><span className="text-terra font-medium">{commission} MAD</span></>
+                      : <><span className="text-brun-mid">Commission ({editing.taux_commission}%) : </span><span className="text-terra font-medium">{commission} MAD</span></>
                   }
                 </div>
               )}
             </>
           )}
+          <div>
+            <label className={labelClass}>Intermédiaire</label>
+            <input className={inputClass} value={editing.intermediaire ?? ''} onChange={(e) => setEditing((p) => ({ ...p, intermediaire: e.target.value || null }))} placeholder="Nom de l'intermédiaire (optionnel)" />
+          </div>
           <div>
             <label className={labelClass}>Notes</label>
             <textarea className={`${inputClass} resize-none`} rows={2} value={editing.notes ?? ''} onChange={(e) => setEditing((p) => ({ ...p, notes: e.target.value }))} placeholder="Remarques éventuelles..." />
@@ -695,7 +730,7 @@ export default function ReservationsPage() {
                                 </td>
                                 <td className="px-3 py-2 text-brun-mid whitespace-nowrap">{r.montant ? `${r.montant} MAD` : '—'}</td>
                                 <td className="px-3 py-2 font-medium text-terra whitespace-nowrap">
-                                  {r.montant && r.taux_commission ? `${Math.round(r.montant * r.taux_commission / 100)} MAD` : '—'}
+                                  {r.montant ? `${Math.round(calcCommission(r))} MAD` : '—'}
                                 </td>
                               </tr>
                             ))}

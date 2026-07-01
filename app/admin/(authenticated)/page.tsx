@@ -64,7 +64,7 @@ export default async function AdminDashboard() {
   ] = await Promise.all([
     supabase.from('biens').select('id,nom', { count: 'exact' }).eq('statut', 'actif'),
     supabase.from('reservations').select('*', { count: 'exact', head: true }).gt('date_depart', monthStart).lte('date_arrivee', monthEnd).in('statut', ['confirmee', 'terminee']),
-    supabase.from('reservations').select('bien_id,date_arrivee,date_depart,montant,taux_commission').gt('date_depart', monthStart).lte('date_arrivee', monthEnd).in('statut', ['confirmee', 'terminee']),
+    supabase.from('reservations').select('bien_id,date_arrivee,date_depart,montant,taux_commission,commission_fixe').gt('date_depart', monthStart).lte('date_arrivee', monthEnd).in('statut', ['confirmee', 'terminee']),
     supabase.from('contacts').select('*').eq('traite', false).order('created_at', { ascending: false }).limit(5),
     supabase.from('biens_visites').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
     supabase.from('vente_visites').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
@@ -80,7 +80,8 @@ export default async function AdminDashboard() {
   for (const r of reservationsData ?? []) {
     const montant = Number(r.montant ?? 0)
     revenusTotal += montant
-    commissionsTotal += montant * (Number(r.taux_commission ?? 0) / 100)
+    const fixe = Number(r.commission_fixe ?? 0)
+    commissionsTotal += fixe > 0 ? fixe : montant * (Number(r.taux_commission ?? 0) / 100)
     const d1 = new Date(r.date_arrivee)
     const d2 = new Date(r.date_depart)
     const clampedStart = d1 < mStart ? mStart : d1
