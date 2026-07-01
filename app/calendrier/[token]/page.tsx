@@ -36,9 +36,12 @@ function expandDates(reservations: Reservation[]): Set<string> {
   const set = new Set<string>()
   for (const r of reservations) {
     try {
+      const depart = parseISO(r.date_depart)
+      const lastNight = new Date(depart.getTime() - 86400000)
+      if (lastNight < parseISO(r.date_arrivee)) continue
       const days = eachDayOfInterval({
         start: parseISO(r.date_arrivee),
-        end: parseISO(r.date_depart),
+        end: lastNight,
       })
       days.forEach((d) => set.add(format(d, 'yyyy-MM-dd')))
     } catch {}

@@ -45,7 +45,9 @@ function expandReservationDates(reservations: { date_arrivee: string; date_depar
   const map: Record<string, ResInfo> = {}
   for (const r of reservations) {
     try {
-      const days = eachDayOfInterval({ start: parseISO(r.date_arrivee), end: parseISO(r.date_depart) })
+      const depart = parseISO(r.date_depart)
+      const lastNight = new Date(depart.getTime() - 86400000)
+      const days = eachDayOfInterval({ start: parseISO(r.date_arrivee), end: lastNight })
       days.forEach((d) => {
         const key = format(d, 'yyyy-MM-dd')
         dates.add(key)
