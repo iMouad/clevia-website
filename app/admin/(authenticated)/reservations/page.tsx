@@ -79,6 +79,7 @@ export default function ReservationsPage() {
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Partial<Reservation>>(EMPTY_RES)
+  const [initialEditing, setInitialEditing] = useState<string>('')
   const [saving, setSaving] = useState(false)
   const [filterStatut, setFilterStatut] = useState('')
   const [filterPlatf, setFilterPlatf] = useState('')
@@ -174,9 +175,23 @@ export default function ReservationsPage() {
 
   const sortIcon = (col: string) => sortCol === col ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ''
 
-  function openAdd() { setEditing({ ...EMPTY_RES, bien_id: biens[0]?.id ?? null }); setModalOpen(true) }
-  function openEdit(r: Reservation) { setEditing({ ...r }); setModalOpen(true) }
-  function closeModal() { setModalOpen(false); setEditing(EMPTY_RES) }
+  function openModal(data: Partial<Reservation>) {
+    setEditing(data)
+    setInitialEditing(JSON.stringify(data))
+    setModalOpen(true)
+  }
+  function openAdd() { openModal({ ...EMPTY_RES, bien_id: biens[0]?.id ?? null }) }
+  function openEdit(r: Reservation) { openModal({ ...r }) }
+  function openDuplicate(r: Reservation) {
+    const { id, created_at, statut, ...rest } = r as any
+    openModal({ ...rest, id: undefined, created_at: undefined, statut: 'confirmee', date_arrivee: '', date_depart: '', notes: '' })
+  }
+  function closeModal(force = false) {
+    if (!force && JSON.stringify(editing) !== initialEditing) {
+      if (!confirm('Des modifications non sauvegardées seront perdues. Fermer quand même ?')) return
+    }
+    setModalOpen(false); setEditing(EMPTY_RES)
+  }
 
   async function syncVoyageur(res: Partial<Reservation>, isNew: boolean) {
     if (!res.voyageur_nom) return
@@ -243,7 +258,7 @@ export default function ReservationsPage() {
       await supabase.from('reservations').insert(fields)
     }
     await syncVoyageur(editing, isNew)
-    setSaving(false); closeModal(); fetchData()
+    setSaving(false); closeModal(true); fetchData()
     showToast(isNew ? 'Réservation ajoutée' : 'Réservation modifiée')
   }
 
@@ -519,14 +534,18 @@ export default function ReservationsPage() {
                 )}
               </div>
             )}
-            <div className="flex gap-3 pt-3 border-t border-brun/8">
+            <div className="flex gap-2 pt-3 border-t border-brun/8">
               <button onClick={() => openEdit(r)} className="flex-1 flex items-center justify-center gap-1.5 bg-terra/10 text-terra text-sm font-medium rounded-xl py-2 hover:bg-terra/20 transition-all" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                 Modifier
               </button>
+              <button onClick={() => openDuplicate(r)} className="flex-1 flex items-center justify-center gap-1.5 bg-brun/5 text-brun-mid text-sm font-medium rounded-xl py-2 hover:bg-brun/10 transition-all" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" /></svg>
+                Dupliquer
+              </button>
               <button onClick={() => handleDelete(r.id)} className="flex-1 flex items-center justify-center gap-1.5 bg-red-50 text-red-500 text-sm font-medium rounded-xl py-2 hover:bg-red-100 transition-all" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2" /></svg>
-                Supprimer
+                Suppr.
               </button>
             </div>
           </div>
@@ -604,6 +623,7 @@ export default function ReservationsPage() {
                   <td className="px-3 py-3">
                     <div className="flex gap-2">
                       <button onClick={() => openEdit(r)} className="text-terra text-xs underline underline-offset-2">Modifier</button>
+                      <button onClick={() => openDuplicate(r)} className="text-brun-mid text-xs underline underline-offset-2">Dupliquer</button>
                       <button onClick={() => handleDelete(r.id)} className="text-red-400 text-xs underline underline-offset-2">Suppr.</button>
                     </div>
                   </td>
@@ -676,12 +696,12 @@ export default function ReservationsPage() {
       )}
 
       {/* Modal réservation */}
-      <Modal open={modalOpen} onClose={closeModal}>
+      <Modal open={modalOpen} onClose={() => closeModal()}>
         <div className="p-5 border-b border-brun/10 flex items-center justify-between">
           <h2 className="text-xl text-brun" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
             {editing.id ? 'Modifier' : 'Nouvelle réservation'}
           </h2>
-          <button onClick={closeModal} className="text-brun-mid hover:text-brun">
+          <button onClick={() => closeModal()} className="text-brun-mid hover:text-brun">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 4l12 12M16 4L4 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
           </button>
         </div>
@@ -800,7 +820,7 @@ export default function ReservationsPage() {
           </div>
         </div>
         <div className="p-5 border-t border-brun/10 flex justify-end gap-3">
-          <button onClick={closeModal} className="border border-brun/20 text-brun-mid text-sm font-medium rounded-full px-5 py-2 hover:bg-brun/5 transition-all">Annuler</button>
+          <button onClick={() => closeModal()} className="border border-brun/20 text-brun-mid text-sm font-medium rounded-full px-5 py-2 hover:bg-brun/5 transition-all">Annuler</button>
           <button onClick={handleSave} disabled={saving || !editing.voyageur_nom} className="bg-terra text-creme text-sm font-medium rounded-full px-5 py-2 hover:bg-brun transition-all disabled:opacity-50">
             {saving ? 'Sauvegarde…' : 'Sauvegarder'}
           </button>

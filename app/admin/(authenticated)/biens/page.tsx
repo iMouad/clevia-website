@@ -160,6 +160,7 @@ export default function BiensPage() {
   const [periode, setPeriode] = useState<'7j' | '30j' | 'tout'>('tout')
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Partial<Bien>>(EMPTY)
+  const [initialEditing, setInitialEditing] = useState<string>('')
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
@@ -204,9 +205,14 @@ export default function BiensPage() {
 
   useEffect(() => { fetchBiens() }, [])
 
-  function openAdd() { setEditing(EMPTY); setModalOpen(true) }
-  function openEdit(b: Bien) { setEditing({ ...b }); setModalOpen(true) }
-  function closeModal() { setModalOpen(false); setEditing(EMPTY) }
+  function openAdd() { setEditing(EMPTY); setInitialEditing(JSON.stringify(EMPTY)); setModalOpen(true) }
+  function openEdit(b: Bien) { const data = { ...b }; setEditing(data); setInitialEditing(JSON.stringify(data)); setModalOpen(true) }
+  function closeModal(force = false) {
+    if (!force && JSON.stringify(editing) !== initialEditing) {
+      if (!confirm('Des modifications non sauvegardées seront perdues. Fermer quand même ?')) return
+    }
+    setModalOpen(false); setEditing(EMPTY)
+  }
 
   async function handleSave() {
     const nom = (editing.nom ?? '').trim()
@@ -228,7 +234,7 @@ export default function BiensPage() {
         }
         showToast('Bien ajouté avec succès.')
       }
-      closeModal()
+      closeModal(true)
       fetchBiens()
     } catch (err: any) {
       showToast(`Erreur : ${err.message ?? 'Échec de la sauvegarde'}`, 'error')
@@ -725,12 +731,12 @@ export default function BiensPage() {
       </div>
 
       {/* Modal */}
-      <Modal open={modalOpen} onClose={closeModal}>
+      <Modal open={modalOpen} onClose={() => closeModal()}>
         <div className="p-6 border-b border-brun/10 flex items-center justify-between">
           <h2 className="text-xl text-brun" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
             {editing.id ? 'Modifier le bien' : 'Nouveau bien'}
           </h2>
-          <button onClick={closeModal} className="text-brun-mid hover:text-brun">
+          <button onClick={() => closeModal()} className="text-brun-mid hover:text-brun">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 4l12 12M16 4L4 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
           </button>
         </div>
@@ -981,7 +987,7 @@ export default function BiensPage() {
         </div>
 
         <div className="p-6 border-t border-brun/10 flex justify-end gap-3">
-          <button onClick={closeModal} className="border border-brun/20 text-brun-mid text-sm font-medium rounded-full px-6 py-2.5 hover:bg-brun/5 transition-all">Annuler</button>
+          <button onClick={() => closeModal()} className="border border-brun/20 text-brun-mid text-sm font-medium rounded-full px-6 py-2.5 hover:bg-brun/5 transition-all">Annuler</button>
           <button onClick={handleSave} disabled={saving || !editing.nom} className="bg-terra text-creme text-sm font-medium rounded-full px-6 py-2.5 hover:bg-brun transition-all disabled:opacity-50">
             {saving ? 'Sauvegarde…' : 'Sauvegarder'}
           </button>

@@ -85,6 +85,7 @@ export default function CalendrierPage() {
   const [loadingCal, setLoadingCal] = useState(false)
   const [loadingToken, setLoadingToken] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [copiedPlanning, setCopiedPlanning] = useState(false)
   const [toggling, setToggling] = useState<string | null>(null)
   const [rangeStart, setRangeStart] = useState<string | null>(null)
   const [rangeMode, setRangeMode] = useState(false)
@@ -273,6 +274,51 @@ export default function CalendrierPage() {
   const occupancyPct = daysInMonth > 0 ? Math.round((reservedNights / daysInMonth) * 100) : 0
   const freeNights = daysInMonth - reservedNights - blockedNights
 
+  function copyPlanning() {
+    if (!selectedBien) return
+    const monthLabel = format(month, 'MMMM yyyy', { locale: fr })
+    const lines: string[] = [`📅 Planning ${selectedBien.nom} — ${monthLabel}`, '']
+
+    const grouped: { type: string; start: string; end: string; info?: string }[] = []
+    let current: { type: string; start: string; end: string; info?: string } | null = null
+
+    for (const date of days) {
+      const dateStr = format(date, 'yyyy-MM-dd')
+      const dateLabel = format(date, 'dd/MM')
+      let type = 'libre'
+      let info = ''
+      if (reservationDates.has(dateStr)) {
+        type = 'réservé'
+        const ri = resDateMap[dateStr]
+        info = ri ? ri.voyageur_nom : ''
+      } else if (blockedDates.has(dateStr)) {
+        type = 'bloqué'
+      }
+
+      if (current && current.type === type && current.info === info) {
+        current.end = dateLabel
+      } else {
+        if (current) grouped.push(current)
+        current = { type, start: dateLabel, end: dateLabel, info }
+      }
+    }
+    if (current) grouped.push(current)
+
+    for (const g of grouped) {
+      const range = g.start === g.end ? g.start : `${g.start} → ${g.end}`
+      const icon = g.type === 'réservé' ? '🔴' : g.type === 'bloqué' ? '🟡' : '🟢'
+      const suffix = g.info ? ` (${g.info})` : ''
+      lines.push(`${icon} ${range} — ${g.type}${suffix}`)
+    }
+
+    lines.push('', `✅ ${reservedNights} réservées · ⛔ ${blockedNights} bloquées · 🟢 ${freeNights} libres`)
+    lines.push(`📊 Taux d'occupation : ${occupancyPct}%`)
+
+    navigator.clipboard.writeText(lines.join('\n'))
+    setCopiedPlanning(true)
+    setTimeout(() => setCopiedPlanning(false), 2500)
+  }
+
   const PLAT_COLORS: Record<string, string> = {
     Airbnb:  '#FF5A5F',
     Booking: '#003580',
@@ -316,6 +362,29 @@ export default function CalendrierPage() {
                   <div className="h-1 rounded-full mt-3" style={{ backgroundColor: color }} />
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Bouton Copier planning */}
+          {!loadingCal && (
+            <div className="flex justify-end mb-3">
+              <button
+                onClick={copyPlanning}
+                className="flex items-center gap-1.5 text-xs font-medium rounded-full px-4 py-2 border border-brun/20 text-brun-mid hover:border-terra hover:text-terra transition-all"
+                style={{ fontFamily: 'var(--font-dm-sans)' }}
+              >
+                {copiedPlanning ? (
+                  <>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5" strokeLinecap="round" /></svg>
+                    Copié !
+                  </>
+                ) : (
+                  <>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" /></svg>
+                    Copier planning WhatsApp
+                  </>
+                )}
+              </button>
             </div>
           )}
 
@@ -439,6 +508,11 @@ export default function CalendrierPage() {
               {rangeMode && !rangeStart && (
                 <span className="text-xs text-brun-mid/50" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                   Cliquez la date de début
+                </span>
+              )}
+              {rangeMode && (
+                <span className="text-[11px] text-brun-mid/40 border-l border-brun/10 pl-3 ml-1" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                  {blockedNights} bloquée{blockedNights > 1 ? 's' : ''} ce mois
                 </span>
               )}
               {[
