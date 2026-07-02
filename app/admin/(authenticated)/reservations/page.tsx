@@ -92,6 +92,13 @@ export default function ReservationsPage() {
   const [rapportGenere, setRapportGenere] = useState(false)
   const [isSuperAdmin, setIsSuperAdmin] = useState(false)
   const [plateformes, setPlateformes] = useState<Plateforme[]>([])
+  const [userEmail, setUserEmail] = useState('')
+  const [commentaires, setCommentaires] = useState<{ id: string; contenu: string; auteur_email: string | null; created_at: string }[]>([])
+  const [newComment, setNewComment] = useState('')
+  const [savingComment, setSavingComment] = useState(false)
+  const [historiqueOpen, setHistoriqueOpen] = useState(false)
+  const [historique, setHistorique] = useState<{ id: string; action: string; changes: any; user_email: string | null; created_at: string }[]>([])
+  const [historiqueLoading, setHistoriqueLoading] = useState(false)
 
   const platNames = plateformes.filter((p) => p.actif).map((p) => p.nom)
   const platColorMap: Record<string, string> = {}
@@ -119,6 +126,7 @@ export default function ReservationsPage() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       setIsSuperAdmin(user?.app_metadata?.role !== 'admin')
+      setUserEmail(user?.email ?? '')
     })
     supabase.from('plateformes').select('*').eq('actif', true).order('ordre').then(({ data }) => {
       setPlateformes(data ?? [])
@@ -183,7 +191,7 @@ export default function ReservationsPage() {
     setModalOpen(true)
   }
   function openAdd() { openModal({ ...EMPTY_RES, bien_id: biens[0]?.id ?? null }) }
-  function openEdit(r: Reservation) { openModal({ ...r }) }
+  function openEdit(r: Reservation) { openModal({ ...r }); fetchCommentaires(r.id) }
   function openDuplicate(r: Reservation) {
     const { id, created_at, statut, ...rest } = r as any
     openModal({ ...rest, id: undefined, created_at: undefined, statut: 'confirmee', date_arrivee: '', date_depart: '', notes: '' })
@@ -192,7 +200,7 @@ export default function ReservationsPage() {
     if (!force && JSON.stringify(editing) !== initialEditing) {
       if (!confirm('Des modifications non sauvegardées seront perdues. Fermer quand même ?')) return
     }
-    setModalOpen(false); setEditing(EMPTY_RES)
+    setModalOpen(false); setEditing(EMPTY_RES); setCommentaires([]); setNewComment('')
   }
 
   async function syncVoyageur(res: Partial<Reservation>, isNew: boolean) {
@@ -235,6 +243,114 @@ export default function ReservationsPage() {
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(''), 3000) }
 
+  async function fetchCommentaires(resId: string) {
+    const { data } = await supabase.from('commentaires_reservations').select('*').eq('reservation_id', resId).order('created_at', { ascending: true })
+    setCommentaires(data ?? [])
+  }
+
+  async function addComment() {
+    if (!newComment.trim() || !editing.id) return
+    setSavingComment(true)
+    await supabase.from('commentaires_reservations').insert({ reservation_id: editing.id, contenu: newComment.trim(), auteur_email: userEmail })
+    setNewComment('')
+    await fetchCommentaires(editing.id)
+    setSavingComment(false)
+  }
+
+  async function deleteComment(commentId: string) {
+    if (!editing.id) return
+    await supabase.from('commentaires_reservations').delete().eq('id', commentId)
+    await fetchCommentaires(editing.id)
+  }
+
+  async function fetchHistorique(resId: string) {
+    setHistoriqueLoading(true)
+    const { data } = await supabase.from('historique').select('*').eq('table_name', 'reservations').eq('record_id', resId).order('created_at', { ascending: false })
+    setHistorique(data ?? [])
+    setHistoriqueLoading(false)
+  }
+
+  async function logHistorique(resId: string, action: string, changes: any) {
+    await supabase.from('historique').insert({ table_name: 'reservations', record_id: resId, action, changes, user_email: userEmail })
+  }
+
+  function generateFacture(r: Reservation) {
+    const bien = biens.find((b) => b.id === r.bien_id)
+    const n = nuits(r.date_arrivee, r.date_depart)
+    const comm = calcCommission(r)
+    const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Facture — ${r.voyageur_nom}</title><style>
+      *{box-sizing:border-box;margin:0;padding:0}
+      body{font-family:'Helvetica Neue',Arial,sans-serif;color:#2C1A0E;padding:40px;font-size:13px}
+      .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #C97B4B;padding-bottom:16px;margin-bottom:28px}
+      .logo{font-size:20px;font-weight:700;color:#C97B4B;letter-spacing:0.1em}
+      .logo-sub{font-size:10px;color:#6B4C35;letter-spacing:0.15em;text-transform:uppercase}
+      .facture-id{text-align:right;font-size:11px;color:#6B4C35}
+      .facture-id strong{display:block;font-size:14px;color:#2C1A0E}
+      .section{margin-bottom:20px}
+      .section-title{font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:#C97B4B;font-weight:600;margin-bottom:8px}
+      .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+      .info-box{background:#FAF6F1;border-radius:8px;padding:12px 16px}
+      .info-label{font-size:10px;color:#6B4C35;text-transform:uppercase;letter-spacing:0.05em}
+      .info-value{font-size:14px;font-weight:500;margin-top:2px}
+      table{width:100%;border-collapse:collapse;margin:16px 0}
+      th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:#6B4C35;border-bottom:2px solid #E8DDD4;padding:8px 12px}
+      td{padding:10px 12px;border-bottom:1px solid #F0EBE5;font-size:13px}
+      .total-row td{font-weight:700;background:#FAF6F1;color:#C97B4B;border-top:2px solid #C97B4B;font-size:14px}
+      .comm-row td{font-weight:600;color:#C97B4B;font-size:12px;border-bottom:none}
+      .footer{margin-top:40px;padding-top:12px;border-top:1px solid #E8DDD4;font-size:10px;color:#A07850;text-align:center}
+      @media print{@page{margin:1.5cm}body{padding:0}}
+    </style></head><body>
+      <div class="header">
+        <div>
+          <div class="logo">CLÉVIA</div>
+          <div class="logo-sub">Conciergerie · Mansouria-Mohammedia</div>
+        </div>
+        <div class="facture-id">
+          <strong>Facture</strong>
+          ${format(new Date(r.created_at), 'dd/MM/yyyy')}
+        </div>
+      </div>
+      <div class="info-grid section">
+        <div class="info-box">
+          <div class="info-label">Voyageur</div>
+          <div class="info-value">${r.voyageur_nom}</div>
+          ${r.voyageur_email ? `<div style="font-size:11px;color:#6B4C35;margin-top:2px">${r.voyageur_email}</div>` : ''}
+          ${r.voyageur_phone ? `<div style="font-size:11px;color:#6B4C35">${r.voyageur_phone}</div>` : ''}
+        </div>
+        <div class="info-box">
+          <div class="info-label">Bien</div>
+          <div class="info-value">${bien?.nom ?? '—'}</div>
+          <div style="font-size:11px;color:#6B4C35;margin-top:2px">via ${r.plateforme ?? '—'}</div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-title">Détails du séjour</div>
+        <table>
+          <thead><tr><th>Description</th><th>Arrivée</th><th>Départ</th><th style="text-align:center">Nuits</th><th style="text-align:right">Montant</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>${bien?.nom ?? 'Hébergement'}</td>
+              <td>${format(new Date(r.date_arrivee), 'dd/MM/yyyy')}</td>
+              <td>${format(new Date(r.date_depart), 'dd/MM/yyyy')}</td>
+              <td style="text-align:center">${n}</td>
+              <td style="text-align:right">${r.montant ? r.montant.toLocaleString('fr-MA') + ' MAD' : '—'}</td>
+            </tr>
+            <tr class="total-row">
+              <td colspan="4">Total</td>
+              <td style="text-align:right">${r.montant ? r.montant.toLocaleString('fr-MA') + ' MAD' : '—'}</td>
+            </tr>
+            ${isSuperAdmin && comm > 0 ? `<tr class="comm-row"><td colspan="4">Commission Clévia (${r.commission_fixe != null ? 'fixe' : r.taux_commission + '%'})</td><td style="text-align:right">${Math.round(comm).toLocaleString('fr-MA')} MAD</td></tr>` : ''}
+          </tbody>
+        </table>
+      </div>
+      ${r.notes ? `<div class="section"><div class="section-title">Notes</div><p style="font-size:12px;color:#6B4C35">${r.notes}</p></div>` : ''}
+      <div class="footer">Clévia Conciergerie · Mansouria-Mohammedia, Maroc · cleviamaroc.com</div>
+      <script>window.onload=function(){window.print()}</script>
+    </body></html>`
+    const w = window.open('', '_blank', 'width=900,height=700')
+    if (w) { w.document.write(html); w.document.close() }
+  }
+
   async function handleSave() {
     if (!editing.voyageur_nom?.trim()) { showToast('Le nom du voyageur est obligatoire'); return }
     if (!editing.bien_id) { showToast('Veuillez sélectionner un bien'); return }
@@ -255,9 +371,18 @@ export default function ReservationsPage() {
     const { id, created_at, biens: _b, ...fields } = editing as any
     const isNew = !editing.id
     if (editing.id) {
+      const original = rows.find((r) => r.id === editing.id)
       await supabase.from('reservations').update(fields).eq('id', editing.id)
+      const changes: Record<string, { avant: any; apres: any }> = {}
+      if (original) {
+        for (const key of Object.keys(fields)) {
+          if ((original as any)[key] !== (fields as any)[key]) changes[key] = { avant: (original as any)[key], apres: (fields as any)[key] }
+        }
+      }
+      if (Object.keys(changes).length > 0) await logHistorique(editing.id, 'modification', changes)
     } else {
-      await supabase.from('reservations').insert(fields)
+      const { data: inserted } = await supabase.from('reservations').insert(fields).select('id').single()
+      if (inserted) await logHistorique(inserted.id, 'création', fields)
     }
     await syncVoyageur(editing, isNew)
     setSaving(false); closeModal(true); fetchData()
@@ -266,6 +391,8 @@ export default function ReservationsPage() {
 
   async function handleDelete(id: string) {
     if (!confirm('Supprimer cette réservation ?')) return
+    const original = rows.find((r) => r.id === id)
+    await logHistorique(id, 'suppression', original ? { voyageur_nom: original.voyageur_nom, date_arrivee: original.date_arrivee, date_depart: original.date_depart } : null)
     await supabase.from('reservations').delete().eq('id', id)
     fetchData()
     showToast('Réservation supprimée')
@@ -560,6 +687,10 @@ export default function ReservationsPage() {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                 Modifier
               </button>
+              <button onClick={() => generateFacture(r as Reservation)} className="flex-1 flex items-center justify-center gap-1.5 bg-brun/5 text-brun-mid text-sm font-medium rounded-xl py-2 hover:bg-brun/10 transition-all" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="2" /><path d="M9 7h6M9 11h6M9 15h4" strokeLinecap="round" /></svg>
+                Facture
+              </button>
               <button onClick={() => openDuplicate(r)} className="flex-1 flex items-center justify-center gap-1.5 bg-brun/5 text-brun-mid text-sm font-medium rounded-xl py-2 hover:bg-brun/10 transition-all" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" /></svg>
                 Dupliquer
@@ -644,6 +775,8 @@ export default function ReservationsPage() {
                   <td className="px-3 py-3">
                     <div className="flex gap-2">
                       <button onClick={() => openEdit(r)} className="text-terra text-xs underline underline-offset-2">Modifier</button>
+                      <button onClick={() => generateFacture(r)} className="text-brun-mid text-xs underline underline-offset-2">Facture</button>
+                      <button onClick={() => { setHistoriqueOpen(true); fetchHistorique(r.id) }} className="text-brun-mid/60 text-xs underline underline-offset-2">Histo.</button>
                       <button onClick={() => openDuplicate(r)} className="text-brun-mid text-xs underline underline-offset-2">Dupliquer</button>
                       <button onClick={() => handleDelete(r.id)} className="text-red-400 text-xs underline underline-offset-2">Suppr.</button>
                     </div>
@@ -839,14 +972,118 @@ export default function ReservationsPage() {
             <label className={labelClass}>Notes</label>
             <textarea className={`${inputClass} resize-none`} rows={2} value={editing.notes ?? ''} onChange={(e) => setEditing((p) => ({ ...p, notes: e.target.value }))} placeholder="Remarques éventuelles..." />
           </div>
+
+          {editing.id && (
+            <div className="border-t border-brun/10 pt-4">
+              <div className="flex items-center justify-between mb-3">
+                <label className={labelClass + ' mb-0'}>Commentaires internes</label>
+                <button onClick={() => { setHistoriqueOpen(true); fetchHistorique(editing.id!) }} className="text-[10px] text-brun-mid/50 underline underline-offset-2 hover:text-terra transition-colors">
+                  Voir l'historique
+                </button>
+              </div>
+              {commentaires.length > 0 && (
+                <div className="flex flex-col gap-2 mb-3 max-h-40 overflow-y-auto">
+                  {commentaires.map((c) => (
+                    <div key={c.id} className="bg-creme/60 rounded-xl px-3 py-2 group relative">
+                      <p className="text-xs text-brun" style={{ fontFamily: 'var(--font-dm-sans)' }}>{c.contenu}</p>
+                      <div className="flex items-center justify-between mt-1">
+                        <p className="text-[10px] text-brun-mid/40">
+                          {c.auteur_email?.split('@')[0] ?? '—'} · {format(new Date(c.created_at), 'dd/MM HH:mm')}
+                        </p>
+                        <button onClick={() => deleteComment(c.id)} className="text-[10px] text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                          supprimer
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="flex gap-2">
+                <input
+                  className={inputClass + ' flex-1'}
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Ajouter un commentaire..."
+                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addComment() } }}
+                />
+                <button
+                  onClick={addComment}
+                  disabled={savingComment || !newComment.trim()}
+                  className="bg-terra text-creme text-xs font-medium rounded-xl px-3 py-2 hover:bg-brun transition-all disabled:opacity-40"
+                >
+                  {savingComment ? '…' : 'Envoyer'}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-        <div className="p-5 border-t border-brun/10 flex justify-end gap-3">
-          <button onClick={() => closeModal()} className="border border-brun/20 text-brun-mid text-sm font-medium rounded-full px-5 py-2 hover:bg-brun/5 transition-all">Annuler</button>
-          <button onClick={handleSave} disabled={saving || !editing.voyageur_nom} className="bg-terra text-creme text-sm font-medium rounded-full px-5 py-2 hover:bg-brun transition-all disabled:opacity-50">
-            {saving ? 'Sauvegarde…' : 'Sauvegarder'}
-          </button>
+        <div className="p-5 border-t border-brun/10 flex items-center justify-between">
+          <div className="flex gap-2">
+            {editing.id && (
+              <button onClick={() => generateFacture(editing as Reservation)} className="flex items-center gap-1.5 border border-brun/20 text-brun-mid text-xs font-medium rounded-full px-3 py-2 hover:border-terra hover:text-terra transition-all">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="2" /><path d="M9 7h6M9 11h6M9 15h4" strokeLinecap="round" /></svg>
+                Facture PDF
+              </button>
+            )}
+          </div>
+          <div className="flex gap-3">
+            <button onClick={() => closeModal()} className="border border-brun/20 text-brun-mid text-sm font-medium rounded-full px-5 py-2 hover:bg-brun/5 transition-all">Annuler</button>
+            <button onClick={handleSave} disabled={saving || !editing.voyageur_nom} className="bg-terra text-creme text-sm font-medium rounded-full px-5 py-2 hover:bg-brun transition-all disabled:opacity-50">
+              {saving ? 'Sauvegarde…' : 'Sauvegarder'}
+            </button>
+          </div>
         </div>
       </Modal>
+
+      {/* Modal historique */}
+      {historiqueOpen && (
+        <div className="fixed inset-0 z-[60] flex items-start justify-center pt-12 px-4 pb-8 bg-brun/50 backdrop-blur-sm overflow-y-auto" onClick={() => setHistoriqueOpen(false)}>
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="p-5 border-b border-brun/10 flex items-center justify-between">
+              <h2 className="text-xl text-brun" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>Historique</h2>
+              <button onClick={() => setHistoriqueOpen(false)} className="text-brun-mid hover:text-brun">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 4l12 12M16 4L4 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+              </button>
+            </div>
+            <div className="p-5 max-h-[60vh] overflow-y-auto">
+              {historiqueLoading ? (
+                <p className="text-sm text-brun-mid/40 text-center py-8">Chargement…</p>
+              ) : historique.length === 0 ? (
+                <p className="text-sm text-brun-mid/40 text-center py-8">Aucun historique</p>
+              ) : (
+                <div className="relative">
+                  <div className="absolute left-3 top-2 bottom-2 w-px bg-brun/10" />
+                  <div className="flex flex-col gap-4">
+                    {historique.map((h) => (
+                      <div key={h.id} className="pl-8 relative">
+                        <div className={`absolute left-1.5 top-1.5 w-3 h-3 rounded-full border-2 ${h.action === 'création' ? 'bg-green-400 border-green-200' : h.action === 'suppression' ? 'bg-red-400 border-red-200' : 'bg-terra border-sable'}`} />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-medium text-brun capitalize">{h.action}</span>
+                            <span className="text-[10px] text-brun-mid/40">{format(new Date(h.created_at), 'dd/MM/yyyy HH:mm')}</span>
+                          </div>
+                          {h.user_email && <p className="text-[10px] text-brun-mid/50 mt-0.5">par {h.user_email.split('@')[0]}</p>}
+                          {h.changes && h.action === 'modification' && (
+                            <div className="mt-1.5 flex flex-col gap-1">
+                              {Object.entries(h.changes as Record<string, { avant: any; apres: any }>).map(([key, val]) => (
+                                <div key={key} className="text-[11px] bg-creme/60 rounded-lg px-2.5 py-1.5">
+                                  <span className="text-brun-mid/60">{key}:</span>{' '}
+                                  <span className="text-red-400 line-through">{String(val.avant ?? '—')}</span>{' → '}
+                                  <span className="text-green-600 font-medium">{String(val.apres ?? '—')}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal rapport mensuel */}
       {rapportOpen && (

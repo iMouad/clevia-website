@@ -171,8 +171,34 @@ export default function BiensPage() {
   const [sortCol, setSortCol] = useState<string>('created_at')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [resCount, setResCount] = useState<Record<string, number>>({})
+  const [resData, setResData] = useState<{ bien_id: string; date_arrivee: string; date_depart: string }[]>([])
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  function getOccupation(bienId: string): { mois: string; taux: number }[] {
+    const now = new Date()
+    const result: { mois: string; taux: number }[] = []
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      const daysInMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()
+      const mStart = d
+      const mEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0)
+      let totalNuits = 0
+      for (const r of resData) {
+        if (r.bien_id !== bienId) continue
+        const d1 = new Date(r.date_arrivee)
+        const d2 = new Date(r.date_depart)
+        if (d2 <= mStart || d1 > mEnd) continue
+        const cs = d1 < mStart ? mStart : d1
+        const ce = d2 > mEnd ? new Date(mEnd.getTime() + 86400000) : d2
+        totalNuits += Math.max(0, Math.round((ce.getTime() - cs.getTime()) / 86400000))
+      }
+      const taux = Math.min(100, Math.round((totalNuits / daysInMonth) * 100))
+      const moisLabel = d.toLocaleDateString('fr', { month: 'short' }).replace('.', '')
+      result.push({ mois: moisLabel, taux })
+    }
+    return result
+  }
 
   function showToast(message: string, type: 'success' | 'error' = 'success') {
     setToast({ message, type })
@@ -190,20 +216,29 @@ export default function BiensPage() {
   }
 
   const fetchBiens = useCallback(async () => {
-    const [{ data: biensData }, { data: visitesData }, { data: resData }] = await Promise.all([
+    const [{ data: biensData }, { data: visitesData }, { data: resResult }] = await Promise.all([
       supabase.from('biens').select('*').order('created_at', { ascending: false }),
       supabase.from('biens_visites').select('*').order('created_at', { ascending: false }),
-      supabase.from('reservations').select('bien_id').in('statut', ['confirmee', 'terminee']),
+      supabase.from('reservations').select('bien_id, date_arrivee, date_depart').in('statut', ['confirmee', 'terminee']),
     ])
     setBiens(biensData ?? [])
     setVisites(visitesData ?? [])
+    setResData(resResult ?? [])
     const counts: Record<string, number> = {}
-    ;(resData ?? []).forEach((r) => { counts[r.bien_id] = (counts[r.bien_id] ?? 0) + 1 })
+    ;(resResult ?? []).forEach((r) => { counts[r.bien_id] = (counts[r.bien_id] ?? 0) + 1 })
     setResCount(counts)
     setLoading(false)
   }, [])
 
-  useEffect(() => { fetchBiens() }, [])
+  const [userEmail, setUserEmail] = useState('')
+  useEffect(() => {
+    fetchBiens()
+    supabase.auth.getUser().then(({ data: { user } }) => { setUserEmail(user?.email ?? '') })
+  }, [])
+
+  async function logBienHistorique(bienId: string, action: string, changes: any) {
+    await supabase.from('historique').insert({ table_name: 'biens', record_id: bienId, action, changes, user_email: userEmail })
+  }
 
   function openAdd() { setEditing(EMPTY); setInitialEditing(JSON.stringify(EMPTY)); setModalOpen(true) }
   function openEdit(b: Bien) { const data = { ...b }; setEditing(data); setInitialEditing(JSON.stringify(data)); setModalOpen(true) }
@@ -222,8 +257,16 @@ export default function BiensPage() {
       const payload = { ...editing, nom, updated_at: new Date().toISOString() }
       if (editing.id) {
         const slug = (editing as any).slug || generateLocationSlug(nom, editing.ville ?? null, editing.id)
+        const original = biens.find((b) => b.id === editing.id)
         const { error } = await supabase.from('biens').update({ ...payload, slug }).eq('id', editing.id)
         if (error) throw error
+        const changes: Record<string, { avant: any; apres: any }> = {}
+        if (original) {
+          for (const key of ['nom', 'ville', 'type', 'statut', 'capacite', 'prix_nuit', 'disponible'] as const) {
+            if ((original as any)[key] !== (payload as any)[key]) changes[key] = { avant: (original as any)[key], apres: (payload as any)[key] }
+          }
+        }
+        if (Object.keys(changes).length > 0) await logBienHistorique(editing.id, 'modification', changes)
         showToast('Bien modifié avec succès.')
       } else {
         const { data: inserted, error } = await supabase.from('biens').insert(payload).select('id, nom, ville').single()
@@ -231,6 +274,7 @@ export default function BiensPage() {
         if (inserted) {
           const slug = generateLocationSlug(inserted.nom, inserted.ville, inserted.id)
           await supabase.from('biens').update({ slug }).eq('id', inserted.id)
+          await logBienHistorique(inserted.id, 'création', { nom, ville: editing.ville })
         }
         showToast('Bien ajouté avec succès.')
       }
@@ -249,6 +293,7 @@ export default function BiensPage() {
       ? `Ce bien a ${count} réservation(s). Supprimer quand même ?`
       : 'Supprimer ce bien ?'
     if (!confirm(msg)) return
+    await logBienHistorique(id, 'suppression', { nom: bien?.nom })
     const { error } = await supabase.from('biens').delete().eq('id', id)
     if (error) {
       showToast(`Erreur : ${error.message}`, 'error')
@@ -552,6 +597,22 @@ export default function BiensPage() {
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
                 </a>
               </div>
+              {/* Occupation 6 mois */}
+              {(() => {
+                const occ = getOccupation(b.id)
+                const hasData = occ.some((o) => o.taux > 0)
+                if (!hasData) return null
+                return (
+                  <div className="mt-2 flex items-end gap-px h-6" title="Occupation 6 derniers mois">
+                    {occ.map((o, idx) => (
+                      <div key={idx} className="flex flex-col items-center gap-0.5 flex-1">
+                        <div className="w-full rounded-sm" style={{ height: Math.max(2, (o.taux / 100) * 20), backgroundColor: o.taux >= 50 ? '#22c55e' : o.taux > 0 ? '#C97B4B' : '#e5e5e5' }} />
+                        <span className="text-[8px] text-brun-mid/40 leading-none">{o.mois}</span>
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()}
               {/* Actions */}
               <div className="flex items-center gap-3 mt-3 pt-3 border-t border-brun/8">
                 <button
@@ -683,7 +744,7 @@ export default function BiensPage() {
                     return (
                       <tr key={`stats-${b.id}`}>
                         <td colSpan={11} className="px-6 pb-4 pt-2 bg-creme/60">
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                             <div>
                               <p className="text-xs font-medium text-brun-mid/50 uppercase tracking-wide mb-2">7 derniers jours</p>
                               <div className="flex items-end gap-1 h-12">
@@ -727,6 +788,26 @@ export default function BiensPage() {
                                   )
                                 })}
                               </div>
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium text-brun-mid/50 uppercase tracking-wide mb-2">Occupation (6 mois)</p>
+                              {(() => {
+                                const occ = getOccupation(b.id)
+                                return (
+                                  <div className="flex items-end gap-1 h-12">
+                                    {occ.map((o, idx) => {
+                                      const max = Math.max(...occ.map((x) => x.taux), 1)
+                                      return (
+                                        <div key={idx} className="flex-1 flex flex-col items-center gap-0.5" title={`${o.mois}: ${o.taux}%`}>
+                                          <span className="text-[8px] text-brun-mid/50 font-medium">{o.taux > 0 ? `${o.taux}%` : ''}</span>
+                                          <div className="w-full rounded-t" style={{ height: `${Math.max(2, (o.taux / max) * 32)}px`, backgroundColor: o.taux >= 50 ? '#22c55e' : o.taux > 0 ? '#C97B4B' : '#E8DDD4' }} />
+                                          <span className="text-[9px] text-brun-mid/30">{o.mois}</span>
+                                        </div>
+                                      )
+                                    })}
+                                  </div>
+                                )
+                              })()}
                             </div>
                           </div>
                         </td>
