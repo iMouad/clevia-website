@@ -44,7 +44,7 @@ function expandReservationDates(reservations: { date_arrivee: string; date_depar
   const dates = new Set<string>()
   const map: Record<string, ResInfo> = {}
   const arrivalDates = new Set<string>()
-  const lastNightDates = new Set<string>()
+  const checkoutDates = new Set<string>()
   for (const r of reservations) {
     try {
       const arrival = parseISO(r.date_arrivee)
@@ -52,9 +52,9 @@ function expandReservationDates(reservations: { date_arrivee: string; date_depar
       const lastNight = new Date(depart.getTime() - 86400000)
       if (lastNight < arrival) continue
       const arrivalStr = format(arrival, 'yyyy-MM-dd')
-      const lastNightStr = format(lastNight, 'yyyy-MM-dd')
+      const departStr = format(depart, 'yyyy-MM-dd')
       arrivalDates.add(arrivalStr)
-      lastNightDates.add(lastNightStr)
+      checkoutDates.add(departStr)
       const days = eachDayOfInterval({ start: arrival, end: lastNight })
       days.forEach((d) => {
         const key = format(d, 'yyyy-MM-dd')
@@ -63,7 +63,7 @@ function expandReservationDates(reservations: { date_arrivee: string; date_depar
       })
     } catch {}
   }
-  return { dates, map, arrivalDates, lastNightDates }
+  return { dates, map, arrivalDates, checkoutDates }
 }
 
 export default function CalendrierPage() {
@@ -76,7 +76,7 @@ export default function CalendrierPage() {
   const [reservationDates, setReservationDates] = useState<Set<string>>(new Set())
   const [resDateMap, setResDateMap] = useState<Record<string, { voyageur_nom: string; plateforme: string | null }>>({})
   const [arrivalDates, setArrivalDates] = useState<Set<string>>(new Set())
-  const [lastNightDates, setLastNightDates] = useState<Set<string>>(new Set())
+  const [checkoutDates, setCheckoutDates] = useState<Set<string>>(new Set())
   const [blockedDates, setBlockedDates] = useState<Set<string>>(new Set())
   const [upcomingRes, setUpcomingRes] = useState<Reservation[]>([])
   const [ownerToken, setOwnerToken] = useState<string | null>(null)
@@ -131,11 +131,11 @@ export default function CalendrierPage() {
         .limit(10),
     ])
 
-    const { dates: resDates, map: resMap, arrivalDates: arrivals, lastNightDates: lastNights } = expandReservationDates(resData ?? [])
+    const { dates: resDates, map: resMap, arrivalDates: arrivals, checkoutDates: checkouts } = expandReservationDates(resData ?? [])
     setReservationDates(resDates)
     setResDateMap(resMap)
     setArrivalDates(arrivals)
-    setLastNightDates(lastNights)
+    setCheckoutDates(checkouts)
     setBlockedDates(new Set((blockedData ?? []).map((d) => d.date)))
     setUpcomingRes(upcomingData ?? [])
     setLoadingCal(false)
@@ -335,29 +335,29 @@ export default function CalendrierPage() {
                   const clickable = status === 'available' || status === 'blocked'
                   const resInfo = resDateMap[dateStr]
                   const isArrival = arrivalDates.has(dateStr) && status === 'reservation'
-                  const isLastNight = lastNightDates.has(dateStr) && status === 'reservation'
+                  const isCheckout = checkoutDates.has(dateStr) && status !== 'reservation'
 
                   return (
                     <button
                       key={dateStr}
                       disabled={!clickable || !!toggling}
                       onClick={() => clickable && handleDayClick(dateStr)}
-                      title={resInfo ? `${resInfo.voyageur_nom}${resInfo.plateforme ? ` (${resInfo.plateforme})` : ''}${isArrival ? ' — Check-in' : ''}${isLastNight ? ' — Dernière nuit' : ''}` : status === 'blocked' ? 'Bloqué — cliquer pour débloquer' : undefined}
+                      title={resInfo ? `${resInfo.voyageur_nom}${resInfo.plateforme ? ` (${resInfo.plateforme})` : ''}${isArrival ? ' — Check-in' : ''}` : isCheckout ? 'Check-out ce jour' : status === 'blocked' ? 'Bloqué — cliquer pour débloquer' : undefined}
                       className={`group relative aspect-square rounded-xl flex flex-col items-center justify-center text-sm font-medium transition-all duration-150 ${isToggling ? 'opacity-50' : ''} ${clickable ? 'hover:scale-105 hover:shadow-md' : ''}`}
                       style={{
-                        backgroundColor: isArrival ? '#A0623A' : style.bg,
-                        color: style.text,
+                        backgroundColor: isArrival ? '#A0623A' : isCheckout ? '#FEF3EE' : style.bg,
+                        color: isCheckout ? '#C97B4B' : style.text,
                         cursor: style.cursor,
                         fontFamily: 'var(--font-dm-sans)',
-                        border: isToday ? '2.5px solid #2C1A0E' : (style.border ?? 'none'),
+                        border: isToday ? '2.5px solid #2C1A0E' : isCheckout ? '1px dashed #C97B4B80' : (style.border ?? 'none'),
                       }}
                     >
                       {format(date, 'd')}
                       {isArrival && (
                         <span className="absolute top-0.5 right-1 text-[8px] text-white/80 font-bold leading-none">IN</span>
                       )}
-                      {isLastNight && (
-                        <span className="absolute bottom-0.5 right-1 text-[8px] text-white/80 font-bold leading-none">OUT</span>
+                      {isCheckout && (
+                        <span className="absolute top-0.5 right-1 text-[8px] text-terra/70 font-bold leading-none">OUT</span>
                       )}
                       {isToday && <span className="absolute -bottom-0.5 w-1.5 h-1.5 rounded-full bg-brun" />}
                       {resInfo && status === 'reservation' && (
@@ -382,7 +382,8 @@ export default function CalendrierPage() {
                 { color: '#ECFDF5', border: '#10B98140', label: 'Disponible' },
                 { color: '#FEF3C7', border: '#F59E0B40', label: 'Bloqué' },
                 { color: '#C97B4B', border: '#C97B4B', label: 'Réservé' },
-                { color: '#A0623A', border: '#A0623A', label: 'Check-in' },
+                { color: '#A0623A', border: '#A0623A', label: 'Check-in (IN)' },
+                { color: '#FEF3EE', border: '#C97B4B80', label: 'Check-out (OUT)' },
                 { color: '#F9FAFB', border: '#C0C5CC40', label: 'Passé' },
               ].map(({ color, border, label }) => (
                 <div key={label} className="flex items-center gap-1.5">
