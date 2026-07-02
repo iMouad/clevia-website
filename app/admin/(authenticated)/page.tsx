@@ -119,15 +119,31 @@ export default async function AdminDashboard() {
   })
 
 
+  const hour = now.getHours()
+  const greeting = hour < 12 ? 'Bonjour' : hour < 18 ? 'Bon après-midi' : 'Bonsoir'
+  const adminName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Admin'
+  const jourFormate = format(now, "EEEE d MMMM yyyy", { locale: fr })
+  const heureFormatee = format(now, "HH:mm", { locale: fr })
+
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-3xl text-brun" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
-          Tableau de bord
-        </h1>
-        <p className="text-brun-mid text-sm mt-1">
-          {format(now, "EEEE d MMMM yyyy", { locale: fr })}
-        </p>
+      <div className="mb-8 bg-gradient-to-br from-brun to-brun/90 rounded-2xl px-6 py-7 sm:px-8 sm:py-8 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-40 h-40 bg-terra/10 rounded-full -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-sable/8 rounded-full translate-y-1/2 -translate-x-1/3" />
+        <div className="relative">
+          <p className="text-sable/70 text-xs uppercase tracking-[0.2em] mb-2" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+            {jourFormate} · {heureFormatee}
+          </p>
+          <h1 className="text-2xl sm:text-3xl text-creme" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
+            {greeting}, <span className="text-terra">{adminName}</span>
+          </h1>
+          <p className="text-creme/50 text-sm mt-2" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+            {(enCoursData ?? []).length > 0
+              ? `${(enCoursData ?? []).length} séjour${(enCoursData ?? []).length > 1 ? 's' : ''} en cours · ${biensActifs ?? 0} bien${(biensActifs ?? 0) > 1 ? 's' : ''} actif${(biensActifs ?? 0) > 1 ? 's' : ''}`
+              : `${biensActifs ?? 0} bien${(biensActifs ?? 0) > 1 ? 's' : ''} actif${(biensActifs ?? 0) > 1 ? 's' : ''} · Aucun séjour en cours`
+            }
+          </p>
+        </div>
       </div>
 
       {/* Alertes demain */}

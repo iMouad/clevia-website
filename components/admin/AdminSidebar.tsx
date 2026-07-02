@@ -86,6 +86,27 @@ const NAV = [
     ),
   },
   {
+    href: '/admin/revenus',
+    label: 'Revenus',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+      </svg>
+    ),
+  },
+  {
+    href: '/admin/multi-calendrier',
+    label: 'Multi-calendrier',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <rect x="2" y="4" width="8" height="8" rx="1.5" />
+        <rect x="14" y="4" width="8" height="8" rx="1.5" />
+        <rect x="2" y="16" width="8" height="8" rx="1.5" />
+        <rect x="14" y="16" width="8" height="8" rx="1.5" />
+      </svg>
+    ),
+  },
+  {
     href: '/admin/contacts',
     label: 'Contacts',
     icon: (
