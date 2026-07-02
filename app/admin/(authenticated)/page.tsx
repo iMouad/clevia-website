@@ -65,6 +65,8 @@ export default async function AdminDashboard() {
     { data: lastWhatsappClics },
     { data: lastReservations },
     { data: enCoursData },
+    { data: checkoutDemainData },
+    { data: checkinDemainData },
   ] = await Promise.all([
     supabase.from('biens').select('id,nom', { count: 'exact' }).eq('statut', 'actif'),
     supabase.from('reservations').select('*', { count: 'exact', head: true }).gt('date_depart', monthStart).lte('date_arrivee', monthEnd).in('statut', ['confirmee', 'terminee']),
@@ -76,6 +78,8 @@ export default async function AdminDashboard() {
     supabase.from('vente_whatsapp_clicks').select('*').order('created_at', { ascending: false }).limit(5),
     supabase.from('reservations').select('*, biens(nom)').order('date_arrivee', { ascending: false }).limit(5),
     supabase.from('reservations').select('voyageur_nom, date_arrivee, date_depart, plateforme, bien_id, biens(nom)').lte('date_arrivee', todayStr).gt('date_depart', todayStr).in('statut', ['confirmee', 'terminee']),
+    supabase.from('reservations').select('voyageur_nom, date_arrivee, date_depart, plateforme, bien_id, biens(nom)').eq('date_depart', new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString().split('T')[0]).in('statut', ['confirmee', 'terminee']),
+    supabase.from('reservations').select('voyageur_nom, date_arrivee, date_depart, plateforme, bien_id, biens(nom)').eq('date_arrivee', new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString().split('T')[0]).in('statut', ['confirmee']),
   ])
 
   // Calcul revenus et taux d'occupation (nuits clampées au mois en cours)
@@ -125,6 +129,62 @@ export default async function AdminDashboard() {
           {format(now, "EEEE d MMMM yyyy", { locale: fr })}
         </p>
       </div>
+
+      {/* Alertes demain */}
+      {((checkoutDemainData ?? []).length > 0 || (checkinDemainData ?? []).length > 0) && (
+        <div className="mb-6 flex flex-col gap-3">
+          {(checkoutDemainData ?? []).length > 0 && (
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-lg">🧹</span>
+                <h3 className="text-sm font-semibold text-amber-800">
+                  Check-out demain — {(checkoutDemainData ?? []).length} départ{(checkoutDemainData ?? []).length > 1 ? 's' : ''}
+                </h3>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                {(checkoutDemainData ?? []).map((r: any, i: number) => {
+                  const nuits = Math.round((new Date(r.date_depart).getTime() - new Date(r.date_arrivee).getTime()) / 86400000)
+                  return (
+                    <div key={i} className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="font-medium text-amber-900 truncate">{r.voyageur_nom}</span>
+                        <span className="text-xs text-amber-700/60">·</span>
+                        <span className="text-xs text-amber-700/70 truncate">{r.biens?.nom ?? '—'}</span>
+                      </div>
+                      <span className="text-xs text-amber-600 flex-shrink-0 ml-2">{nuits} nuit{nuits > 1 ? 's' : ''} · {r.plateforme ?? '—'}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+          {(checkinDemainData ?? []).length > 0 && (
+            <div className="bg-blue-50 border border-blue-200 rounded-2xl px-5 py-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-lg">🔑</span>
+                <h3 className="text-sm font-semibold text-blue-800">
+                  Check-in demain — {(checkinDemainData ?? []).length} arrivée{(checkinDemainData ?? []).length > 1 ? 's' : ''}
+                </h3>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                {(checkinDemainData ?? []).map((r: any, i: number) => {
+                  const nuits = Math.round((new Date(r.date_depart).getTime() - new Date(r.date_arrivee).getTime()) / 86400000)
+                  return (
+                    <div key={i} className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="font-medium text-blue-900 truncate">{r.voyageur_nom}</span>
+                        <span className="text-xs text-blue-700/60">·</span>
+                        <span className="text-xs text-blue-700/70 truncate">{r.biens?.nom ?? '—'}</span>
+                      </div>
+                      <span className="text-xs text-blue-600 flex-shrink-0 ml-2">{nuits} nuit{nuits > 1 ? 's' : ''} · {r.plateforme ?? '—'}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
