@@ -65,7 +65,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     Promise.all([
       supabase.auth.getUser(),
-      supabase.from('biens').select('id,nom', { count: 'exact' }).eq('statut', 'actif'),
+      supabase.from('biens').select('id,nom', { count: 'exact' }).eq('statut', 'actif').neq('disponible', false),
       supabase.from('reservations').select('bien_id,date_arrivee,date_depart,montant,taux_commission,commission_fixe').gt('date_depart', monthStart).lte('date_arrivee', monthEnd).in('statut', ['confirmee', 'terminee']),
       supabase.from('contacts').select('*').eq('traite', false).order('created_at', { ascending: false }).limit(5),
       supabase.from('biens_visites').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
