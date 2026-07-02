@@ -61,6 +61,8 @@ export default async function AdminDashboard() {
     { count: vuesLocation },
     { count: vuesVente },
     { count: whatsappClicsMois },
+    { data: lastWhatsappClics },
+    { data: lastReservations },
   ] = await Promise.all([
     supabase.from('biens').select('id,nom', { count: 'exact' }).eq('statut', 'actif'),
     supabase.from('reservations').select('*', { count: 'exact', head: true }).gt('date_depart', monthStart).lte('date_arrivee', monthEnd).in('statut', ['confirmee', 'terminee']),
@@ -69,6 +71,8 @@ export default async function AdminDashboard() {
     supabase.from('biens_visites').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
     supabase.from('vente_visites').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
     supabase.from('vente_whatsapp_clicks').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
+    supabase.from('vente_whatsapp_clicks').select('*').order('created_at', { ascending: false }).limit(5),
+    supabase.from('reservations').select('*, biens(nom)').order('date_arrivee', { ascending: false }).limit(5),
   ])
 
   // Calcul revenus et taux d'occupation (nuits clampées au mois en cours)
@@ -107,19 +111,6 @@ export default async function AdminDashboard() {
     return { id: bien.id, nom: bien.nom, nuits, taux, reservations: resaBien.length }
   })
 
-  // 5 derniers clics WhatsApp
-  const { data: lastWhatsappClics } = await supabase
-    .from('vente_whatsapp_clicks')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(5)
-
-  // 5 dernières réservations (triées par date d'arrivée)
-  const { data: lastReservations } = await supabase
-    .from('reservations')
-    .select('*, biens(nom)')
-    .order('date_arrivee', { ascending: false })
-    .limit(5)
 
   return (
     <div>
