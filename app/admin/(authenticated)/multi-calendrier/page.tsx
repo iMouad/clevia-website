@@ -34,7 +34,7 @@ export default function MultiCalendrierPage() {
 
   useEffect(() => {
     Promise.all([
-      supabase.from('biens').select('id, nom, statut').eq('statut', 'actif').order('nom'),
+      supabase.from('biens').select('id, nom, statut').eq('statut', 'actif').neq('disponible', false).order('nom'),
       supabase.from('reservations').select('id, bien_id, voyageur_nom, date_arrivee, date_depart, plateforme, statut').in('statut', ['confirmee', 'terminee']),
       supabase.from('blocked_dates').select('bien_id, date'),
       supabase.from('plateformes').select('*').eq('actif', true).order('ordre'),

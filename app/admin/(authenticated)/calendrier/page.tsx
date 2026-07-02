@@ -96,7 +96,7 @@ export default function CalendrierPage() {
     supabase.auth.getUser().then(({ data: { user } }) => {
       setIsSuperAdmin(user?.app_metadata?.role !== 'admin')
     })
-    supabase.from('biens').select('id, nom').eq('statut', 'actif').order('nom')
+    supabase.from('biens').select('id, nom').eq('statut', 'actif').neq('disponible', false).order('nom')
       .then(({ data }) => {
         setBiens(data ?? [])
         if (data?.[0]) setSelectedId(data[0].id)
