@@ -320,6 +320,16 @@ export default function BiensPage() {
     })
   }
 
+  function movePhoto(index: number, direction: 'up' | 'down') {
+    setEditing((prev) => {
+      const photos = [...(prev.photos ?? [])]
+      const target = direction === 'up' ? index - 1 : index + 1
+      if (target < 0 || target >= photos.length) return prev
+      ;[photos[index], photos[target]] = [photos[target], photos[index]]
+      return { ...prev, photos }
+    })
+  }
+
   function toggleEquipement(key: string) {
     setEditing((prev) => {
       const current = prev.equipements ?? []
@@ -962,7 +972,23 @@ export default function BiensPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <div className="flex flex-col gap-0.5">
+                        <button
+                          onClick={() => movePhoto(i, 'up')}
+                          disabled={i === 0}
+                          className="w-6 h-5 rounded bg-brun/5 hover:bg-brun/15 text-brun-mid disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center transition-all"
+                        >
+                          <svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M5 12l5-5 5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                        </button>
+                        <button
+                          onClick={() => movePhoto(i, 'down')}
+                          disabled={i === (editing.photos ?? []).length - 1}
+                          className="w-6 h-5 rounded bg-brun/5 hover:bg-brun/15 text-brun-mid disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center transition-all"
+                        >
+                          <svg width="10" height="10" viewBox="0 0 20 20" fill="none"><path d="M5 8l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                        </button>
+                      </div>
                       {i !== 0 && (
                         <button
                           onClick={() => setMainPhoto(url)}

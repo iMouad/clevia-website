@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import { createClient } from '@/lib/supabase'
 import AdminSelect from '@/components/admin/AdminSelect'
+import type { Plateforme } from '@/lib/plateformes'
+import { platBg } from '@/lib/plateformes'
 
 type Voyageur = {
   id: string
@@ -11,6 +13,7 @@ type Voyageur = {
   email: string | null
   telephone: string | null
   sources: string[] | null
+  notes: string | null
   nb_reservations: number
   created_at: string
   updated_at: string | null
@@ -28,13 +31,6 @@ type Reservation = {
   biens?: { nom: string } | null
 }
 
-const PLATF_COLORS: Record<string, string> = {
-  Airbnb: 'bg-rose-100 text-rose-600',
-  Booking: 'bg-blue-100 text-blue-600',
-  Avito: 'bg-orange-100 text-orange-600',
-  Facebook: 'bg-blue-100 text-blue-700',
-  Direct: 'bg-green-100 text-green-700',
-}
 
 const STATUT_LABELS: Record<string, string> = { confirmee: 'Confirmée', annulee: 'Annulée', terminee: 'Terminée' }
 const STATUT_COLORS: Record<string, string> = {
@@ -79,6 +75,7 @@ export default function VoyageursPage() {
   const [resaVoyageur, setResaVoyageur] = useState<Voyageur | null>(null)
   const [resaList, setResaList] = useState<Reservation[]>([])
   const [resaLoading, setResaLoading] = useState(false)
+  const [platColorMap, setPlatColorMap] = useState<Record<string, string>>({})
 
   // Compteurs réels depuis la table reservations
   const [realCounts, setRealCounts] = useState<Record<string, number>>({})
@@ -116,6 +113,11 @@ export default function VoyageursPage() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       setIsSuperAdmin(user?.app_metadata?.role !== 'admin')
+    })
+    supabase.from('plateformes').select('nom, couleur').eq('actif', true).then(({ data }) => {
+      const map: Record<string, string> = {}
+      ;(data ?? []).forEach((p: any) => { map[p.nom] = p.couleur })
+      setPlatColorMap(map)
     })
     fetchData()
   }, [])
@@ -167,6 +169,7 @@ export default function VoyageursPage() {
       email: editing.email?.trim() || null,
       telephone: editing.telephone?.trim() || null,
       sources: editing.sources,
+      notes: editing.notes?.trim() || null,
       updated_at: new Date().toISOString(),
     }).eq('id', editing.id!)
     setSaving(false); closeEdit(); fetchData()
@@ -287,17 +290,27 @@ export default function VoyageursPage() {
         ) : paginated.map((v) => (
           <div key={v.id} className="bg-white rounded-2xl border border-brun/10 p-4">
             <div className="flex items-center justify-between gap-2 mb-1">
-              <p className="font-medium text-brun text-sm">{v.nom}</p>
+              <div className="flex items-center gap-1.5">
+                <p className="font-medium text-brun text-sm">{v.nom}</p>
+                {v.nb_reservations >= 2 && (
+                  <span className="text-[9px] font-bold text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-1.5 py-0.5">FIDÈLE</span>
+                )}
+              </div>
               <span className="text-xs text-brun-mid/50 bg-brun/5 rounded-full px-2 py-0.5">
                 {v.nb_reservations} rés.
               </span>
             </div>
-            <p className="text-xs text-brun-mid/60 mb-2">
+            <p className="text-xs text-brun-mid/60 mb-1">
               {isSuperAdmin ? (v.telephone ?? '—') : '•••••••••'}{v.email ? ` · ${v.email}` : ''}
             </p>
+            {v.notes && (
+              <p className="text-[11px] text-brun-mid/50 italic mb-2 truncate" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                {v.notes}
+              </p>
+            )}
             <div className="flex flex-wrap gap-1 mb-3">
               {(v.sources ?? []).map((s) => (
-                <span key={s} className={`text-xs px-2 py-0.5 rounded-full font-medium ${PLATF_COLORS[s] ?? 'bg-gray-100 text-gray-500'}`}>{s}</span>
+                <span key={s} className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: platBg(platColorMap[s] ?? '#6B4C35'), color: platColorMap[s] ?? '#6B4C35' }}>{s}</span>
               ))}
             </div>
             <div className="flex gap-2 pt-3 border-t border-brun/8">
@@ -341,13 +354,23 @@ export default function VoyageursPage() {
                 <tr><td colSpan={7} className="px-4 py-10 text-center text-brun-mid/50">Aucun voyageur</td></tr>
               ) : paginated.map((v) => (
                 <tr key={v.id} className="hover:bg-creme/40 transition-colors">
-                  <td className="px-4 py-3 text-brun font-medium">{v.nom}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-brun font-medium">{v.nom}</span>
+                      {v.nb_reservations >= 2 && (
+                        <span className="text-[9px] font-bold text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-1.5 py-0.5">FIDÈLE</span>
+                      )}
+                    </div>
+                    {v.notes && (
+                      <p className="text-[10px] text-brun-mid/40 italic truncate max-w-[180px] mt-0.5">{v.notes}</p>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-brun-mid">{isSuperAdmin ? (v.telephone ?? '—') : '•••••••••'}</td>
                   <td className="px-4 py-3 text-brun-mid">{v.email ?? '—'}</td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1">
                       {(v.sources ?? []).map((s) => (
-                        <span key={s} className={`text-xs px-2 py-0.5 rounded-full font-medium ${PLATF_COLORS[s] ?? 'bg-gray-100 text-gray-500'}`}>{s}</span>
+                        <span key={s} className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: platBg(platColorMap[s] ?? '#6B4C35'), color: platColorMap[s] ?? '#6B4C35' }}>{s}</span>
                       ))}
                     </div>
                   </td>
@@ -450,7 +473,7 @@ export default function VoyageursPage() {
             <div>
               <label className={labelClass}>Sources</label>
               <div className="flex flex-wrap gap-1.5">
-                {['Airbnb', 'Booking', 'Avito', 'Facebook', 'Direct'].map((s) => {
+                {Object.keys(platColorMap).map((s) => {
                   const active = (editing.sources ?? []).includes(s)
                   return (
                     <button
@@ -462,13 +485,24 @@ export default function VoyageursPage() {
                           ? (p!.sources ?? []).filter(x => x !== s)
                           : [...(p!.sources ?? []), s]
                       }))}
-                      className={`text-xs rounded-lg px-2.5 py-1 font-medium transition-all ${active ? 'bg-terra text-creme' : 'bg-brun/8 text-brun-mid hover:bg-terra/20'}`}
+                      className={`text-xs rounded-lg px-2.5 py-1 font-medium transition-all ${active ? 'text-white' : 'bg-brun/8 text-brun-mid hover:bg-terra/20'}`}
+                      style={active ? { backgroundColor: platColorMap[s] } : undefined}
                     >
                       {s}
                     </button>
                   )
                 })}
               </div>
+            </div>
+            <div>
+              <label className={labelClass}>Notes (optionnel)</label>
+              <textarea
+                className={`${inputClass} resize-none`}
+                rows={2}
+                value={editing.notes ?? ''}
+                onChange={(e) => setEditing(p => ({ ...p!, notes: e.target.value }))}
+                placeholder="Ex : demande toujours un lit bébé, préfère RDC…"
+              />
             </div>
           </div>
         )}
@@ -512,7 +546,7 @@ export default function VoyageursPage() {
                     <span>{format(new Date(r.date_arrivee), 'dd/MM/yy')} → {format(new Date(r.date_depart), 'dd/MM/yy')}</span>
                     <span>·</span>
                     {r.plateforme && (
-                      <span className={`px-1.5 py-0.5 rounded-full font-medium ${PLATF_COLORS[r.plateforme] ?? 'bg-gray-100 text-gray-500'}`}>
+                      <span className="px-1.5 py-0.5 rounded-full font-medium" style={{ backgroundColor: platBg(platColorMap[r.plateforme ?? ''] ?? '#6B4C35'), color: platColorMap[r.plateforme ?? ''] ?? '#6B4C35' }}>
                         {r.plateforme}
                       </span>
                     )}

@@ -8,6 +8,7 @@ import {
 import { fr } from 'date-fns/locale'
 import { createClient } from '@/lib/supabase'
 import AdminSelect from '@/components/admin/AdminSelect'
+import type { Plateforme } from '@/lib/plateformes'
 
 type Bien = { id: string; nom: string }
 
@@ -319,13 +320,15 @@ export default function CalendrierPage() {
     setTimeout(() => setCopiedPlanning(false), 2500)
   }
 
-  const PLAT_COLORS: Record<string, string> = {
-    Airbnb:  '#FF5A5F',
-    Booking: '#003580',
-    Avito:   '#E07A2F',
-    Facebook: '#1877F2',
-    Direct:  '#6B4C35',
-  }
+  const [platColorMap, setPlatColorMap] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    supabase.from('plateformes').select('nom, couleur').eq('actif', true).then(({ data }) => {
+      const map: Record<string, string> = {}
+      ;(data ?? []).forEach((p: any) => { map[p.nom] = p.couleur })
+      setPlatColorMap(map)
+    })
+  }, [])
 
   return (
     <div className="max-w-4xl">
@@ -459,8 +462,12 @@ export default function CalendrierPage() {
                       title={resInfo ? `${resInfo.voyageur_nom}${resInfo.plateforme ? ` (${resInfo.plateforme})` : ''}${isArrival ? ' — Check-in' : ''}` : isCheckout ? 'Check-out ce jour' : status === 'blocked' ? 'Bloqué — cliquer pour débloquer' : undefined}
                       className={`group relative aspect-square rounded-xl flex flex-col items-center justify-center text-sm font-medium transition-all duration-150 ${isToggling ? 'opacity-50' : ''} ${clickable ? 'hover:scale-105 hover:shadow-md' : ''} ${rangeStart === dateStr ? 'ring-2 ring-terra ring-offset-1' : ''}`}
                       style={{
-                        backgroundColor: isArrival ? '#A0623A' : isCheckout ? '#FEF3EE' : style.bg,
-                        color: isCheckout ? '#C97B4B' : style.text,
+                        backgroundColor: isArrival
+                          ? (resInfo ? (platColorMap[resInfo.plateforme ?? ''] ?? '#A0623A') : '#A0623A')
+                          : status === 'reservation'
+                            ? (resInfo ? (platColorMap[resInfo.plateforme ?? ''] ?? '#C97B4B') : '#C97B4B')
+                            : isCheckout ? '#FEF3EE' : style.bg,
+                        color: (status === 'reservation' || isArrival) ? '#FFFFFF' : isCheckout ? '#C97B4B' : style.text,
                         cursor: style.cursor,
                         fontFamily: 'var(--font-dm-sans)',
                         border: isToday ? '2.5px solid #2C1A0E' : isCheckout ? '1px dashed #C97B4B80' : (style.border ?? 'none'),
@@ -693,7 +700,7 @@ export default function CalendrierPage() {
                             const depart = parseISO(r.date_depart)
                             const nuits = Math.round((depart.getTime() - arrivee.getTime()) / 86400000)
                             const nuitsRestantes = Math.round((depart.getTime() - today.getTime()) / 86400000)
-                            const platColor = PLAT_COLORS[r.plateforme ?? 'Direct'] ?? '#6B4C35'
+                            const platColor = platColorMap[r.plateforme ?? 'Direct'] ?? '#6B4C35'
                             return (
                               <div key={r.id} className="flex items-center gap-4 p-4 rounded-xl border-2 border-green-200 bg-green-50/50">
                                 <div className="flex-1 min-w-0">
@@ -738,7 +745,7 @@ export default function CalendrierPage() {
                             const arrivee = parseISO(r.date_arrivee)
                             const depart = parseISO(r.date_depart)
                             const nuits = Math.round((depart.getTime() - arrivee.getTime()) / 86400000)
-                            const platColor = PLAT_COLORS[r.plateforme ?? 'Direct'] ?? '#6B4C35'
+                            const platColor = platColorMap[r.plateforme ?? 'Direct'] ?? '#6B4C35'
                             return (
                               <div key={r.id} className="flex items-center gap-4 p-4 rounded-xl border border-brun/8 hover:bg-creme/40 transition-colors">
                                 <div className="flex-1 min-w-0">

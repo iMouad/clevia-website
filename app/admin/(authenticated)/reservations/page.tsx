@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import { createClient } from '@/lib/supabase'
 import AdminSelect from '@/components/admin/AdminSelect'
+import type { Plateforme } from '@/lib/plateformes'
+import { platBg } from '@/lib/plateformes'
 
 type Reservation = {
   id: string
@@ -30,19 +32,11 @@ const EMPTY_RES: Partial<Reservation> = {
   voyageur_nom: '', voyageur_email: '', voyageur_phone: '', date_arrivee: '', date_depart: '',
   plateforme: 'Airbnb', montant: null, taux_commission: 20, commission_fixe: null, intermediaire: null, statut: 'confirmee', notes: '',
 }
-const PLATF = ['Airbnb', 'Booking', 'Avito', 'Facebook', 'Direct']
 const STATUT_LABELS: Record<string, string> = { confirmee: 'Confirmée', annulee: 'Annulée', terminee: 'Terminée' }
 const STATUT_COLORS: Record<string, string> = {
   confirmee: 'bg-green-100 text-green-700',
   annulee: 'bg-red-100 text-red-700',
   terminee: 'bg-gray-100 text-gray-500',
-}
-const PLATF_COLORS: Record<string, string> = {
-  Airbnb: 'bg-rose-100 text-rose-600',
-  Booking: 'bg-blue-100 text-blue-600',
-  Avito: 'bg-orange-100 text-orange-600',
-  Facebook: 'bg-blue-100 text-blue-700',
-  Direct: 'bg-green-100 text-green-700',
 }
 const MOIS_FR = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
 
@@ -97,6 +91,11 @@ export default function ReservationsPage() {
   const [rapportAnnee, setRapportAnnee] = useState(new Date().getFullYear())
   const [rapportGenere, setRapportGenere] = useState(false)
   const [isSuperAdmin, setIsSuperAdmin] = useState(false)
+  const [plateformes, setPlateformes] = useState<Plateforme[]>([])
+
+  const platNames = plateformes.filter((p) => p.actif).map((p) => p.nom)
+  const platColorMap: Record<string, string> = {}
+  plateformes.forEach((p) => { platColorMap[p.nom] = p.couleur })
 
   async function fetchData() {
     const [{ data: resData }, { data: bienData }] = await Promise.all([
@@ -120,6 +119,9 @@ export default function ReservationsPage() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       setIsSuperAdmin(user?.app_metadata?.role !== 'admin')
+    })
+    supabase.from('plateformes').select('*').eq('actif', true).order('ordre').then(({ data }) => {
+      setPlateformes(data ?? [])
     })
     fetchData()
   }, [])
@@ -468,8 +470,27 @@ export default function ReservationsPage() {
         </AdminSelect>
         <AdminSelect className="!py-2 !px-3" value={filterPlatf} onChange={(e) => { setFilterPlatf(e.target.value); setPage(1) }}>
           <option value="">Toutes plateformes</option>
-          {PLATF.map((p) => <option key={p}>{p}</option>)}
+          {platNames.map((p) => <option key={p}>{p}</option>)}
         </AdminSelect>
+
+        {/* Mini répartition par plateforme */}
+        <div className="hidden lg:flex items-center gap-1.5 ml-auto">
+          {(() => {
+            const totalMontant = filtered.reduce((s, r) => s + (r.montant ?? 0), 0)
+            if (!totalMontant) return null
+            return plateformes.filter((p) => p.actif).map((p) => {
+              const montant = filtered.filter((r) => r.plateforme === p.nom).reduce((s, r) => s + (r.montant ?? 0), 0)
+              const pct = Math.round((montant / totalMontant) * 100)
+              if (!pct) return null
+              return (
+                <div key={p.nom} className="flex items-center gap-1" title={`${p.nom}: ${pct}% du revenu`}>
+                  <div className="h-5 rounded-full min-w-[4px]" style={{ width: `${Math.max(pct * 0.6, 4)}px`, backgroundColor: p.couleur }} />
+                  <span className="text-[10px] text-brun-mid/50" style={{ fontFamily: 'var(--font-dm-sans)' }}>{pct}%</span>
+                </div>
+              )
+            })
+          })()}
+        </div>
         <input
           type="month"
           className="border border-brun/20 rounded-xl px-3 py-2 text-sm text-brun focus:outline-none focus:border-terra focus:ring-1 focus:ring-terra transition-colors"
@@ -516,7 +537,7 @@ export default function ReservationsPage() {
               </span>
               <span className="text-xs text-brun-mid/50">·</span>
               <span className="text-xs text-brun-mid" style={{ fontFamily: 'var(--font-dm-sans)' }}>{nuits(r.date_arrivee, r.date_depart)} nuit(s)</span>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${PLATF_COLORS[r.plateforme ?? ''] ?? 'bg-gray-100 text-gray-500'}`}>
+              <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: platBg(platColorMap[r.plateforme ?? ''] ?? '#6B4C35'), color: platColorMap[r.plateforme ?? ''] ?? '#6B4C35' }}>
                 {r.plateforme ?? '—'}
               </span>
             </div>
@@ -601,7 +622,7 @@ export default function ReservationsPage() {
                   <td className="px-3 py-3 text-brun-mid whitespace-nowrap">{format(new Date(r.date_depart), 'dd/MM/yy')}</td>
                   <td className="px-3 py-3 text-center text-brun-mid">{nuits(r.date_arrivee, r.date_depart)}</td>
                   <td className="px-3 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${PLATF_COLORS[r.plateforme ?? ''] ?? 'bg-gray-100 text-gray-500'}`}>
+                    <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: platBg(platColorMap[r.plateforme ?? ''] ?? '#6B4C35'), color: platColorMap[r.plateforme ?? ''] ?? '#6B4C35' }}>
                       {r.plateforme ?? '—'}
                     </span>
                   </td>
@@ -744,7 +765,7 @@ export default function ReservationsPage() {
             <div>
               <label className={labelClass}>Plateforme</label>
               <AdminSelect value={editing.plateforme ?? 'Airbnb'} onChange={(e) => setEditing((p) => ({ ...p, plateforme: e.target.value }))}>
-                {PLATF.map((p) => <option key={p}>{p}</option>)}
+                {platNames.map((p) => <option key={p}>{p}</option>)}
               </AdminSelect>
             </div>
             <div>
@@ -912,7 +933,7 @@ export default function ReservationsPage() {
                                 <td className="px-3 py-2 text-center text-brun-mid">{nuits(r.date_arrivee, r.date_depart)}</td>
                                 <td className="px-3 py-2 text-brun font-medium truncate max-w-[90px]">{r.voyageur_nom}</td>
                                 <td className="px-3 py-2">
-                                  <span className={`px-1.5 py-0.5 rounded-full font-medium ${PLATF_COLORS[r.plateforme ?? ''] ?? 'bg-gray-100 text-gray-500'}`}>
+                                  <span className="px-1.5 py-0.5 rounded-full font-medium" style={{ backgroundColor: platBg(platColorMap[r.plateforme ?? ''] ?? '#6B4C35'), color: platColorMap[r.plateforme ?? ''] ?? '#6B4C35' }}>
                                     {r.plateforme ?? '—'}
                                   </span>
                                 </td>

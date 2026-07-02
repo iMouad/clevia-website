@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { applyWatermark } from '@/lib/watermark'
+import type { Plateforme } from '@/lib/plateformes'
 
 type Setting = {
   key: string
@@ -29,6 +30,62 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState(false)
 
+  // Plateformes
+  const [plateformes, setPlateformes] = useState<Plateforme[]>([])
+  const [newPlat, setNewPlat] = useState({ nom: '', couleur: '#6B4C35' })
+  const [editingPlat, setEditingPlat] = useState<Plateforme | null>(null)
+  const [platToast, setPlatToast] = useState('')
+
+  function showPlatToast(msg: string) { setPlatToast(msg); setTimeout(() => setPlatToast(''), 3000) }
+
+  async function fetchPlateformes() {
+    const { data } = await supabase.from('plateformes').select('*').order('ordre', { ascending: true })
+    setPlateformes(data ?? [])
+  }
+
+  async function addPlateforme() {
+    const nom = newPlat.nom.trim()
+    if (!nom) return
+    if (plateformes.some((p) => p.nom.toLowerCase() === nom.toLowerCase())) {
+      showPlatToast('Cette plateforme existe déjà'); return
+    }
+    const ordre = plateformes.length + 1
+    const { error } = await supabase.from('plateformes').insert({ nom, couleur: newPlat.couleur, ordre })
+    if (error) { showPlatToast(`Erreur : ${error.message}`); return }
+    setNewPlat({ nom: '', couleur: '#6B4C35' })
+    showPlatToast(`${nom} ajoutée`)
+    fetchPlateformes()
+  }
+
+  async function updatePlateforme() {
+    if (!editingPlat) return
+    const { error } = await supabase.from('plateformes').update({ nom: editingPlat.nom, couleur: editingPlat.couleur, actif: editingPlat.actif }).eq('id', editingPlat.id)
+    if (error) { showPlatToast(`Erreur : ${error.message}`); return }
+    setEditingPlat(null)
+    showPlatToast('Plateforme modifiée')
+    fetchPlateformes()
+  }
+
+  async function deletePlateforme(p: Plateforme) {
+    if (!confirm(`Supprimer "${p.nom}" ? Les réservations existantes garderont le nom mais sans couleur.`)) return
+    await supabase.from('plateformes').delete().eq('id', p.id)
+    showPlatToast(`${p.nom} supprimée`)
+    fetchPlateformes()
+  }
+
+  async function movePlateforme(id: string, direction: 'up' | 'down') {
+    const idx = plateformes.findIndex((p) => p.id === id)
+    if (idx < 0) return
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1
+    if (swapIdx < 0 || swapIdx >= plateformes.length) return
+    const a = plateformes[idx], b = plateformes[swapIdx]
+    await Promise.all([
+      supabase.from('plateformes').update({ ordre: b.ordre }).eq('id', a.id),
+      supabase.from('plateformes').update({ ordre: a.ordre }).eq('id', b.id),
+    ])
+    fetchPlateformes()
+  }
+
   // Watermark état
   const [watermarking, setWatermarking] = useState(false)
   const [wmDone, setWmDone] = useState(0)
@@ -40,6 +97,7 @@ export default function SettingsPage() {
       setSettings(data ?? [])
       setLoading(false)
     })
+    fetchPlateformes()
   }, [])
 
   function update(key: string, field: 'value_fr' | 'value_ar' | 'value_en', value: string) {
@@ -204,6 +262,118 @@ export default function SettingsPage() {
                 className="w-full border border-brun/20 rounded-xl px-3 py-2 text-sm text-brun focus:outline-none focus:border-terra focus:ring-1 focus:ring-terra transition-colors resize-none" />
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* ── Plateformes de réservation ── */}
+      <div className="mt-10">
+        <h2 className="text-xl text-brun mb-1" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>Plateformes de réservation</h2>
+        <p className="text-sm text-brun-mid/60 mb-5" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+          Gérez les plateformes disponibles pour les réservations. L&apos;ordre et les couleurs sont utilisés partout dans l&apos;admin.
+        </p>
+
+        {platToast && (
+          <div className="mb-4 px-4 py-2.5 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+            {platToast}
+          </div>
+        )}
+
+        <div className="bg-white rounded-2xl border border-brun/10 overflow-hidden">
+          {/* Liste */}
+          <div className="divide-y divide-brun/5">
+            {plateformes.map((p, i) => (
+              <div key={p.id} className="px-6 py-3.5 flex items-center gap-4">
+                {/* Ordre */}
+                <div className="flex flex-col gap-0.5">
+                  <button onClick={() => movePlateforme(p.id, 'up')} disabled={i === 0}
+                    className="text-brun-mid/30 hover:text-terra disabled:opacity-20 transition-colors">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 15l-6-6-6 6" /></svg>
+                  </button>
+                  <button onClick={() => movePlateforme(p.id, 'down')} disabled={i === plateformes.length - 1}
+                    className="text-brun-mid/30 hover:text-terra disabled:opacity-20 transition-colors">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6" /></svg>
+                  </button>
+                </div>
+
+                {/* Couleur preview */}
+                <span className="w-8 h-8 rounded-lg flex-shrink-0 border border-brun/10" style={{ backgroundColor: p.couleur }} />
+
+                {/* Nom + badge */}
+                {editingPlat?.id === p.id ? (
+                  <div className="flex-1 flex items-center gap-2">
+                    <input
+                      value={editingPlat.nom}
+                      onChange={(e) => setEditingPlat({ ...editingPlat, nom: e.target.value })}
+                      className="border border-brun/20 rounded-lg px-3 py-1.5 text-sm text-brun focus:outline-none focus:border-terra w-36"
+                      style={{ fontFamily: 'var(--font-dm-sans)' }}
+                    />
+                    <input
+                      type="color"
+                      value={editingPlat.couleur}
+                      onChange={(e) => setEditingPlat({ ...editingPlat, couleur: e.target.value })}
+                      className="w-8 h-8 rounded cursor-pointer border-0"
+                    />
+                    <button
+                      onClick={() => setEditingPlat({ ...editingPlat, actif: !editingPlat.actif })}
+                      className={`text-xs font-medium px-2.5 py-1 rounded-full ${editingPlat.actif ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}
+                      style={{ fontFamily: 'var(--font-dm-sans)' }}
+                    >
+                      {editingPlat.actif ? 'Actif' : 'Inactif'}
+                    </button>
+                    <button onClick={updatePlateforme} className="text-xs font-medium text-terra hover:underline" style={{ fontFamily: 'var(--font-dm-sans)' }}>Sauver</button>
+                    <button onClick={() => setEditingPlat(null)} className="text-xs text-brun-mid/50 hover:underline" style={{ fontFamily: 'var(--font-dm-sans)' }}>Annuler</button>
+                  </div>
+                ) : (
+                  <div className="flex-1 flex items-center gap-2">
+                    <span className="text-sm font-medium text-white px-3 py-1 rounded-full" style={{ backgroundColor: p.couleur, fontFamily: 'var(--font-dm-sans)' }}>
+                      {p.nom}
+                    </span>
+                    {!p.actif && (
+                      <span className="text-xs text-gray-400 italic" style={{ fontFamily: 'var(--font-dm-sans)' }}>inactif</span>
+                    )}
+                  </div>
+                )}
+
+                {/* Actions */}
+                {editingPlat?.id !== p.id && (
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setEditingPlat({ ...p })} className="text-xs text-terra hover:underline" style={{ fontFamily: 'var(--font-dm-sans)' }}>Modifier</button>
+                    <button onClick={() => deletePlateforme(p)} className="text-xs text-red-400 hover:underline" style={{ fontFamily: 'var(--font-dm-sans)' }}>Supprimer</button>
+                  </div>
+                )}
+              </div>
+            ))}
+            {!plateformes.length && (
+              <p className="px-6 py-8 text-center text-brun-mid/40 text-sm">Aucune plateforme configurée</p>
+            )}
+          </div>
+
+          {/* Ajouter */}
+          <div className="px-6 py-4 bg-brun/3 border-t border-brun/10 flex items-center gap-3">
+            <input
+              value={newPlat.nom}
+              onChange={(e) => setNewPlat({ ...newPlat, nom: e.target.value })}
+              onKeyDown={(e) => e.key === 'Enter' && addPlateforme()}
+              placeholder="Nouvelle plateforme…"
+              className="border border-brun/20 rounded-xl px-3 py-2 text-sm text-brun focus:outline-none focus:border-terra flex-1"
+              style={{ fontFamily: 'var(--font-dm-sans)' }}
+            />
+            <input
+              type="color"
+              value={newPlat.couleur}
+              onChange={(e) => setNewPlat({ ...newPlat, couleur: e.target.value })}
+              className="w-9 h-9 rounded-lg cursor-pointer border border-brun/20"
+            />
+            <button
+              onClick={addPlateforme}
+              disabled={!newPlat.nom.trim()}
+              className="flex items-center gap-1.5 bg-terra text-creme text-sm font-medium rounded-full px-5 py-2 hover:bg-brun transition-all disabled:opacity-40"
+              style={{ fontFamily: 'var(--font-dm-sans)' }}
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
+              Ajouter
+            </button>
+          </div>
         </div>
       </div>
 
