@@ -52,6 +52,7 @@ export default async function AdminDashboard() {
   const isSuperAdmin = user?.app_metadata?.role !== 'admin'
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
+  const todayStr = now.toISOString().split('T')[0]
 
   const [
     { data: biensActifsData, count: biensActifs },
@@ -63,6 +64,7 @@ export default async function AdminDashboard() {
     { count: whatsappClicsMois },
     { data: lastWhatsappClics },
     { data: lastReservations },
+    { data: enCoursData },
   ] = await Promise.all([
     supabase.from('biens').select('id,nom', { count: 'exact' }).eq('statut', 'actif'),
     supabase.from('reservations').select('*', { count: 'exact', head: true }).gt('date_depart', monthStart).lte('date_arrivee', monthEnd).in('statut', ['confirmee', 'terminee']),
@@ -73,6 +75,7 @@ export default async function AdminDashboard() {
     supabase.from('vente_whatsapp_clicks').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
     supabase.from('vente_whatsapp_clicks').select('*').order('created_at', { ascending: false }).limit(5),
     supabase.from('reservations').select('*, biens(nom)').order('date_arrivee', { ascending: false }).limit(5),
+    supabase.from('reservations').select('voyageur_nom, date_arrivee, date_depart, plateforme, bien_id, biens(nom)').lte('date_arrivee', todayStr).gt('date_depart', todayStr).in('statut', ['confirmee', 'terminee']),
   ])
 
   // Calcul revenus et taux d'occupation (nuits clampées au mois en cours)
@@ -182,6 +185,42 @@ export default async function AdminDashboard() {
           )}
         </div>
       </div>
+
+      {/* Séjours en cours aujourd'hui */}
+      {(enCoursData ?? []).length > 0 && (
+        <div className="bg-white rounded-2xl border border-brun/10 overflow-hidden mb-6">
+          <div className="px-6 py-4 border-b border-brun/8 flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
+            <h2 className="text-base font-medium text-brun">En cours aujourd&apos;hui</h2>
+            <span className="text-xs text-brun-mid/50 ml-1">({(enCoursData ?? []).length} séjour{(enCoursData ?? []).length > 1 ? 's' : ''})</span>
+          </div>
+          <div className="divide-y divide-brun/5">
+            {(enCoursData ?? []).map((r: any, i: number) => {
+              const depart = new Date(r.date_depart)
+              const nuitsRestantes = Math.max(0, Math.round((depart.getTime() - now.getTime()) / 86400000))
+              const nuits = Math.round((depart.getTime() - new Date(r.date_arrivee).getTime()) / 86400000)
+              const bienNom = r.biens?.nom ?? '—'
+              const platColors: Record<string, string> = { Airbnb: '#FF5A5F', Booking: '#003580', Avito: '#E07A2F', Facebook: '#1877F2', Direct: '#6B4C35' }
+              return (
+                <div key={i} className="px-6 py-3.5 flex items-center gap-4">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-brun truncate">{r.voyageur_nom}</p>
+                    <p className="text-xs text-brun-mid/60 mt-0.5">
+                      {bienNom} · {nuits} nuit{nuits > 1 ? 's' : ''} · <span className="text-green-600 font-medium">Check-out dans {nuitsRestantes}j</span>
+                    </p>
+                  </div>
+                  {r.plateforme && (
+                    <span className="text-[10px] font-semibold text-white px-2 py-0.5 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: platColors[r.plateforme] ?? '#6B4C35' }}>
+                      {r.plateforme}
+                    </span>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="grid xl:grid-cols-2 gap-6">
         {/* Dernières réservations */}

@@ -86,6 +86,8 @@ export default function CalendrierPage() {
   const [loadingToken, setLoadingToken] = useState(false)
   const [copied, setCopied] = useState(false)
   const [toggling, setToggling] = useState<string | null>(null)
+  const [rangeStart, setRangeStart] = useState<string | null>(null)
+  const [rangeMode, setRangeMode] = useState(false)
 
   // Fetch biens + role
   useEffect(() => {
@@ -153,6 +155,49 @@ export default function CalendrierPage() {
 
   async function handleDayClick(dateStr: string) {
     if (!selectedId || toggling) return
+
+    if (rangeMode) {
+      if (!rangeStart) {
+        setRangeStart(dateStr)
+        return
+      }
+      const d1 = rangeStart < dateStr ? rangeStart : dateStr
+      const d2 = rangeStart < dateStr ? dateStr : rangeStart
+      const rangeDays = eachDayOfInterval({ start: parseISO(d1), end: parseISO(d2) })
+        .map((d) => format(d, 'yyyy-MM-dd'))
+        .filter((d) => !reservationDates.has(d) && !isBefore(parseISO(d), today))
+
+      if (!rangeDays.length) { setRangeStart(null); return }
+
+      const allBlocked = rangeDays.every((d) => blockedDates.has(d))
+      const action = allBlocked ? 'Débloquer' : 'Bloquer'
+      if (!confirm(`${action} ${rangeDays.length} jour(s) du ${d1.slice(5).replace('-', '/')} au ${d2.slice(5).replace('-', '/')} ?`)) {
+        setRangeStart(null)
+        return
+      }
+
+      setToggling(dateStr)
+      if (allBlocked) {
+        for (const d of rangeDays) {
+          await supabase.from('blocked_dates').delete().eq('bien_id', selectedId).eq('date', d)
+        }
+        setBlockedDates((prev) => {
+          const n = new Set(prev)
+          rangeDays.forEach((d) => n.delete(d))
+          return n
+        })
+      } else {
+        const toBlock = rangeDays.filter((d) => !blockedDates.has(d))
+        for (const d of toBlock) {
+          await supabase.from('blocked_dates').insert({ bien_id: selectedId, date: d, raison: 'Bloqué manuellement' })
+        }
+        setBlockedDates((prev) => new Set([...prev, ...toBlock]))
+      }
+      setRangeStart(null)
+      setToggling(null)
+      return
+    }
+
     setToggling(dateStr)
     if (blockedDates.has(dateStr)) {
       await supabase.from('blocked_dates').delete().eq('bien_id', selectedId).eq('date', dateStr)
@@ -343,7 +388,7 @@ export default function CalendrierPage() {
                       disabled={!clickable || !!toggling}
                       onClick={() => clickable && handleDayClick(dateStr)}
                       title={resInfo ? `${resInfo.voyageur_nom}${resInfo.plateforme ? ` (${resInfo.plateforme})` : ''}${isArrival ? ' — Check-in' : ''}` : isCheckout ? 'Check-out ce jour' : status === 'blocked' ? 'Bloqué — cliquer pour débloquer' : undefined}
-                      className={`group relative aspect-square rounded-xl flex flex-col items-center justify-center text-sm font-medium transition-all duration-150 ${isToggling ? 'opacity-50' : ''} ${clickable ? 'hover:scale-105 hover:shadow-md' : ''}`}
+                      className={`group relative aspect-square rounded-xl flex flex-col items-center justify-center text-sm font-medium transition-all duration-150 ${isToggling ? 'opacity-50' : ''} ${clickable ? 'hover:scale-105 hover:shadow-md' : ''} ${rangeStart === dateStr ? 'ring-2 ring-terra ring-offset-1' : ''}`}
                       style={{
                         backgroundColor: isArrival ? '#A0623A' : isCheckout ? '#FEF3EE' : style.bg,
                         color: isCheckout ? '#C97B4B' : style.text,
@@ -376,8 +421,26 @@ export default function CalendrierPage() {
               </div>
             )}
 
-            {/* Légende */}
-            <div className="flex flex-wrap gap-x-5 gap-y-2 mt-6 pt-5 border-t border-brun/8">
+            {/* Mode plage + Légende */}
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-6 pt-5 border-t border-brun/8">
+              <button
+                onClick={() => { setRangeMode(!rangeMode); setRangeStart(null) }}
+                className={`flex items-center gap-1.5 text-xs font-medium rounded-full px-3.5 py-1.5 transition-all mr-2 ${rangeMode ? 'bg-terra text-white' : 'border border-brun/20 text-brun-mid hover:border-terra hover:text-terra'}`}
+                style={{ fontFamily: 'var(--font-dm-sans)' }}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>
+                {rangeMode ? 'Mode plage actif' : 'Bloquer une plage'}
+              </button>
+              {rangeMode && rangeStart && (
+                <span className="text-xs text-terra font-medium animate-pulse" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                  Début : {rangeStart.slice(5).replace('-', '/')} — cliquez la date de fin
+                </span>
+              )}
+              {rangeMode && !rangeStart && (
+                <span className="text-xs text-brun-mid/50" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                  Cliquez la date de début
+                </span>
+              )}
               {[
                 { color: '#ECFDF5', border: '#10B98140', label: 'Disponible' },
                 { color: '#FEF3C7', border: '#F59E0B40', label: 'Bloqué' },
