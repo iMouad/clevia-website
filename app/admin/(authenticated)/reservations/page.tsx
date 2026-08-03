@@ -107,7 +107,7 @@ export default function ReservationsPage() {
   async function fetchData() {
     const [{ data: resData }, { data: bienData }] = await Promise.all([
       supabase.from('reservations').select('*, biens(nom)').order('date_arrivee', { ascending: false }),
-      supabase.from('biens').select('id, nom').eq('statut', 'actif'),
+      supabase.from('biens').select('id, nom').eq('statut', 'actif').neq('disponible', false),
     ])
     const today = new Date().toISOString().split('T')[0]
     const aTerminer = (resData ?? []).filter(r => r.statut === 'confirmee' && r.date_depart <= today)
