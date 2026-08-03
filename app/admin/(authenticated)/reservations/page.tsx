@@ -26,7 +26,7 @@ type Reservation = {
   biens?: { nom: string } | null
 }
 
-type Bien = { id: string; nom: string }
+type Bien = { id: string; nom: string; disponible?: boolean }
 
 const EMPTY_RES: Partial<Reservation> = {
   voyageur_nom: '', voyageur_email: '', voyageur_phone: '', date_arrivee: '', date_depart: '',
@@ -107,7 +107,7 @@ export default function ReservationsPage() {
   async function fetchData() {
     const [{ data: resData }, { data: bienData }] = await Promise.all([
       supabase.from('reservations').select('*, biens(nom)').order('date_arrivee', { ascending: false }),
-      supabase.from('biens').select('id, nom').eq('statut', 'actif').neq('disponible', false),
+      supabase.from('biens').select('id, nom, disponible').eq('statut', 'actif'),
     ])
     const today = new Date().toISOString().split('T')[0]
     const aTerminer = (resData ?? []).filter(r => r.statut === 'confirmee' && r.date_depart <= today)
@@ -190,7 +190,7 @@ export default function ReservationsPage() {
     setInitialEditing(JSON.stringify(data))
     setModalOpen(true)
   }
-  function openAdd() { openModal({ ...EMPTY_RES, bien_id: biens[0]?.id ?? null }) }
+  function openAdd() { openModal({ ...EMPTY_RES, bien_id: biens.find((b) => b.disponible !== false)?.id ?? null }) }
   function openEdit(r: Reservation) { openModal({ ...r }); fetchCommentaires(r.id) }
   function openDuplicate(r: Reservation) {
     const { id, created_at, statut, ...rest } = r as any
@@ -864,7 +864,9 @@ export default function ReservationsPage() {
             <label className={labelClass}>Bien</label>
             <AdminSelect value={editing.bien_id ?? ''} onChange={(e) => setEditing((p) => ({ ...p, bien_id: e.target.value || null }))}>
               <option value="">— Sélectionner —</option>
-              {biens.map((b) => <option key={b.id} value={b.id}>{b.nom}</option>)}
+              {biens.filter((b) => b.disponible !== false || b.id === editing.bien_id).map((b) => (
+                <option key={b.id} value={b.id}>{b.nom}{b.disponible === false ? ' (indisponible)' : ''}</option>
+              ))}
             </AdminSelect>
           </div>
           <div>
