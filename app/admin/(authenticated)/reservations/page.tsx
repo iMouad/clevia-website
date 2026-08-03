@@ -40,6 +40,10 @@ const STATUT_COLORS: Record<string, string> = {
 }
 const MOIS_FR = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
 
+function esc(s: string) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
 function nuits(d1: string, d2: string) {
   if (!d1 || !d2) return 0
   return Math.max(0, Math.round((new Date(d2).getTime() - new Date(d1).getTime()) / 86400000))
@@ -77,6 +81,7 @@ export default function ReservationsPage() {
   const [saving, setSaving] = useState(false)
   const [filterStatut, setFilterStatut] = useState('')
   const [filterPlatf, setFilterPlatf] = useState('')
+  const [filterEnCours, setFilterEnCours] = useState(false)
   const [filterBien, setFilterBien] = useState('')
   const [filterMois, setFilterMois] = useState('')
   const [search, setSearch] = useState('')
@@ -134,7 +139,11 @@ export default function ReservationsPage() {
     fetchData()
   }, [])
 
+  const today = new Date().toISOString().split('T')[0]
+  function isEnCours(r: Reservation) { return r.statut === 'confirmee' && r.date_arrivee <= today && r.date_depart > today }
+
   const filtered = rows.filter((r) => {
+    if (filterEnCours && !isEnCours(r)) return false
     if (filterStatut && r.statut !== filterStatut) return false
     if (filterPlatf && r.plateforme !== filterPlatf) return false
     if (filterBien && r.bien_id !== filterBien) return false
@@ -278,7 +287,7 @@ export default function ReservationsPage() {
     const bien = biens.find((b) => b.id === r.bien_id)
     const n = nuits(r.date_arrivee, r.date_depart)
     const comm = calcCommission(r)
-    const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Facture — ${r.voyageur_nom}</title><style>
+    const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Facture — ${esc(r.voyageur_nom)}</title><style>
       *{box-sizing:border-box;margin:0;padding:0}
       body{font-family:'Helvetica Neue',Arial,sans-serif;color:#2C1A0E;padding:40px;font-size:13px}
       .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #C97B4B;padding-bottom:16px;margin-bottom:28px}
@@ -313,14 +322,14 @@ export default function ReservationsPage() {
       <div class="info-grid section">
         <div class="info-box">
           <div class="info-label">Voyageur</div>
-          <div class="info-value">${r.voyageur_nom}</div>
-          ${r.voyageur_email ? `<div style="font-size:11px;color:#6B4C35;margin-top:2px">${r.voyageur_email}</div>` : ''}
-          ${r.voyageur_phone ? `<div style="font-size:11px;color:#6B4C35">${r.voyageur_phone}</div>` : ''}
+          <div class="info-value">${esc(r.voyageur_nom)}</div>
+          ${r.voyageur_email ? `<div style="font-size:11px;color:#6B4C35;margin-top:2px">${esc(r.voyageur_email)}</div>` : ''}
+          ${r.voyageur_phone ? `<div style="font-size:11px;color:#6B4C35">${esc(r.voyageur_phone)}</div>` : ''}
         </div>
         <div class="info-box">
           <div class="info-label">Bien</div>
-          <div class="info-value">${bien?.nom ?? '—'}</div>
-          <div style="font-size:11px;color:#6B4C35;margin-top:2px">via ${r.plateforme ?? '—'}</div>
+          <div class="info-value">${esc(bien?.nom ?? '—')}</div>
+          <div style="font-size:11px;color:#6B4C35;margin-top:2px">via ${esc(r.plateforme ?? '—')}</div>
         </div>
       </div>
       <div class="section">
@@ -329,7 +338,7 @@ export default function ReservationsPage() {
           <thead><tr><th>Description</th><th>Arrivée</th><th>Départ</th><th style="text-align:center">Nuits</th><th style="text-align:right">Montant</th></tr></thead>
           <tbody>
             <tr>
-              <td>${bien?.nom ?? 'Hébergement'}</td>
+              <td>${esc(bien?.nom ?? 'Hébergement')}</td>
               <td>${format(new Date(r.date_arrivee), 'dd/MM/yyyy')}</td>
               <td>${format(new Date(r.date_depart), 'dd/MM/yyyy')}</td>
               <td style="text-align:center">${n}</td>
@@ -343,7 +352,7 @@ export default function ReservationsPage() {
           </tbody>
         </table>
       </div>
-      ${r.notes ? `<div class="section"><div class="section-title">Notes</div><p style="font-size:12px;color:#6B4C35">${r.notes}</p></div>` : ''}
+      ${r.notes ? `<div class="section"><div class="section-title">Notes</div><p style="font-size:12px;color:#6B4C35">${esc(r.notes)}</p></div>` : ''}
       <div class="footer">Clévia Conciergerie · Mansouria-Mohammedia, Maroc · cleviamaroc.com</div>
       <script>window.onload=function(){window.print()}</script>
     </body></html>`
@@ -464,14 +473,14 @@ export default function ReservationsPage() {
     const data = computeRapport()
     if (!data) return
     const { bien, resRapport, totalNuits, totalMontant, totalCommission, tauxOccupation, daysInMonth } = data
-    const titre = `Rapport — ${bien.nom} — ${MOIS_FR[rapportMois - 1]} ${rapportAnnee}`
+    const titre = `Rapport — ${esc(bien.nom)} — ${MOIS_FR[rapportMois - 1]} ${rapportAnnee}`
     const tableRows = resRapport.map((r) => `
       <tr>
         <td>${format(new Date(r.date_arrivee), 'dd/MM/yyyy')}</td>
         <td>${format(new Date(r.date_depart), 'dd/MM/yyyy')}</td>
         <td style="text-align:center">${nuits(r.date_arrivee, r.date_depart)}</td>
-        <td>${r.voyageur_nom}${r.intermediaire ? `<br><span style="font-size:10px;color:#A07850">via ${r.intermediaire}</span>` : ''}</td>
-        <td>${r.plateforme ?? '—'}</td>
+        <td>${esc(r.voyageur_nom)}${r.intermediaire ? `<br><span style="font-size:10px;color:#A07850">via ${esc(r.intermediaire)}</span>` : ''}</td>
+        <td>${esc(r.plateforme ?? '—')}</td>
         <td>${r.montant ? r.montant.toLocaleString('fr-MA') + ' MAD' : '—'}</td>
         <td>${r.montant ? Math.round(calcCommission(r)).toLocaleString('fr-MA') + ' MAD' : '—'}</td>
         <td>${STATUT_LABELS[r.statut] ?? r.statut}</td>
@@ -531,9 +540,6 @@ export default function ReservationsPage() {
   const commissionVal = calcCommission(editing)
   const commission = commissionVal > 0 ? commissionVal.toFixed(2) : '—'
 
-  const today = new Date().toISOString().split('T')[0]
-  function isEnCours(r: Reservation) { return r.statut === 'confirmee' && r.date_arrivee <= today && r.date_depart > today }
-
   const totNuits = filtered.reduce((s, r) => s + nuits(r.date_arrivee, r.date_depart), 0)
   const totMontant = filtered.reduce((s, r) => s + (r.montant ?? 0), 0)
   const totCommission = filtered.reduce((s, r) => s + calcCommission(r), 0)
@@ -587,6 +593,12 @@ export default function ReservationsPage() {
             onChange={(e) => { setSearch(e.target.value); setPage(1) }}
           />
         </div>
+        <button
+          onClick={() => { setFilterEnCours((v) => !v); setPage(1) }}
+          className={`text-sm font-medium rounded-xl px-3 py-2 transition-all ${filterEnCours ? 'bg-green-500 text-white' : 'border border-brun/20 text-brun-mid hover:border-terra hover:text-terra'}`}
+        >
+          En cours
+        </button>
         <AdminSelect className="!py-2 !px-3" value={filterBien} onChange={(e) => { setFilterBien(e.target.value); setPage(1) }}>
           <option value="">Tous les biens</option>
           {biens.map((b) => <option key={b.id} value={b.id}>{b.nom}</option>)}
@@ -624,9 +636,9 @@ export default function ReservationsPage() {
           value={filterMois}
           onChange={(e) => { setFilterMois(e.target.value); setPage(1) }}
         />
-        {(filterBien || filterStatut || filterPlatf || filterMois || search) && (
+        {(filterBien || filterStatut || filterPlatf || filterMois || filterEnCours || search) && (
           <button
-            onClick={() => { setFilterBien(''); setFilterStatut(''); setFilterPlatf(''); setFilterMois(''); setSearch(''); setPage(1) }}
+            onClick={() => { setFilterBien(''); setFilterStatut(''); setFilterPlatf(''); setFilterMois(''); setFilterEnCours(false); setSearch(''); setPage(1) }}
             className="text-xs text-terra hover:text-brun transition-colors self-center underline underline-offset-2"
           >
             Réinitialiser
