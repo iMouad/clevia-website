@@ -89,6 +89,7 @@ export default function ReservationsPage() {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [page, setPage] = useState(1)
   const [toast, setToast] = useState('')
+  const [selected, setSelected] = useState<Set<string>>(new Set())
   const PER_PAGE = 20
   const [rapportOpen, setRapportOpen] = useState(false)
   const [rapportBienId, setRapportBienId] = useState('')
@@ -407,6 +408,44 @@ export default function ReservationsPage() {
     showToast('Réservation supprimée')
   }
 
+  function toggleSelect(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      return next
+    })
+  }
+
+  function toggleSelectAll() {
+    if (selected.size === paginated.length) setSelected(new Set())
+    else setSelected(new Set(paginated.map((r) => r.id)))
+  }
+
+  async function bulkUpdateStatut(statut: string) {
+    const ids = Array.from(selected)
+    if (!ids.length) return
+    if (!confirm(`Changer le statut de ${ids.length} réservation(s) en "${STATUT_LABELS[statut]}" ?`)) return
+    await supabase.from('reservations').update({ statut }).in('id', ids)
+    for (const id of ids) await logHistorique(id, 'modification', { statut: { avant: rows.find((r) => r.id === id)?.statut, apres: statut } })
+    setSelected(new Set())
+    fetchData()
+    showToast(`${ids.length} réservation(s) → ${STATUT_LABELS[statut]}`)
+  }
+
+  async function bulkDelete() {
+    const ids = Array.from(selected)
+    if (!ids.length) return
+    if (!confirm(`Supprimer ${ids.length} réservation(s) ? Cette action est irréversible.`)) return
+    for (const id of ids) {
+      const original = rows.find((r) => r.id === id)
+      await logHistorique(id, 'suppression', original ? { voyageur_nom: original.voyageur_nom, date_arrivee: original.date_arrivee, date_depart: original.date_depart } : null)
+    }
+    await supabase.from('reservations').delete().in('id', ids)
+    setSelected(new Set())
+    fetchData()
+    showToast(`${ids.length} réservation(s) supprimée(s)`)
+  }
+
   function exportCSV() {
     const headers = isSuperAdmin
       ? ['Voyageur', 'Intermédiaire', 'Email', 'Téléphone', 'Bien', 'Arrivée', 'Départ', 'Nuits', 'Plateforme', 'Montant MAD', 'Commission MAD', 'Statut', 'Notes']
@@ -582,6 +621,26 @@ export default function ReservationsPage() {
         </div>
       )}
 
+      {/* Bulk actions */}
+      {selected.size > 0 && (
+        <div className="flex items-center gap-3 mb-4 bg-terra/10 border border-terra/20 rounded-xl px-4 py-3 flex-wrap">
+          <span className="text-sm font-medium text-brun">{selected.size} sélectionnée(s)</span>
+          <div className="h-4 w-px bg-brun/20" />
+          {Object.entries(STATUT_LABELS).map(([v, l]) => (
+            <button key={v} onClick={() => bulkUpdateStatut(v)} className={`text-xs font-medium rounded-full px-3 py-1.5 transition-all ${STATUT_COLORS[v]}`}>
+              → {l}
+            </button>
+          ))}
+          <div className="h-4 w-px bg-brun/20" />
+          <button onClick={bulkDelete} className="text-xs font-medium text-red-500 hover:text-red-700 transition-colors">
+            Supprimer
+          </button>
+          <button onClick={() => setSelected(new Set())} className="text-xs text-brun-mid/50 underline underline-offset-2 hover:text-brun transition-colors ml-auto">
+            Désélectionner
+          </button>
+        </div>
+      )}
+
       {/* Filters */}
       <div className="flex gap-3 mb-5 flex-wrap">
         <div className="relative">
@@ -722,6 +781,9 @@ export default function ReservationsPage() {
           <table className="w-full text-sm">
             <thead className="bg-brun/4">
               <tr>
+                <th className="px-3 py-3 w-10">
+                  <input type="checkbox" checked={paginated.length > 0 && selected.size === paginated.length} onChange={toggleSelectAll} className="rounded border-brun/30 text-terra focus:ring-terra cursor-pointer" />
+                </th>
                 {[
                   { label: 'Voyageur', col: 'voyageur_nom' },
                   { label: 'Bien', col: 'bien' },
@@ -748,11 +810,14 @@ export default function ReservationsPage() {
             </thead>
             <tbody className="divide-y divide-brun/5">
               {loading ? (
-                <tr><td colSpan={isSuperAdmin ? 10 : 8} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
+                <tr><td colSpan={isSuperAdmin ? 11 : 9} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
               ) : !filtered.length ? (
-                <tr><td colSpan={isSuperAdmin ? 10 : 8} className="px-4 py-10 text-center text-brun-mid/50">Aucune réservation</td></tr>
+                <tr><td colSpan={isSuperAdmin ? 11 : 9} className="px-4 py-10 text-center text-brun-mid/50">Aucune réservation</td></tr>
               ) : paginated.map((r) => (
-                <tr key={r.id} className={`transition-colors ${isEnCours(r) ? 'bg-green-50/60 border-l-2 border-l-green-400' : 'hover:bg-creme/40'}`}>
+                <tr key={r.id} className={`transition-colors ${isEnCours(r) ? 'bg-green-50/60 border-l-2 border-l-green-400' : 'hover:bg-creme/40'} ${selected.has(r.id) ? 'bg-terra/5' : ''}`}>
+                  <td className="px-3 py-3">
+                    <input type="checkbox" checked={selected.has(r.id)} onChange={() => toggleSelect(r.id)} className="rounded border-brun/30 text-terra focus:ring-terra cursor-pointer" />
+                  </td>
                   <td className="px-3 py-3 whitespace-nowrap">
                     <div className="flex items-center gap-1.5">
                       <span className="text-brun font-medium">{r.voyageur_nom}</span>
@@ -799,7 +864,7 @@ export default function ReservationsPage() {
             {filtered.length > 0 && (
               <tfoot className="bg-brun/4 border-t-2 border-brun/15">
                 <tr>
-                  <td className="px-3 py-3 text-brun font-semibold text-sm" colSpan={4}>Total ({filtered.length} résa{filtered.length > 1 ? 's' : ''})</td>
+                  <td className="px-3 py-3 text-brun font-semibold text-sm" colSpan={5}>Total ({filtered.length} résa{filtered.length > 1 ? 's' : ''})</td>
                   <td className="px-3 py-3 text-center text-brun font-semibold text-sm">{totNuits}</td>
                   <td className="px-3 py-3"></td>
                   {isSuperAdmin && (
