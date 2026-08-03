@@ -82,6 +82,7 @@ export default function ReservationsPage() {
   const [filterStatut, setFilterStatut] = useState('')
   const [filterPlatf, setFilterPlatf] = useState('')
   const [filterEnCours, setFilterEnCours] = useState(false)
+  const [filterAVenir, setFilterAVenir] = useState(false)
   const [filterBien, setFilterBien] = useState('')
   const [filterMois, setFilterMois] = useState('')
   const [search, setSearch] = useState('')
@@ -141,10 +142,14 @@ export default function ReservationsPage() {
   }, [])
 
   const today = new Date().toISOString().split('T')[0]
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0]
   function isEnCours(r: Reservation) { return r.statut === 'confirmee' && r.date_arrivee <= today && r.date_depart > today }
+  function isCheckinDemain(r: Reservation) { return r.statut === 'confirmee' && r.date_arrivee === tomorrow }
+  function isCheckoutDemain(r: Reservation) { return r.statut === 'confirmee' && r.date_depart === tomorrow }
 
   const filtered = rows.filter((r) => {
     if (filterEnCours && !isEnCours(r)) return false
+    if (filterAVenir && !(r.statut === 'confirmee' && r.date_arrivee > today)) return false
     if (filterStatut && r.statut !== filterStatut) return false
     if (filterPlatf && r.plateforme !== filterPlatf) return false
     if (filterBien && r.bien_id !== filterBien) return false
@@ -653,10 +658,25 @@ export default function ReservationsPage() {
           />
         </div>
         <button
-          onClick={() => { setFilterEnCours((v) => !v); setPage(1) }}
+          onClick={() => {
+            const mois = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`
+            setFilterMois((v) => v === mois ? '' : mois); setPage(1)
+          }}
+          className={`text-sm font-medium rounded-xl px-3 py-2 transition-all ${filterMois === `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}` ? 'bg-terra text-white' : 'border border-brun/20 text-brun-mid hover:border-terra hover:text-terra'}`}
+        >
+          Ce mois
+        </button>
+        <button
+          onClick={() => { setFilterEnCours((v) => !v); setFilterAVenir(false); setPage(1) }}
           className={`text-sm font-medium rounded-xl px-3 py-2 transition-all ${filterEnCours ? 'bg-green-500 text-white' : 'border border-brun/20 text-brun-mid hover:border-terra hover:text-terra'}`}
         >
           En cours
+        </button>
+        <button
+          onClick={() => { setFilterAVenir((v) => !v); setFilterEnCours(false); setPage(1); if (!filterAVenir) { setSortCol('date_arrivee'); setSortDir('asc') } }}
+          className={`text-sm font-medium rounded-xl px-3 py-2 transition-all ${filterAVenir ? 'bg-blue-500 text-white' : 'border border-brun/20 text-brun-mid hover:border-terra hover:text-terra'}`}
+        >
+          À venir
         </button>
         <AdminSelect className="!py-2 !px-3" value={filterBien} onChange={(e) => { setFilterBien(e.target.value); setPage(1) }}>
           <option value="">Tous les biens</option>
@@ -695,9 +715,9 @@ export default function ReservationsPage() {
           value={filterMois}
           onChange={(e) => { setFilterMois(e.target.value); setPage(1) }}
         />
-        {(filterBien || filterStatut || filterPlatf || filterMois || filterEnCours || search) && (
+        {(filterBien || filterStatut || filterPlatf || filterMois || filterEnCours || filterAVenir || search) && (
           <button
-            onClick={() => { setFilterBien(''); setFilterStatut(''); setFilterPlatf(''); setFilterMois(''); setFilterEnCours(false); setSearch(''); setPage(1) }}
+            onClick={() => { setFilterBien(''); setFilterStatut(''); setFilterPlatf(''); setFilterMois(''); setFilterEnCours(false); setFilterAVenir(false); setSearch(''); setPage(1) }}
             className="text-xs text-terra hover:text-brun transition-colors self-center underline underline-offset-2"
           >
             Réinitialiser
@@ -713,12 +733,14 @@ export default function ReservationsPage() {
         ) : !filtered.length ? (
           <p className="text-center py-10 text-brun-mid/50 text-sm">Aucune réservation</p>
         ) : paginated.map((r) => (
-          <div key={r.id} className={`rounded-2xl border p-4 ${isEnCours(r) ? 'bg-green-50/60 border-green-300' : 'bg-white border-brun/10'}`}>
+          <div key={r.id} className={`rounded-2xl border p-4 ${isCheckinDemain(r) ? 'bg-blue-50/60 border-blue-300' : isCheckoutDemain(r) ? 'bg-orange-50/60 border-orange-300' : isEnCours(r) ? 'bg-green-50/60 border-green-300' : 'bg-white border-brun/10'}`}>
             <div className="flex items-center justify-between gap-2 mb-1">
               <div className="truncate">
                 <div className="flex items-center gap-1.5">
                   <p className="font-medium text-brun text-sm truncate" style={{ fontFamily: 'var(--font-dm-sans)' }}>{r.voyageur_nom}</p>
-                  {isEnCours(r) && <span className="text-[9px] bg-green-500 text-white px-1.5 py-0.5 rounded-full font-medium shrink-0">En cours</span>}
+                  {isCheckinDemain(r) && <span className="text-[9px] bg-blue-500 text-white px-1.5 py-0.5 rounded-full font-medium shrink-0">Check-in demain</span>}
+                  {isCheckoutDemain(r) && <span className="text-[9px] bg-orange-500 text-white px-1.5 py-0.5 rounded-full font-medium shrink-0">Check-out demain</span>}
+                  {!isCheckinDemain(r) && !isCheckoutDemain(r) && isEnCours(r) && <span className="text-[9px] bg-green-500 text-white px-1.5 py-0.5 rounded-full font-medium shrink-0">En cours</span>}
                 </div>
                 {r.intermediaire && <p className="text-[10px] text-brun-mid/50" style={{ fontFamily: 'var(--font-dm-sans)' }}>via {r.intermediaire}</p>}
               </div>
@@ -814,14 +836,16 @@ export default function ReservationsPage() {
               ) : !filtered.length ? (
                 <tr><td colSpan={isSuperAdmin ? 11 : 9} className="px-4 py-10 text-center text-brun-mid/50">Aucune réservation</td></tr>
               ) : paginated.map((r) => (
-                <tr key={r.id} className={`transition-colors ${isEnCours(r) ? 'bg-green-50/60 border-l-2 border-l-green-400' : 'hover:bg-creme/40'} ${selected.has(r.id) ? 'bg-terra/5' : ''}`}>
+                <tr key={r.id} className={`transition-colors ${isCheckinDemain(r) ? 'bg-blue-50/60 border-l-2 border-l-blue-400' : isCheckoutDemain(r) ? 'bg-orange-50/60 border-l-2 border-l-orange-400' : isEnCours(r) ? 'bg-green-50/60 border-l-2 border-l-green-400' : 'hover:bg-creme/40'} ${selected.has(r.id) ? 'bg-terra/5' : ''}`}>
                   <td className="px-3 py-3">
                     <input type="checkbox" checked={selected.has(r.id)} onChange={() => toggleSelect(r.id)} className="rounded border-brun/30 text-terra focus:ring-terra cursor-pointer" />
                   </td>
                   <td className="px-3 py-3 whitespace-nowrap">
                     <div className="flex items-center gap-1.5">
                       <span className="text-brun font-medium">{r.voyageur_nom}</span>
-                      {isEnCours(r) && <span className="text-[9px] bg-green-500 text-white px-1.5 py-0.5 rounded-full font-medium">En cours</span>}
+                      {isCheckinDemain(r) && <span className="text-[9px] bg-blue-500 text-white px-1.5 py-0.5 rounded-full font-medium">Check-in demain</span>}
+                      {isCheckoutDemain(r) && <span className="text-[9px] bg-orange-500 text-white px-1.5 py-0.5 rounded-full font-medium">Check-out demain</span>}
+                      {!isCheckinDemain(r) && !isCheckoutDemain(r) && isEnCours(r) && <span className="text-[9px] bg-green-500 text-white px-1.5 py-0.5 rounded-full font-medium">En cours</span>}
                     </div>
                     {r.intermediaire && <span className="block text-[10px] text-brun-mid/50">via {r.intermediaire}</span>}
                   </td>
