@@ -1070,7 +1070,39 @@ export default function ReservationsPage() {
               </div>
               <div>
                 <label className={labelClass}>Téléphone</label>
-                <input className={inputClass} value={editing.voyageur_phone ?? ''} onChange={(e) => setEditing((p) => ({ ...p, voyageur_phone: e.target.value }))} />
+                <div className="flex gap-1.5">
+                  <select
+                    className="border border-brun/20 rounded-xl px-2 py-2.5 text-sm text-brun focus:outline-none focus:border-terra focus:ring-1 focus:ring-terra transition-colors w-[90px] shrink-0"
+                    value={(editing.voyageur_phone ?? '').match(/^(\+\d{1,4})/)?.[1] ?? '+212'}
+                    onChange={(e) => {
+                      const num = (editing.voyageur_phone ?? '').replace(/^\+\d{1,4}\s?/, '')
+                      setEditing((p) => ({ ...p, voyageur_phone: e.target.value + ' ' + num }))
+                    }}
+                  >
+                    <option value="+212">+212</option>
+                    <option value="+33">+33</option>
+                    <option value="+34">+34</option>
+                    <option value="+44">+44</option>
+                    <option value="+49">+49</option>
+                    <option value="+1">+1</option>
+                    <option value="+39">+39</option>
+                    <option value="+32">+32</option>
+                    <option value="+31">+31</option>
+                    <option value="+216">+216</option>
+                    <option value="+213">+213</option>
+                    <option value="+966">+966</option>
+                    <option value="+971">+971</option>
+                  </select>
+                  <input
+                    className={inputClass}
+                    value={(editing.voyageur_phone ?? '').replace(/^\+\d{1,4}\s?/, '')}
+                    onChange={(e) => {
+                      const prefix = (editing.voyageur_phone ?? '').match(/^(\+\d{1,4})/)?.[1] ?? '+212'
+                      setEditing((p) => ({ ...p, voyageur_phone: prefix + ' ' + e.target.value }))
+                    }}
+                    placeholder="6 12 34 56 78"
+                  />
+                </div>
               </div>
             </div>
           </div>

@@ -159,21 +159,34 @@ export default function VoyageursPage() {
 
   // CRUD
   function openEdit(v: Voyageur) { setEditing({ ...v }); setEditModal(true) }
+  function openAdd() { setEditing({ nom: '', email: '', telephone: '', sources: [], notes: '', nb_reservations: 0 }); setEditModal(true) }
   function closeEdit() { setEditModal(false); setEditing(null) }
 
   async function handleSave() {
     if (!editing?.nom?.trim()) { showToast('Le nom est obligatoire'); return }
     setSaving(true)
-    await supabase.from('voyageurs').update({
-      nom: editing.nom.trim(),
-      email: editing.email?.trim() || null,
-      telephone: editing.telephone?.trim() || null,
-      sources: editing.sources,
-      notes: editing.notes?.trim() || null,
-      updated_at: new Date().toISOString(),
-    }).eq('id', editing.id!)
+    if (editing.id) {
+      await supabase.from('voyageurs').update({
+        nom: editing.nom.trim(),
+        email: editing.email?.trim() || null,
+        telephone: editing.telephone?.trim() || null,
+        sources: editing.sources,
+        notes: editing.notes?.trim() || null,
+        updated_at: new Date().toISOString(),
+      }).eq('id', editing.id)
+      showToast('Voyageur modifié')
+    } else {
+      await supabase.from('voyageurs').insert({
+        nom: editing.nom.trim(),
+        email: editing.email?.trim() || null,
+        telephone: editing.telephone?.trim() || null,
+        sources: editing.sources ?? [],
+        notes: editing.notes?.trim() || null,
+        nb_reservations: 0,
+      })
+      showToast('Voyageur ajouté')
+    }
     setSaving(false); closeEdit(); fetchData()
-    showToast('Voyageur modifié')
   }
 
   async function handleDelete(id: string, nom: string) {
@@ -246,13 +259,22 @@ export default function VoyageursPage() {
           </h1>
           <p className="text-brun-mid text-sm mt-1">{voyageurs.length} voyageur(s) enregistré(s)</p>
         </div>
-        <button
-          onClick={exportCSV}
-          className="flex items-center gap-2 border border-brun/20 text-brun-mid text-sm font-medium rounded-full px-4 py-2.5 hover:border-terra hover:text-terra transition-all"
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          Export CSV
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={exportCSV}
+            className="flex items-center gap-2 border border-brun/20 text-brun-mid text-sm font-medium rounded-full px-4 py-2.5 hover:border-terra hover:text-terra transition-all"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            Export CSV
+          </button>
+          <button
+            onClick={openAdd}
+            className="flex items-center gap-2 bg-terra text-creme text-sm font-medium rounded-full px-4 py-2.5 hover:bg-brun transition-all"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+            Nouveau voyageur
+          </button>
+        </div>
       </div>
 
       {/* Toast */}
@@ -448,7 +470,7 @@ export default function VoyageursPage() {
       <Modal open={editModal} onClose={closeEdit}>
         <div className="p-5 border-b border-brun/10 flex items-center justify-between">
           <h2 className="text-xl text-brun" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
-            Modifier le voyageur
+            {editing?.id ? 'Modifier le voyageur' : 'Nouveau voyageur'}
           </h2>
           <button onClick={closeEdit} className="text-brun-mid hover:text-brun">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 4l12 12M16 4L4 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
@@ -463,7 +485,39 @@ export default function VoyageursPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className={labelClass}>Téléphone</label>
-                <input className={inputClass} value={editing.telephone ?? ''} onChange={(e) => setEditing(p => ({ ...p!, telephone: e.target.value }))} />
+                <div className="flex gap-1.5">
+                  <select
+                    className="border border-brun/20 rounded-xl px-2 py-2.5 text-sm text-brun focus:outline-none focus:border-terra focus:ring-1 focus:ring-terra transition-colors w-[90px] shrink-0"
+                    value={(editing.telephone ?? '').match(/^(\+\d{1,4})/)?.[1] ?? '+212'}
+                    onChange={(e) => {
+                      const num = (editing.telephone ?? '').replace(/^\+\d{1,4}\s?/, '')
+                      setEditing(p => ({ ...p!, telephone: e.target.value + ' ' + num }))
+                    }}
+                  >
+                    <option value="+212">+212</option>
+                    <option value="+33">+33</option>
+                    <option value="+34">+34</option>
+                    <option value="+44">+44</option>
+                    <option value="+49">+49</option>
+                    <option value="+1">+1</option>
+                    <option value="+39">+39</option>
+                    <option value="+32">+32</option>
+                    <option value="+31">+31</option>
+                    <option value="+216">+216</option>
+                    <option value="+213">+213</option>
+                    <option value="+966">+966</option>
+                    <option value="+971">+971</option>
+                  </select>
+                  <input
+                    className={inputClass}
+                    value={(editing.telephone ?? '').replace(/^\+\d{1,4}\s?/, '')}
+                    onChange={(e) => {
+                      const prefix = (editing.telephone ?? '').match(/^(\+\d{1,4})/)?.[1] ?? '+212'
+                      setEditing(p => ({ ...p!, telephone: prefix + ' ' + e.target.value }))
+                    }}
+                    placeholder="6 12 34 56 78"
+                  />
+                </div>
               </div>
               <div>
                 <label className={labelClass}>Email</label>
