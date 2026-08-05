@@ -1127,8 +1127,8 @@ export default function ReservationsPage() {
                     <input
                       type="number" min={0}
                       className={inputClass}
-                      value={editing.commission_fixe ?? ''}
-                      onChange={(e) => setEditing((p) => ({ ...p, commission_fixe: e.target.value === '' ? null : Number(e.target.value) }))}
+                      value={editing.commission_fixe || ''}
+                      onChange={(e) => setEditing((p) => ({ ...p, commission_fixe: e.target.value === '' ? 0 : Number(e.target.value) }))}
                       placeholder="Montant fixe en MAD"
                     />
                   ) : (
