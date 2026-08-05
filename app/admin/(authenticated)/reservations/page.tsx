@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { format } from 'date-fns'
 import { createClient } from '@/lib/supabase'
 import AdminSelect from '@/components/admin/AdminSelect'
@@ -612,6 +612,17 @@ export default function ReservationsPage() {
   const commissionVal = calcCommission(editing)
   const commission = commissionVal > 0 ? commissionVal.toFixed(2) : '—'
 
+  const chevauchement = useMemo(() => {
+    if (!editing.bien_id || !editing.date_arrivee || !editing.date_depart) return null
+    return rows.find(r =>
+      r.id !== editing.id
+      && r.bien_id === editing.bien_id
+      && r.statut !== 'annulee'
+      && r.date_arrivee < editing.date_depart!
+      && r.date_depart > editing.date_arrivee!
+    ) ?? null
+  }, [editing.bien_id, editing.date_arrivee, editing.date_depart, editing.id, rows])
+
   const totNuits = filtered.reduce((s, r) => s + nuits(r.date_arrivee, r.date_depart), 0)
   const totMontant = filtered.reduce((s, r) => s + (r.montant ?? 0), 0)
   const totCommission = filtered.reduce((s, r) => s + calcCommission(r), 0)
@@ -1080,6 +1091,12 @@ export default function ReservationsPage() {
             {editing.date_arrivee && editing.date_depart && (
               <p className="text-xs text-terra mt-2">{nuits(editing.date_arrivee, editing.date_depart)} nuit(s)</p>
             )}
+            {chevauchement && (
+              <div className="mt-2 flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5 text-xs text-red-700">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="shrink-0 mt-0.5"><path d="M12 9v4M12 17h.01" /><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /></svg>
+                <span>Conflit : <strong>{chevauchement.voyageur_nom}</strong> a déjà une réservation du {format(new Date(chevauchement.date_arrivee), 'dd/MM')} au {format(new Date(chevauchement.date_depart), 'dd/MM')} sur ce bien</span>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-3 mt-3">
               <div>
                 <label className={labelClass}>Plateforme</label>
@@ -1212,6 +1229,45 @@ export default function ReservationsPage() {
             </div>
           )}
         </div>
+        {/* ── Résumé récapitulatif ── */}
+        {editing.voyageur_nom && editing.date_arrivee && editing.date_depart && editing.bien_id && (
+          <div className="px-5 pb-4">
+            <div className="bg-creme/80 border border-brun/8 rounded-xl px-4 py-3">
+              <p className="text-[10px] uppercase tracking-widest text-brun-mid/40 font-medium mb-2">Récapitulatif</p>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-brun-mid/60">Bien</span>
+                  <span className="text-brun font-medium">{biens.find(b => b.id === editing.bien_id)?.nom ?? '—'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-brun-mid/60">Voyageur</span>
+                  <span className="text-brun font-medium">{editing.voyageur_nom}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-brun-mid/60">Séjour</span>
+                  <span className="text-brun font-medium">{format(new Date(editing.date_arrivee), 'dd/MM')} → {format(new Date(editing.date_depart), 'dd/MM')} ({nuits(editing.date_arrivee, editing.date_depart)}n)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-brun-mid/60">Plateforme</span>
+                  <span className="text-brun font-medium">{editing.plateforme ?? '—'}</span>
+                </div>
+                {isSuperAdmin && editing.montant != null && editing.montant > 0 && (
+                  <>
+                    <div className="flex justify-between">
+                      <span className="text-brun-mid/60">Montant</span>
+                      <span className="text-brun font-medium">{editing.montant} MAD</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-brun-mid/60">Commission</span>
+                      <span className="text-terra font-medium">{commission} MAD</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="p-5 border-t border-brun/10 flex items-center justify-between">
           <div className="flex gap-2">
             {editing.id && (
