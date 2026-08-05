@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { format } from 'date-fns'
 import { createClient } from '@/lib/supabase'
 import AdminSelect from '@/components/admin/AdminSelect'
@@ -27,6 +27,7 @@ type Reservation = {
 }
 
 type Bien = { id: string; nom: string; disponible?: boolean }
+type VoyageurOption = { id: string; nom: string; email: string | null; telephone: string | null }
 
 const EMPTY_RES: Partial<Reservation> = {
   voyageur_nom: '', voyageur_email: '', voyageur_phone: '', date_arrivee: '', date_depart: '',
@@ -106,15 +107,21 @@ export default function ReservationsPage() {
   const [historiqueOpen, setHistoriqueOpen] = useState(false)
   const [historique, setHistorique] = useState<{ id: string; action: string; changes: any; user_email: string | null; created_at: string }[]>([])
   const [historiqueLoading, setHistoriqueLoading] = useState(false)
+  const [voyageurs, setVoyageurs] = useState<VoyageurOption[]>([])
+  const [voyageurQuery, setVoyageurQuery] = useState('')
+  const [voyageurDropdownOpen, setVoyageurDropdownOpen] = useState(false)
+  const [selectedVoyageur, setSelectedVoyageur] = useState<VoyageurOption | null>(null)
+  const voyageurRef = useRef<HTMLDivElement>(null)
 
   const platNames = plateformes.filter((p) => p.actif).map((p) => p.nom)
   const platColorMap: Record<string, string> = {}
   plateformes.forEach((p) => { platColorMap[p.nom] = p.couleur })
 
   async function fetchData() {
-    const [{ data: resData }, { data: bienData }] = await Promise.all([
+    const [{ data: resData }, { data: bienData }, { data: voyData }] = await Promise.all([
       supabase.from('reservations').select('*, biens(nom)').order('date_arrivee', { ascending: false }),
       supabase.from('biens').select('id, nom, disponible').eq('statut', 'actif'),
+      supabase.from('voyageurs').select('id, nom, email, telephone').order('nom'),
     ])
     const today = new Date().toISOString().split('T')[0]
     const aTerminer = (resData ?? []).filter(r => r.statut === 'confirmee' && r.date_depart <= today)
@@ -127,6 +134,7 @@ export default function ReservationsPage() {
     }
     setRows(resData ?? [])
     setBiens(bienData ?? [])
+    setVoyageurs(voyData ?? [])
     setLoading(false)
   }
 
@@ -140,6 +148,20 @@ export default function ReservationsPage() {
     })
     fetchData()
   }, [])
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (voyageurRef.current && !voyageurRef.current.contains(e.target as Node)) {
+        setVoyageurDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const filteredVoyageurs = voyageurQuery.trim().length > 0
+    ? voyageurs.filter(v => v.nom.toLowerCase().includes(voyageurQuery.toLowerCase()) || v.telephone?.includes(voyageurQuery))
+    : voyageurs
 
   const today = new Date().toISOString().split('T')[0]
   const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0]
@@ -203,6 +225,12 @@ export default function ReservationsPage() {
   function openModal(data: Partial<Reservation>) {
     setEditing(data)
     setInitialEditing(JSON.stringify(data))
+    setVoyageurQuery(data.voyageur_nom ?? '')
+    setVoyageurDropdownOpen(false)
+    const match = data.voyageur_phone
+      ? voyageurs.find(v => v.telephone === data.voyageur_phone) ?? null
+      : voyageurs.find(v => v.nom === data.voyageur_nom) ?? null
+    setSelectedVoyageur(match)
     setModalOpen(true)
   }
   function openAdd() { openModal({ ...EMPTY_RES, bien_id: biens.find((b) => b.disponible !== false)?.id ?? null }) }
@@ -960,63 +988,122 @@ export default function ReservationsPage() {
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 4l12 12M16 4L4 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
           </button>
         </div>
-        <div className="p-5 flex flex-col gap-4 max-h-[70vh] overflow-y-auto">
-          <div>
-            <label className={labelClass}>Bien</label>
-            <AdminSelect value={editing.bien_id ?? ''} onChange={(e) => setEditing((p) => ({ ...p, bien_id: e.target.value || null }))}>
-              <option value="">— Sélectionner —</option>
-              {biens.filter((b) => b.disponible !== false || b.id === editing.bien_id).map((b) => (
-                <option key={b.id} value={b.id}>{b.nom}{b.disponible === false ? ' (indisponible)' : ''}</option>
-              ))}
-            </AdminSelect>
-          </div>
-          <div>
-            <label className={labelClass}>Nom voyageur *</label>
-            <input className={inputClass} value={editing.voyageur_nom ?? ''} onChange={(e) => setEditing((p) => ({ ...p, voyageur_nom: e.target.value }))} placeholder="Prénom Nom" />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
+        <div className="p-5 flex flex-col gap-0 max-h-[70vh] overflow-y-auto">
+          {/* ── Section : Bien ── */}
+          <div className="pb-4">
             <div>
-              <label className={labelClass}>Email</label>
-              <input type="email" className={inputClass} value={editing.voyageur_email ?? ''} onChange={(e) => setEditing((p) => ({ ...p, voyageur_email: e.target.value }))} />
-            </div>
-            <div>
-              <label className={labelClass}>Téléphone</label>
-              <input className={inputClass} value={editing.voyageur_phone ?? ''} onChange={(e) => setEditing((p) => ({ ...p, voyageur_phone: e.target.value }))} />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={labelClass}>Arrivée *</label>
-              <input type="date" className={inputClass} value={editing.date_arrivee ?? ''} onChange={(e) => setEditing((p) => ({ ...p, date_arrivee: e.target.value }))} />
-            </div>
-            <div>
-              <label className={labelClass}>Départ *</label>
-              <input type="date" className={inputClass} value={editing.date_depart ?? ''} onChange={(e) => setEditing((p) => ({ ...p, date_depart: e.target.value }))} />
-            </div>
-          </div>
-          {editing.date_arrivee && editing.date_depart && (
-            <p className="text-xs text-terra">{nuits(editing.date_arrivee, editing.date_depart)} nuit(s)</p>
-          )}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={labelClass}>Plateforme</label>
-              <AdminSelect value={editing.plateforme ?? 'Airbnb'} onChange={(e) => setEditing((p) => ({ ...p, plateforme: e.target.value }))}>
-                {platNames.map((p) => <option key={p}>{p}</option>)}
-              </AdminSelect>
-            </div>
-            <div>
-              <label className={labelClass}>Statut</label>
-              <AdminSelect value={editing.statut ?? 'confirmee'} onChange={(e) => setEditing((p) => ({ ...p, statut: e.target.value }))}>
-                {Object.entries(STATUT_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              <label className={labelClass}>Bien</label>
+              <AdminSelect value={editing.bien_id ?? ''} onChange={(e) => setEditing((p) => ({ ...p, bien_id: e.target.value || null }))}>
+                <option value="">— Sélectionner —</option>
+                {biens.filter((b) => b.disponible !== false || b.id === editing.bien_id).map((b) => (
+                  <option key={b.id} value={b.id}>{b.nom}{b.disponible === false ? ' (indisponible)' : ''}</option>
+                ))}
               </AdminSelect>
             </div>
           </div>
+
+          {/* ── Section : Voyageur ── */}
+          <div className="border-t border-brun/8 pt-4 pb-4">
+            <p className="text-[10px] uppercase tracking-widest text-brun-mid/40 font-medium mb-3">Voyageur</p>
+            <div ref={voyageurRef} className="relative">
+              <label className={labelClass}>Nom *</label>
+              <input
+                className={inputClass}
+                value={voyageurQuery}
+                onChange={(e) => {
+                  setVoyageurQuery(e.target.value)
+                  setEditing((p) => ({ ...p, voyageur_nom: e.target.value }))
+                  setSelectedVoyageur(null)
+                  setVoyageurDropdownOpen(true)
+                }}
+                onFocus={() => setVoyageurDropdownOpen(true)}
+                placeholder="Rechercher ou saisir un nom…"
+                autoComplete="off"
+              />
+              {voyageurDropdownOpen && filteredVoyageurs.length > 0 && (
+                <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-brun/15 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                  {filteredVoyageurs.slice(0, 20).map((v) => (
+                    <button
+                      key={v.id}
+                      type="button"
+                      className="w-full text-left px-3 py-2 hover:bg-creme transition-colors flex items-center justify-between gap-2 text-sm"
+                      onClick={() => {
+                        setVoyageurQuery(v.nom)
+                        setSelectedVoyageur(v)
+                        setEditing((p) => ({
+                          ...p,
+                          voyageur_nom: v.nom,
+                          voyageur_email: v.email ?? p.voyageur_email ?? '',
+                          voyageur_phone: v.telephone ?? p.voyageur_phone ?? '',
+                        }))
+                        setVoyageurDropdownOpen(false)
+                      }}
+                    >
+                      <span className="text-brun font-medium truncate">{v.nom}</span>
+                      {v.telephone && <span className="text-brun-mid/60 text-xs shrink-0">{v.telephone}</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            {selectedVoyageur && (
+              <div className="mt-2 flex items-center gap-1.5 text-[11px] text-terra bg-terra/8 rounded-lg px-2.5 py-1.5 w-fit">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M20 6L9 17l-5-5" /></svg>
+                Voyageur connu
+              </div>
+            )}
+            <div className="grid grid-cols-2 gap-3 mt-3">
+              <div>
+                <label className={labelClass}>Email</label>
+                <input type="email" className={inputClass} value={editing.voyageur_email ?? ''} onChange={(e) => setEditing((p) => ({ ...p, voyageur_email: e.target.value }))} />
+              </div>
+              <div>
+                <label className={labelClass}>Téléphone</label>
+                <input className={inputClass} value={editing.voyageur_phone ?? ''} onChange={(e) => setEditing((p) => ({ ...p, voyageur_phone: e.target.value }))} />
+              </div>
+            </div>
+          </div>
+
+          {/* ── Section : Dates ── */}
+          <div className="border-t border-brun/8 pt-4 pb-4">
+            <p className="text-[10px] uppercase tracking-widest text-brun-mid/40 font-medium mb-3">Séjour</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={labelClass}>Arrivée *</label>
+                <input type="date" className={inputClass} value={editing.date_arrivee ?? ''} onChange={(e) => setEditing((p) => ({ ...p, date_arrivee: e.target.value }))} />
+              </div>
+              <div>
+                <label className={labelClass}>Départ *</label>
+                <input type="date" className={inputClass} value={editing.date_depart ?? ''} onChange={(e) => setEditing((p) => ({ ...p, date_depart: e.target.value }))} />
+              </div>
+            </div>
+            {editing.date_arrivee && editing.date_depart && (
+              <p className="text-xs text-terra mt-2">{nuits(editing.date_arrivee, editing.date_depart)} nuit(s)</p>
+            )}
+            <div className="grid grid-cols-2 gap-3 mt-3">
+              <div>
+                <label className={labelClass}>Plateforme</label>
+                <AdminSelect value={editing.plateforme ?? 'Airbnb'} onChange={(e) => setEditing((p) => ({ ...p, plateforme: e.target.value }))}>
+                  {platNames.map((p) => <option key={p}>{p}</option>)}
+                </AdminSelect>
+              </div>
+              <div>
+                <label className={labelClass}>Statut</label>
+                <AdminSelect value={editing.statut ?? 'confirmee'} onChange={(e) => setEditing((p) => ({ ...p, statut: e.target.value }))}>
+                  {Object.entries(STATUT_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                </AdminSelect>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Section : Financier ── */}
           {isSuperAdmin && (
-            <>
+            <div className="border-t border-brun/8 pt-4 pb-4">
+              <p className="text-[10px] uppercase tracking-widest text-brun-mid/40 font-medium mb-3">Financier</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={labelClass}>Montant (MAD)</label>
-                  <input type="number" min={0} className={inputClass} value={editing.montant ?? ''} onChange={(e) => setEditing((p) => ({ ...p, montant: Number(e.target.value) || null }))} placeholder="1500" />
+                  <input type="number" min={0} className={inputClass} value={editing.montant ?? ''} onChange={(e) => setEditing((p) => ({ ...p, montant: e.target.value === '' ? null : Number(e.target.value) }))} placeholder="1500" />
                 </div>
                 <div>
                   <label className={labelClass}>Commission</label>
@@ -1041,7 +1128,7 @@ export default function ReservationsPage() {
                       type="number" min={0}
                       className={inputClass}
                       value={editing.commission_fixe ?? ''}
-                      onChange={(e) => setEditing((p) => ({ ...p, commission_fixe: Number(e.target.value) || null }))}
+                      onChange={(e) => setEditing((p) => ({ ...p, commission_fixe: e.target.value === '' ? null : Number(e.target.value) }))}
                       placeholder="Montant fixe en MAD"
                     />
                   ) : (
@@ -1049,14 +1136,14 @@ export default function ReservationsPage() {
                       type="number" min={0} max={100} step={0.5}
                       className={inputClass}
                       value={editing.taux_commission ?? ''}
-                      onChange={(e) => setEditing((p) => ({ ...p, taux_commission: Number(e.target.value) }))}
+                      onChange={(e) => setEditing((p) => ({ ...p, taux_commission: e.target.value === '' ? 0 : Number(e.target.value) }))}
                       placeholder="Taux %"
                     />
                   )}
                 </div>
               </div>
               {editing.montant != null && editing.montant > 0 && (
-                <div className="bg-terra/10 rounded-xl px-4 py-3 text-sm">
+                <div className="bg-terra/10 rounded-xl px-4 py-3 text-sm mt-3">
                   {commissionVal === 0
                     ? <span className="text-brun-mid">Sans commission</span>
                     : editing.commission_fixe != null
@@ -1065,15 +1152,20 @@ export default function ReservationsPage() {
                   }
                 </div>
               )}
-            </>
+            </div>
           )}
-          <div>
-            <label className={labelClass}>Intermédiaire</label>
-            <input className={inputClass} value={editing.intermediaire ?? ''} onChange={(e) => setEditing((p) => ({ ...p, intermediaire: e.target.value || null }))} placeholder="Nom de l'intermédiaire (optionnel)" />
-          </div>
-          <div>
-            <label className={labelClass}>Notes</label>
-            <textarea className={`${inputClass} resize-none`} rows={2} value={editing.notes ?? ''} onChange={(e) => setEditing((p) => ({ ...p, notes: e.target.value }))} placeholder="Remarques éventuelles..." />
+
+          {/* ── Section : Détails ── */}
+          <div className="border-t border-brun/8 pt-4">
+            <p className="text-[10px] uppercase tracking-widest text-brun-mid/40 font-medium mb-3">Détails</p>
+            <div>
+              <label className={labelClass}>Intermédiaire</label>
+              <input className={inputClass} value={editing.intermediaire ?? ''} onChange={(e) => setEditing((p) => ({ ...p, intermediaire: e.target.value || null }))} placeholder="Nom de l'intermédiaire (optionnel)" />
+            </div>
+            <div className="mt-3">
+              <label className={labelClass}>Notes</label>
+              <textarea className={`${inputClass} resize-none`} rows={2} value={editing.notes ?? ''} onChange={(e) => setEditing((p) => ({ ...p, notes: e.target.value }))} placeholder="Remarques éventuelles..." />
+            </div>
           </div>
 
           {editing.id && (
