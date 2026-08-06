@@ -180,7 +180,7 @@ export default function ServicesPage() {
       </section>
 
       {/* ── TARIFICATION (dark) ──────────────────── */}
-      <section className="bg-brun py-24 px-4">
+      <section className="bg-brun py-24 px-4 border-b border-creme/10">
         <div className="max-w-4xl mx-auto">
           <AnimateIn className="text-center mb-14">
             <span className="inline-block text-sable text-xs font-medium tracking-[0.2em] uppercase mb-6" style={{ fontFamily: 'var(--font-dm-sans)' }}>
