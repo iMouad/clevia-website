@@ -24,7 +24,8 @@
     "hero": {
       "tag": "Free tool",
       "title": "How much can your property earn?",
-      "subtitle": "Adjust the criteria and get a monthly revenue estimate based on local market data."
+      "subtitle": "Adjust the criteria and get a monthly revenue estimate based on local market data.",
+      "cta": "Calculate my revenue"
     },
     "cta": {
       "title": "Ready to entrust your property to Clévia?",
@@ -47,7 +48,8 @@
     "titleEmphasis": "handled.",
     "subtitle": "We manage your short-term rentals on Airbnb, Booking and Avito — from listing to guest check-in.",
     "cta1": "Entrust your property",
-    "cta2": "How it works"
+    "cta2": "How it works",
+    "ctaWhatsapp": "Message us on WhatsApp"
   },
   "stats": {
     "days": "+15 nights / month",
@@ -192,16 +194,28 @@
     "title": "Simple, fast, effective",
     "step1": {
       "number": "01",
-      "title": "Contact us"
+      "title": "Contact us",
+      "description": "Call us or fill out the form. Free visit within 48 hours."
     },
     "step2": {
       "number": "02",
-      "title": "We handle everything"
+      "title": "We handle everything",
+      "description": "Photos, listings, guest check-in, cleaning — you manage nothing."
     },
     "step3": {
       "number": "03",
-      "title": "You collect the income"
+      "title": "You collect the income",
+      "description": "Automatic monthly transfer with a detailed report."
     }
+  },
+  "zone": {
+    "tag": "Our area",
+    "title": "Where we operate",
+    "subtitle": "We cover the entire coast between Mohammedia and Benslimane.",
+    "mohammedia": "Mohammedia",
+    "mansouria": "Mansouria",
+    "bouznika": "Bouznika",
+    "benslimane": "Benslimane"
   },
   "cta": {
     "title": "Ready to rent your property?",

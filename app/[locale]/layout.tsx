@@ -57,6 +57,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: 'Clévia Immobilier - Conciergerie',
       locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_US' : 'fr_MA',
       type: 'website',
+      images: [
+        {
+          url: `${SITE_URL}/logo.svg`,
+          width: 512,
+          height: 512,
+          alt: 'Clévia Immobilier - Conciergerie',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary',
+      title: 'Clévia Immobilier - Conciergerie · Maroc',
+      description: t('subtitle'),
+      images: [`${SITE_URL}/logo.svg`],
     },
     alternates: {
       languages: {

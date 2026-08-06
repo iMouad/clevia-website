@@ -24,7 +24,8 @@
     "hero": {
       "tag": "Outil gratuit",
       "title": "Combien peut rapporter votre bien ?",
-      "subtitle": "Ajustez les critères et obtenez une estimation de vos revenus mensuels basée sur les données du marché local."
+      "subtitle": "Ajustez les critères et obtenez une estimation de vos revenus mensuels basée sur les données du marché local.",
+      "cta": "Calculer mes revenus"
     },
     "cta": {
       "title": "Prêt à confier votre bien à Clévia ?",
@@ -47,7 +48,8 @@
     "titleEmphasis": "notre priorité",
     "subtitle": "Nous gérons vos locations courte durée sur Airbnb, Booking et Avito — de la mise en ligne jusqu'à l'accueil des voyageurs.",
     "cta1": "Confier mon bien",
-    "cta2": "Comment ça marche"
+    "cta2": "Comment ça marche",
+    "ctaWhatsapp": "Écrire sur WhatsApp"
   },
   "stats": {
     "days": "+15 nuits / mois",
@@ -192,16 +194,28 @@
     "title": "Simple, rapide, efficace",
     "step1": {
       "number": "01",
-      "title": "Contactez-nous"
+      "title": "Contactez-nous",
+      "description": "Appelez-nous ou remplissez le formulaire. Visite gratuite sous 48h."
     },
     "step2": {
       "number": "02",
-      "title": "On s'occupe de tout"
+      "title": "On s'occupe de tout",
+      "description": "Photos, annonces, accueil voyageurs, ménage — vous ne gérez rien."
     },
     "step3": {
       "number": "03",
-      "title": "Vous percevez vos revenus"
+      "title": "Vous percevez vos revenus",
+      "description": "Virement mensuel automatique avec rapport détaillé."
     }
+  },
+  "zone": {
+    "tag": "Notre zone",
+    "title": "Où nous intervenons",
+    "subtitle": "Nous couvrons toute la côte entre Mohammedia et Benslimane.",
+    "mohammedia": "Mohammedia",
+    "mansouria": "Mansouria",
+    "bouznika": "Bouznika",
+    "benslimane": "Benslimane"
   },
   "cta": {
     "title": "Prêt à louer votre bien ?",
