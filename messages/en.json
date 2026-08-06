@@ -106,7 +106,28 @@
       "commission": "Custom",
       "commissionLabel": "tailored offer for your property",
       "included": "All included: photos, listings, check-in, cleaning, reporting.",
-      "cta": "Contact us"
+      "cta": "Contact us",
+      "whatsapp": "Message on WhatsApp",
+      "phone": "Call: +212 614 268 283",
+      "features": {
+        "photos": "Professional photos",
+        "annonces": "Optimized listings",
+        "accueil": "24/7 check-in",
+        "menage": "Cleaning & linen",
+        "reporting": "Monthly report",
+        "virement": "Auto transfer"
+      }
+    },
+    "miniProcess": {
+      "tag": "How it works",
+      "title": "3 steps to get started",
+      "cta": "Learn more",
+      "step1": "Contact us",
+      "step1Sub": "Reply within 24h",
+      "step2": "We set everything up",
+      "step2Sub": "Live within 48h",
+      "step3": "You collect income",
+      "step3Sub": "Monthly transfer"
     }
   },
   "why": {

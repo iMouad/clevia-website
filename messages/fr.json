@@ -106,7 +106,28 @@
       "commission": "Sur mesure",
       "commissionLabel": "formule adaptée à votre bien",
       "included": "Tout inclus : photos, annonces, accueil, ménage, reporting.",
-      "cta": "Nous contacter"
+      "cta": "Nous contacter",
+      "whatsapp": "Écrire sur WhatsApp",
+      "phone": "Appeler : +212 614 268 283",
+      "features": {
+        "photos": "Photos professionnelles",
+        "annonces": "Annonces optimisées",
+        "accueil": "Accueil 7j/7",
+        "menage": "Ménage & linge",
+        "reporting": "Rapport mensuel",
+        "virement": "Virement automatique"
+      }
+    },
+    "miniProcess": {
+      "tag": "Comment ça marche",
+      "title": "3 étapes pour commencer",
+      "cta": "En savoir plus",
+      "step1": "Contactez-nous",
+      "step1Sub": "Réponse sous 24h",
+      "step2": "On prépare tout",
+      "step2Sub": "En ligne sous 48h",
+      "step3": "Vous encaissez",
+      "step3Sub": "Virement mensuel"
     }
   },
   "why": {
