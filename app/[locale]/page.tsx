@@ -199,7 +199,7 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
       />
       {/* ── HERO ────────────────────────────────── */}
-      <section className="bg-creme py-28 md:py-36 lg:py-44 px-4 overflow-hidden relative">
+      <section className="bg-creme py-16 md:py-20 lg:py-24 px-4 overflow-hidden relative">
         {/* Decorative gradients */}
         <div
           className="absolute inset-0 pointer-events-none"
