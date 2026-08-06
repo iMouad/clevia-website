@@ -199,153 +199,139 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
       />
       {/* ── HERO ────────────────────────────────── */}
-      <section className="bg-creme py-20 md:py-28 px-4 overflow-hidden relative">
-        {/* Decorative gradient */}
+      <section className="bg-creme py-28 md:py-36 lg:py-44 px-4 overflow-hidden relative">
+        {/* Decorative gradients */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              'radial-gradient(ellipse at 75% 50%, rgba(201,123,75,0.08) 0%, transparent 65%)',
+              'radial-gradient(ellipse at 20% 80%, rgba(201,123,75,0.06) 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, rgba(201,123,75,0.08) 0%, transparent 50%)',
+          }}
+        />
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] pointer-events-none opacity-[0.03]"
+          style={{
+            background: 'radial-gradient(circle, #2C1A0E, transparent 70%)',
           }}
         />
 
-        <div className="max-w-7xl mx-auto relative">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            {/* Left content */}
-            <div className="flex flex-col gap-6">
-              <AnimateIn>
-                <span className="inline-block text-terra text-xs font-medium tracking-[0.2em] uppercase">
-                  {t('hero.tag')}
-                </span>
-              </AnimateIn>
+        <div className="max-w-4xl mx-auto relative text-center">
+          <AnimateIn>
+            <span
+              className="inline-block text-terra text-xs font-medium tracking-[0.25em] uppercase mb-8 border border-terra/20 rounded-full px-5 py-2 bg-terra/5"
+              style={{ fontFamily: 'var(--font-dm-sans)' }}
+            >
+              {t('hero.tag')}
+            </span>
+          </AnimateIn>
 
-              <AnimateIn delay={0.1}>
-                <h1 className="text-5xl md:text-6xl lg:text-7xl leading-tight text-brun">
-                  {t('hero.title')}
-                  <br />
-                  <em className="text-terra not-italic" style={{ fontStyle: 'italic', fontFamily: 'var(--font-cormorant)' }}>
-                    {t('hero.titleEmphasis')}
-                  </em>
-                </h1>
-              </AnimateIn>
+          <AnimateIn delay={0.1}>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl leading-[1.1] text-brun mb-6">
+              {t('hero.title')}
+              <br />
+              <em className="text-terra" style={{ fontStyle: 'italic', fontFamily: 'var(--font-cormorant)' }}>
+                {t('hero.titleEmphasis')}
+              </em>
+            </h1>
+          </AnimateIn>
 
-              <AnimateIn delay={0.2}>
-                <p className="text-brun-mid text-lg leading-relaxed max-w-lg" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                  {t('hero.subtitle')}
-                </p>
-              </AnimateIn>
+          <AnimateIn delay={0.2}>
+            <p className="text-brun-mid text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-10" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+              {t('hero.subtitle')}
+            </p>
+          </AnimateIn>
 
-              <AnimateIn delay={0.3}>
-                <div className="flex flex-wrap gap-3">
-                  <Link
-                    href="/contact"
-                    className="inline-flex items-center gap-2 bg-terra text-creme font-medium rounded-full px-8 py-3 hover:bg-brun transition-all duration-200"
-                    style={{ fontFamily: 'var(--font-dm-sans)' }}
-                  >
-                    {t('hero.cta1')}
-                    <ArrowRight />
-                  </Link>
-                  <Link
-                    href="/comment"
-                    className="inline-flex items-center gap-2 border-2 border-brun text-brun font-medium rounded-full px-8 py-3 hover:bg-brun hover:text-creme transition-all duration-200"
-                    style={{ fontFamily: 'var(--font-dm-sans)' }}
-                  >
-                    {t('hero.cta2')}
-                  </Link>
-                  <a
-                    href={`https://wa.me/212614268283?text=${encodeURIComponent(t('whatsapp.message'))}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-[#25D366] font-medium rounded-full px-4 py-3 hover:bg-[#25D366]/10 transition-all duration-200"
-                    style={{ fontFamily: 'var(--font-dm-sans)' }}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                    </svg>
-                    {t('hero.ctaWhatsapp')}
-                  </a>
-                </div>
-              </AnimateIn>
-
-              {/* Platform badges */}
-              <AnimateIn delay={0.4}>
-                <div className="flex items-center gap-3 flex-wrap pt-2">
-                  <span className="text-brun-mid text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                    {t('stats.platforms')} :
-                  </span>
-                  {/* Airbnb */}
-                  <div className="flex items-center gap-1.5 border border-brun/15 rounded-full px-3 py-1.5 bg-white shadow-xs">
-                    <svg width="14" height="14" viewBox="0 0 32 32" fill="#FF5A5F">
-                      <path d="M16 1C10.477 1 6 5.477 6 11c0 3.518 1.946 6.614 4.857 8.32L16 31l5.143-11.68C24.054 17.614 26 14.518 26 11c0-5.523-4.477-10-10-10zm0 13.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7z"/>
-                    </svg>
-                    <span className="text-xs font-medium text-[#FF5A5F]" style={{ fontFamily: 'var(--font-dm-sans)' }}>Airbnb</span>
-                  </div>
-                  {/* Booking */}
-                  <div className="flex items-center gap-1.5 border border-brun/15 rounded-full px-3 py-1.5 bg-white shadow-xs">
-                    <svg width="14" height="14" viewBox="0 0 32 32" fill="none">
-                      <rect width="32" height="32" rx="6" fill="#003580"/>
-                      <text x="5" y="23" fontSize="20" fontWeight="bold" fill="white" fontFamily="Arial">B</text>
-                    </svg>
-                    <span className="text-xs font-medium text-[#003580]" style={{ fontFamily: 'var(--font-dm-sans)' }}>Booking</span>
-                  </div>
-                  {/* Avito */}
-                  <div className="flex items-center gap-1.5 border border-brun/15 rounded-full px-3 py-1.5 bg-white shadow-xs">
-                    <svg width="14" height="14" viewBox="0 0 32 32" fill="none">
-                      <rect width="32" height="32" rx="6" fill="#E07A2F"/>
-                      <text x="6" y="23" fontSize="20" fontWeight="bold" fill="white" fontFamily="Arial">A</text>
-                    </svg>
-                    <span className="text-xs font-medium text-[#E07A2F]" style={{ fontFamily: 'var(--font-dm-sans)' }}>Avito</span>
-                  </div>
-                </div>
-              </AnimateIn>
+          <AnimateIn delay={0.3}>
+            <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
+              <Link
+                href="/contact"
+                className="inline-flex items-center gap-2 bg-terra text-creme font-medium rounded-full px-10 py-4 hover:bg-brun transition-all duration-200 text-base shadow-lg shadow-terra/20"
+                style={{ fontFamily: 'var(--font-dm-sans)' }}
+              >
+                {t('hero.cta1')}
+                <ArrowRight />
+              </Link>
+              <Link
+                href="/comment"
+                className="inline-flex items-center gap-2 border-2 border-brun text-brun font-medium rounded-full px-10 py-4 hover:bg-brun hover:text-creme transition-all duration-200 text-base"
+                style={{ fontFamily: 'var(--font-dm-sans)' }}
+              >
+                {t('hero.cta2')}
+              </Link>
+              <a
+                href={`https://wa.me/212614268283?text=${encodeURIComponent(t('whatsapp.message'))}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-[#25D366] font-medium rounded-full px-5 py-4 hover:bg-[#25D366]/10 transition-all duration-200 text-base"
+                style={{ fontFamily: 'var(--font-dm-sans)' }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#25D366">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+                {t('hero.ctaWhatsapp')}
+              </a>
             </div>
+          </AnimateIn>
 
-            {/* Right: Visual illustration */}
-            <AnimateIn delay={0.2} className="lg:flex lg:justify-end">
-              <div className="relative w-full max-w-md">
-                {/* Main decorative card */}
-                <div className="bg-white rounded-2xl p-8 shadow-md border border-brun/10 relative overflow-hidden">
-                  <div
-                    className="absolute top-0 right-0 w-32 h-32 pointer-events-none opacity-20"
-                    style={{ background: 'radial-gradient(circle, #C97B4B, transparent 70%)' }}
-                  />
-                  {/* Illustration: house with key */}
-                  <div className="flex flex-col items-center gap-6 py-4">
-                    <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
-                      <rect x="10" y="30" width="60" height="45" rx="4" fill="#FAF6F1" stroke="#C97B4B" strokeWidth="2"/>
-                      <path d="M5 35L40 8L75 35" stroke="#C97B4B" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                      <rect x="30" y="50" width="20" height="25" rx="2" fill="#C97B4B" fillOpacity="0.15" stroke="#C97B4B" strokeWidth="1.5"/>
-                      <circle cx="45" cy="63" r="2" fill="#C97B4B"/>
-                      <rect x="18" y="40" width="12" height="10" rx="1" fill="#C97B4B" fillOpacity="0.1" stroke="#C97B4B" strokeWidth="1"/>
-                      <rect x="50" y="40" width="12" height="10" rx="1" fill="#C97B4B" fillOpacity="0.1" stroke="#C97B4B" strokeWidth="1"/>
-                    </svg>
-                    <div className="grid grid-cols-3 gap-4 w-full">
-                      {[
-                        { value: '+15', label: t('stats.days'), sub: t('stats.daysLabel') },
-                        { value: '48h', label: t('stats.commission'), sub: t('stats.commissionLabel') },
-                        { value: '7j/7', label: t('stats.stress'), sub: t('stats.stressLabel') },
-                      ].map(({ value, label, sub }) => (
-                        <div key={value} className="text-center">
-                          <span
-                            className="text-3xl text-terra block"
-                            style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}
-                          >
-                            {value}
-                          </span>
-                          <p className="text-brun-mid/70 text-xs mt-1 leading-tight" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                            {sub}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
+          {/* Stats row */}
+          <AnimateIn delay={0.4}>
+            <div className="flex items-center justify-center gap-8 md:gap-16">
+              {[
+                { value: '+15', sub: t('stats.daysLabel') },
+                { value: '48h', sub: t('stats.commissionLabel') },
+                { value: '7j/7', sub: t('stats.stressLabel') },
+              ].map(({ value, sub }, i) => (
+                <div key={value} className="flex items-center gap-8 md:gap-16">
+                  {i > 0 && <div className="hidden md:block w-px h-12 bg-brun/15" />}
+                  <div className="text-center">
+                    <span
+                      className="text-3xl md:text-4xl text-terra block mb-1"
+                      style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}
+                    >
+                      {value}
+                    </span>
+                    <p className="text-brun-mid/60 text-xs md:text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                      {sub}
+                    </p>
                   </div>
                 </div>
-                {/* Floating badge */}
-                <div className="absolute -bottom-3 -left-3 bg-terra text-white rounded-xl px-4 py-2 shadow-lg">
-                  <span className="text-sm font-medium" style={{ fontFamily: 'var(--font-dm-sans)' }}>100% {t('hero.tag').split('·')[0]?.trim()}</span>
-                </div>
-              </div>
-            </AnimateIn>
+              ))}
+            </div>
+          </AnimateIn>
+        </div>
+      </section>
+
+      {/* ── BANDE PLATEFORMES ────────────────────── */}
+      <section className="bg-white border-y border-brun/8 py-8 px-4">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center justify-center gap-6 md:gap-12 flex-wrap">
+            <span className="text-brun-mid/50 text-xs font-medium tracking-[0.15em] uppercase" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+              {t('stats.platforms')}
+            </span>
+            <div className="hidden sm:block w-px h-8 bg-brun/10" />
+            {/* Airbnb */}
+            <div className="flex items-center gap-2.5 opacity-70 hover:opacity-100 transition-opacity">
+              <svg width="24" height="24" viewBox="0 0 32 32" fill="#FF5A5F">
+                <path d="M16 1C10.477 1 6 5.477 6 11c0 3.518 1.946 6.614 4.857 8.32L16 31l5.143-11.68C24.054 17.614 26 14.518 26 11c0-5.523-4.477-10-10-10zm0 13.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7z"/>
+              </svg>
+              <span className="text-sm font-medium text-[#FF5A5F]" style={{ fontFamily: 'var(--font-dm-sans)' }}>Airbnb</span>
+            </div>
+            {/* Booking.com */}
+            <div className="flex items-center gap-2.5 opacity-70 hover:opacity-100 transition-opacity">
+              <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+                <rect width="32" height="32" rx="6" fill="#003580"/>
+                <text x="5" y="23" fontSize="20" fontWeight="bold" fill="white" fontFamily="Arial">B</text>
+              </svg>
+              <span className="text-sm font-medium text-[#003580]" style={{ fontFamily: 'var(--font-dm-sans)' }}>Booking.com</span>
+            </div>
+            {/* Avito */}
+            <div className="flex items-center gap-2.5 opacity-70 hover:opacity-100 transition-opacity">
+              <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+                <rect width="32" height="32" rx="6" fill="#E07A2F"/>
+                <text x="6" y="23" fontSize="20" fontWeight="bold" fill="white" fontFamily="Arial">A</text>
+              </svg>
+              <span className="text-sm font-medium text-[#E07A2F]" style={{ fontFamily: 'var(--font-dm-sans)' }}>Avito.ma</span>
+            </div>
           </div>
         </div>
       </section>
