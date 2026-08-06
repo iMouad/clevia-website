@@ -226,12 +226,19 @@ export default function HomePage() {
           </AnimateIn>
 
           <AnimateIn delay={0.1}>
-            <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl leading-[1.1] text-brun mb-6">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.15] text-brun mb-8">
               {t('hero.title')}
-              <br />
-              <em className="text-terra" style={{ fontStyle: 'italic', fontFamily: 'var(--font-cormorant)' }}>
+              <span className="text-brun/30 mx-2 font-light" aria-hidden="true">—</span>
+              <span
+                className="text-terra relative inline-block"
+                style={{ fontStyle: 'italic', fontFamily: 'var(--font-cormorant)' }}
+              >
                 {t('hero.titleEmphasis')}
-              </em>
+                <span
+                  className="absolute -bottom-1 left-0 w-full h-[3px] rounded-full bg-terra/30"
+                  aria-hidden="true"
+                />
+              </span>
             </h1>
           </AnimateIn>
 
