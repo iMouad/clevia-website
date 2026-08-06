@@ -60,6 +60,12 @@
     "stressLabel": "disponibilité de notre équipe",
     "platforms": "Disponible sur"
   },
+  "counters": {
+    "biens": "Biens gérés",
+    "voyageurs": "Voyageurs accueillis",
+    "avis": "Avis 5 étoiles",
+    "villes": "Villes couvertes"
+  },
   "services": {
     "tag": "Nos services",
     "title": "Un service complet, de A à Z",
@@ -220,7 +226,9 @@
   "cta": {
     "title": "Prêt à louer votre bien ?",
     "subtitle": "Rejoignez les propriétaires qui nous font confiance à Mohammedia, Mansouria, Bouznika et Benslimane.",
-    "button": "Nous contacter"
+    "button": "Nous contacter",
+    "whatsapp": "Écrire sur WhatsApp",
+    "phone": "Appeler : +212 614 268 283"
   },
   "contact": {
     "tag": "Contact",

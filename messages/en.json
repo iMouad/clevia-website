@@ -60,6 +60,12 @@
     "stressLabel": "team availability",
     "platforms": "Available on"
   },
+  "counters": {
+    "biens": "Properties managed",
+    "voyageurs": "Guests welcomed",
+    "avis": "5-star reviews",
+    "villes": "Cities covered"
+  },
   "services": {
     "tag": "Our services",
     "title": "A complete service, A to Z",
@@ -220,7 +226,9 @@
   "cta": {
     "title": "Ready to rent your property?",
     "subtitle": "Join the property owners who trust us in Mohammedia, Mansouria, Bouznika and Benslimane.",
-    "button": "Contact us"
+    "button": "Contact us",
+    "whatsapp": "Message on WhatsApp",
+    "phone": "Call: +212 614 268 283"
   },
   "contact": {
     "tag": "Contact",
