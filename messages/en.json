@@ -118,6 +118,16 @@
         "virement": "Auto transfer"
       }
     },
+    "faq": {
+      "q1": "What services are included in your concierge?",
+      "a1": "We handle everything: professional photos, listing on Airbnb, Booking and Avito, 24/7 guest check-in, cleaning between each stay, monthly reporting and automatic transfer.",
+      "q2": "How much does your concierge service cost?",
+      "a2": "Our pricing is custom and tailored to each property. It includes all our services with no hidden fees. Contact us for a free estimate.",
+      "q3": "Which cities do you cover?",
+      "a3": "We cover Mohammedia, Mansouria, Bouznika and Benslimane. The entire coast between Mohammedia and Benslimane is within our service area.",
+      "q4": "How long to get my property listed?",
+      "a4": "Your property goes live within 48 hours after signing. We handle the photos, write the listings and set up the platforms."
+    },
     "miniProcess": {
       "tag": "How it works",
       "title": "3 steps to get started",
@@ -173,6 +183,14 @@
       "nuitsLabel": "nights rented / month",
       "commission": "7/7",
       "commissionLabel": "team availability"
+    },
+    "faq": {
+      "q1": "Is your concierge service legal in Morocco?",
+      "a1": "Yes, 100% legal. A management contract is signed with each owner, compliant with the Moroccan legal framework.",
+      "q2": "What is your commission on revenue?",
+      "a2": "Our commission is custom and tailored to each property, between 20 and 25% of generated revenue. Everything is included, no hidden fees.",
+      "q3": "How will I receive my income?",
+      "a3": "By automatic bank transfer every month, with a detailed report: revenue, nights occupied, guest reviews."
     }
   },
   "how": {
@@ -214,6 +232,14 @@
         "title": "Monthly transfer",
         "description": "You receive your income every month with a detailed report."
       }
+    },
+    "faq": {
+      "q1": "How long does the onboarding process take?",
+      "a1": "From first contact to first guest, about one week. Your property goes live within 48 hours after signing.",
+      "q2": "Do I need to manage anything once signed up?",
+      "a2": "No, we handle everything: bookings, check-in, cleaning, maintenance and reporting. You receive your transfer every month.",
+      "q3": "Can I use my property whenever I want?",
+      "a3": "Yes, you block the dates you want on the shared calendar. Your property remains yours, we only manage the rental periods."
     }
   },
   "process": {

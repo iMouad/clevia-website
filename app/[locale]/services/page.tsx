@@ -1,7 +1,8 @@
 import { useTranslations } from 'next-intl'
 import { getTranslations } from 'next-intl/server'
 import { getPageSeo } from '@/lib/seo'
-import { Link } from '@/i18n/navigation'
+import { getFaqJsonLd, getBreadcrumbJsonLd } from '@/lib/schemas'
+import { Link, usePathname } from '@/i18n/navigation'
 import { AnimateIn, StaggerContainer, StaggerItem } from '@/components/ui/AnimateIn'
 import type { Metadata } from 'next'
 
@@ -64,6 +65,17 @@ export default function ServicesPage() {
   const t = useTranslations('services')
   const tGlobal = useTranslations()
 
+  const faqItems = [
+    { question: t('faq.q1'), answer: t('faq.a1') },
+    { question: t('faq.q2'), answer: t('faq.a2') },
+    { question: t('faq.q3'), answer: t('faq.a3') },
+    { question: t('faq.q4'), answer: t('faq.a4') },
+  ]
+
+  const breadcrumbJsonLd = getBreadcrumbJsonLd('fr', [
+    { name: t('hero.title'), path: '/services' },
+  ])
+
   const servicesJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Service',
@@ -98,6 +110,14 @@ export default function ServicesPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(servicesJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(getFaqJsonLd(faqItems)) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       {/* ── HERO ────────────────────────────────── */}
       <section className="bg-creme py-16 md:py-20 px-4 overflow-hidden relative">

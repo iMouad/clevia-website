@@ -4,6 +4,7 @@ import { AnimateIn, StaggerContainer, StaggerItem } from '@/components/ui/Animat
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { getPageSeo } from '@/lib/seo'
+import { getBreadcrumbJsonLd } from '@/lib/schemas'
 import HomeBiensSection from '@/components/HomeBiensSection'
 import HomeBiensVenteSection from '@/components/HomeBiensVenteSection'
 import RevenueCalculator from '@/components/RevenueCalculator'
@@ -180,6 +181,10 @@ export default function HomePage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(getBreadcrumbJsonLd('fr', [])) }}
       />
       {/* ── HERO ────────────────────────────────── */}
       <section className="bg-creme py-16 md:py-20 lg:py-24 px-4 overflow-hidden relative">

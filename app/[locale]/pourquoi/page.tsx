@@ -4,6 +4,7 @@ import { Link } from '@/i18n/navigation'
 import { AnimateIn, StaggerContainer, StaggerItem } from '@/components/ui/AnimateIn'
 import type { Metadata } from 'next'
 import { getPageSeo } from '@/lib/seo'
+import { getFaqJsonLd, getBreadcrumbJsonLd } from '@/lib/schemas'
 
 export async function generateMetadata({
   params,
@@ -51,8 +52,22 @@ export default function PourquoiPage() {
   const t = useTranslations('why')
   const tCta = useTranslations('cta')
 
+  const faqItems = [
+    { question: t('faq.q1'), answer: t('faq.a1') },
+    { question: t('faq.q2'), answer: t('faq.a2') },
+    { question: t('faq.q3'), answer: t('faq.a3') },
+  ]
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(getFaqJsonLd(faqItems)) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(getBreadcrumbJsonLd('fr', [{ name: t('hero.title'), path: '/pourquoi' }])) }}
+      />
       {/* ── HERO ────────────────────────────────── */}
       <section className="bg-creme py-24 px-4 border-b border-brun/5">
         <div className="max-w-7xl mx-auto text-center">

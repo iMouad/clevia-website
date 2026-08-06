@@ -118,6 +118,16 @@
         "virement": "Virement automatique"
       }
     },
+    "faq": {
+      "q1": "Quels sont les services inclus dans votre conciergerie ?",
+      "a1": "Nous prenons tout en charge : photos professionnelles, publication sur Airbnb, Booking et Avito, accueil des voyageurs 7j/7, ménage entre chaque séjour, reporting mensuel et virement automatique.",
+      "q2": "Combien coûte votre service de conciergerie ?",
+      "a2": "Notre tarification est sur mesure et adaptée à chaque bien. Elle inclut l'ensemble de nos services sans frais cachés. Contactez-nous pour une estimation gratuite.",
+      "q3": "Dans quelles villes intervenez-vous ?",
+      "a3": "Nous couvrons Mohammedia, Mansouria, Bouznika et Benslimane. Toute la côte entre Mohammedia et Benslimane est dans notre zone d'intervention.",
+      "q4": "Combien de temps pour mettre mon bien en ligne ?",
+      "a4": "Votre bien est en ligne sous 48h après la signature du contrat. Nous réalisons les photos, rédigeons les annonces et configurons les plateformes."
+    },
     "miniProcess": {
       "tag": "Comment ça marche",
       "title": "3 étapes pour commencer",
@@ -173,6 +183,14 @@
       "nuitsLabel": "nuits louées / mois",
       "commission": "7j/7",
       "commissionLabel": "disponibilité"
+    },
+    "faq": {
+      "q1": "Est-ce que votre conciergerie est légale au Maroc ?",
+      "a1": "Oui, 100% légale. Un contrat de gestion est signé avec chaque propriétaire, conforme au cadre juridique marocain.",
+      "q2": "Quelle est votre commission sur les revenus ?",
+      "a2": "Notre commission est sur mesure et adaptée à chaque bien, entre 20 et 25% des revenus générés. Tout est inclus, sans frais cachés.",
+      "q3": "Comment recevrai-je mes revenus ?",
+      "a3": "Par virement bancaire automatique chaque mois, accompagné d'un rapport détaillé : revenus, nuits occupées, avis voyageurs."
     }
   },
   "how": {
@@ -214,6 +232,14 @@
         "title": "Virement mensuel",
         "description": "Vous recevez vos revenus chaque mois accompagnés d'un rapport détaillé."
       }
+    },
+    "faq": {
+      "q1": "Combien de temps dure le processus d'inscription ?",
+      "a1": "De la prise de contact au premier voyageur, comptez environ une semaine. Votre bien est en ligne sous 48h après la signature.",
+      "q2": "Dois-je m'occuper de quelque chose une fois inscrit ?",
+      "a2": "Non, nous gérons tout : réservations, accueil, ménage, maintenance et reporting. Vous recevez votre virement chaque mois.",
+      "q3": "Puis-je utiliser mon bien quand je veux ?",
+      "a3": "Oui, vous bloquez les dates de votre choix dans le calendrier partagé. Votre bien reste le vôtre, nous gérons uniquement les périodes de location."
     }
   },
   "process": {
