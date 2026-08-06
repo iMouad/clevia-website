@@ -5,17 +5,14 @@ import { Link } from '@/i18n/navigation'
 import { AnimateIn } from '@/components/ui/AnimateIn'
 import BiensGrid from '@/components/BiensGrid'
 import type { BienPublic } from '@/components/BienCard'
+import { getPageSeo } from '@/lib/seo'
 
 type Props = { params: Promise<{ locale: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'biens' })
-  return {
-    title: t('title'),
-    description: t('subtitle'),
-    alternates: { canonical: `/${locale}/biens` },
-  }
+  return getPageSeo(locale, '/biens', t('title'), t('subtitle'))
 }
 
 export default async function BiensPage({ params }: Props) {

@@ -3,6 +3,7 @@ import { Link } from '@/i18n/navigation'
 import { AnimateIn, StaggerContainer, StaggerItem } from '@/components/ui/AnimateIn'
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
+import { getPageSeo } from '@/lib/seo'
 import HomeBiensSection from '@/components/HomeBiensSection'
 import HomeBiensVenteSection from '@/components/HomeBiensVenteSection'
 import RevenueCalculator from '@/components/RevenueCalculator'
@@ -16,25 +17,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'hero' })
-  const siteUrl = 'https://www.cleviamaroc.com'
-  return {
-    title: 'Clévia Immobilier - Conciergerie · Maroc',
-    description: t('subtitle'),
-    openGraph: {
-      url: `${siteUrl}/${locale}`,
-      title: 'Clévia Immobilier - Conciergerie · Maroc',
-      description: t('subtitle'),
-    },
-    alternates: {
-      canonical: `${siteUrl}/${locale}`,
-      languages: {
-        'fr': `${siteUrl}/fr`,
-        'ar': `${siteUrl}/ar`,
-        'en': `${siteUrl}/en`,
-        'x-default': `${siteUrl}/fr`,
-      },
-    },
-  }
+  return getPageSeo(locale, '', 'Clévia Immobilier - Conciergerie · Maroc', t('subtitle'))
 }
 
 // ── Icons ────────────────────────────────────────────

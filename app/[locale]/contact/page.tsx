@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server'
 import { AnimateIn } from '@/components/ui/AnimateIn'
 import ContactForm from '@/components/ContactForm'
 import type { Metadata } from 'next'
+import { getPageSeo } from '@/lib/seo'
 
 export async function generateMetadata({
   params,
@@ -10,12 +11,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'contact' })
-  return {
-    title: t('hero.title'),
-    description: t('hero.subtitle'),
-    openGraph: { url: `/${locale}/contact` },
-    alternates: { canonical: `/${locale}/contact` },
-  }
+  return getPageSeo(locale, '/contact', t('hero.title'), t('hero.subtitle'))
 }
 
 function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {

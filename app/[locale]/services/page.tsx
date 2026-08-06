@@ -1,5 +1,6 @@
 import { useTranslations } from 'next-intl'
 import { getTranslations } from 'next-intl/server'
+import { getPageSeo } from '@/lib/seo'
 import { Link } from '@/i18n/navigation'
 import { AnimateIn, StaggerContainer, StaggerItem } from '@/components/ui/AnimateIn'
 import type { Metadata } from 'next'
@@ -11,12 +12,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'services' })
-  return {
-    title: t('hero.title'),
-    description: t('hero.subtitle'),
-    openGraph: { url: `/${locale}/services` },
-    alternates: { canonical: `/${locale}/services` },
-  }
+  return getPageSeo(locale, '/services', t('hero.title'), t('hero.subtitle'))
 }
 
 const SERVICE_ICONS = [
@@ -68,8 +64,41 @@ export default function ServicesPage() {
   const t = useTranslations('services')
   const tGlobal = useTranslations()
 
+  const servicesJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    serviceType: 'Property Management',
+    provider: {
+      '@type': 'LocalBusiness',
+      name: 'Clévia Immobilier - Conciergerie',
+      url: 'https://www.cleviamaroc.com',
+    },
+    areaServed: [
+      { '@type': 'City', name: 'Mohammedia' },
+      { '@type': 'City', name: 'Mansouria' },
+      { '@type': 'City', name: 'Bouznika' },
+      { '@type': 'City', name: 'Benslimane' },
+    ],
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: t('hero.title'),
+      itemListElement: SERVICE_KEYS.map((key, i) => ({
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Service',
+          name: t(`items.${key}.title`),
+          description: t(`items.${key}.description`),
+        },
+      })),
+    },
+  }
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(servicesJsonLd) }}
+      />
       {/* ── HERO ────────────────────────────────── */}
       <section className="bg-creme py-16 md:py-20 px-4 overflow-hidden relative">
         <div

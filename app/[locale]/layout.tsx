@@ -59,18 +59,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: 'website',
       images: [
         {
-          url: `${SITE_URL}/logo.svg`,
-          width: 512,
-          height: 512,
+          url: `${SITE_URL}/api/og?title=${encodeURIComponent('Clévia Immobilier - Conciergerie')}&subtitle=${encodeURIComponent('Location courte durée · Maroc')}`,
+          width: 1200,
+          height: 630,
           alt: 'Clévia Immobilier - Conciergerie',
         },
       ],
     },
     twitter: {
-      card: 'summary',
+      card: 'summary_large_image',
       title: 'Clévia Immobilier - Conciergerie · Maroc',
       description: t('subtitle'),
-      images: [`${SITE_URL}/logo.svg`],
+      images: [`${SITE_URL}/api/og?title=${encodeURIComponent('Clévia Immobilier - Conciergerie')}&subtitle=${encodeURIComponent('Location courte durée · Maroc')}`],
     },
     alternates: {
       languages: {

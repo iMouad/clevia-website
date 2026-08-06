@@ -5,6 +5,7 @@ import { AnimateIn } from '@/components/ui/AnimateIn'
 import { Link } from '@/i18n/navigation'
 import VenteGrid from '@/components/vente/VenteGrid'
 import type { BienVente } from '@/components/BienVenteCard'
+import { getPageSeo } from '@/lib/seo'
 
 type Props = { params: Promise<{ locale: string }> }
 
@@ -21,20 +22,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .limit(1)
     .single()
   const ogImage = (firstBien?.photos as string[] | null)?.[0] ?? null
-  const siteUrl = 'https://www.cleviamaroc.com'
-  return {
-    title: `${t('title')} · Clévia`,
-    description: t('subtitle'),
-    alternates: { canonical: `${siteUrl}/${locale}/vente` },
-    openGraph: {
-      title: `${t('title')} · Clévia`,
-      description: t('subtitle'),
-      url: `${siteUrl}/${locale}/vente`,
-      type: 'website',
-      siteName: 'Clévia Immobilier - Conciergerie',
-      ...(ogImage ? { images: [{ url: ogImage, width: 1200, height: 630 }] } : {}),
-    },
+  const seo = getPageSeo(locale, '/vente', `${t('title')} · Clévia`, t('subtitle'))
+  if (ogImage) {
+    seo.openGraph.images = [{ url: ogImage, width: 1200, height: 630, alt: t('title') }]
   }
+  return seo
 }
 
 export default async function VentePage({ params }: Props) {

@@ -3,6 +3,7 @@ import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import RevenueCalculator from '@/components/RevenueCalculator'
 import type { Metadata } from 'next'
+import { getPageSeo } from '@/lib/seo'
 
 export async function generateMetadata({
   params,
@@ -11,26 +12,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'simulateur.meta' })
-  return {
-    title: t('title'),
-    description: t('description'),
-    openGraph: {
-      title: t('title'),
-      description: t('description'),
-      url: `/${locale}/simulateur`,
-      siteName: 'Clévia Immobilier - Conciergerie',
-      locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_US' : 'fr_MA',
-      type: 'website',
-    },
-    alternates: {
-      canonical: `/${locale}/simulateur`,
-      languages: {
-        fr: '/fr/simulateur',
-        ar: '/ar/simulateur',
-        en: '/en/simulateur',
-      },
-    },
-  }
+  return getPageSeo(locale, '/simulateur', t('title'), t('description'))
 }
 
 function SimulateurHero() {

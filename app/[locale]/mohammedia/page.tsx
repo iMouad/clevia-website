@@ -1,19 +1,12 @@
 import type { Metadata } from 'next'
 import CityLandingPage, { CITY_CONFIGS } from '@/components/CityLandingPage'
+import { getPageSeo } from '@/lib/seo'
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params
   return {
-    title: 'Conciergerie Airbnb à Mohammedia — Clévia',
-    description: 'Clévia Immobilier - Conciergerie gère votre bien à Mohammedia : mise en ligne Airbnb & Booking, accueil voyageurs, ménage, clé en main. Estimation gratuite.',
+    ...getPageSeo(locale, '/mohammedia', 'Conciergerie Airbnb à Mohammedia — Clévia', 'Clévia gère votre location courte durée à Mohammedia. +15 nuits louées/mois, gestion 100% clé en main.'),
     keywords: ['conciergerie Mohammedia', 'gestion location Mohammedia', 'Airbnb Mohammedia', 'location courte durée Mohammedia'],
-    alternates: {
-      canonical: 'https://www.cleviamaroc.com/fr/mohammedia',
-    },
-    openGraph: {
-      title: 'Conciergerie Airbnb à Mohammedia — Clévia',
-      description: 'Clévia gère votre location courte durée à Mohammedia. +15 nuits louées/mois, gestion 100% clé en main.',
-      url: 'https://www.cleviamaroc.com/fr/mohammedia',
-    },
   }
 }
 

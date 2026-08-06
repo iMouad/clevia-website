@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import { AnimateIn, StaggerContainer, StaggerItem } from '@/components/ui/AnimateIn'
 import type { Metadata } from 'next'
+import { getPageSeo } from '@/lib/seo'
 
 export async function generateMetadata({
   params,
@@ -11,12 +12,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'how' })
-  return {
-    title: t('hero.title'),
-    description: t('hero.subtitle'),
-    openGraph: { url: `/${locale}/comment` },
-    alternates: { canonical: `/${locale}/comment` },
-  }
+  return getPageSeo(locale, '/comment', t('hero.title'), t('hero.subtitle'))
 }
 
 const STEP_KEYS = ['contact', 'visit', 'contract', 'publish', 'manage', 'payment'] as const

@@ -1,19 +1,12 @@
 import type { Metadata } from 'next'
 import CityLandingPage, { CITY_CONFIGS } from '@/components/CityLandingPage'
+import { getPageSeo } from '@/lib/seo'
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params
   return {
-    title: 'Conciergerie Airbnb à Mansouria — Clévia',
-    description: 'Clévia Immobilier - Conciergerie gère votre bien à Mansouria (El Mansouria) : mise en ligne Airbnb & Booking, accueil voyageurs, ménage, clé en main. Estimation gratuite.',
+    ...getPageSeo(locale, '/mansouria', 'Conciergerie Airbnb à Mansouria — Clévia', 'Clévia gère votre location courte durée à Mansouria. +15 nuits louées/mois, gestion 100% clé en main.'),
     keywords: ['conciergerie Mansouria', 'gestion location Mansouria', 'Airbnb Mansouria', 'location courte durée Mansouria', 'El Mansouria'],
-    alternates: {
-      canonical: 'https://www.cleviamaroc.com/fr/mansouria',
-    },
-    openGraph: {
-      title: 'Conciergerie Airbnb à Mansouria — Clévia',
-      description: 'Clévia gère votre location courte durée à Mansouria. +15 nuits louées/mois, gestion 100% clé en main.',
-      url: 'https://www.cleviamaroc.com/fr/mansouria',
-    },
   }
 }
 
