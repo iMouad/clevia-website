@@ -1161,9 +1161,8 @@ export default function ReservationsPage() {
           </div>
 
           {/* ── Section : Financier ── */}
-          {isSuperAdmin && (
-            <div className="border-t border-brun/8 pt-4 pb-4">
-              <p className="text-[10px] uppercase tracking-widest text-brun-mid/40 font-medium mb-3">Financier</p>
+          <div className="border-t border-brun/8 pt-4 pb-4">
+            <p className="text-[10px] uppercase tracking-widest text-brun-mid/40 font-medium mb-3">Financier</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={labelClass}>Prix / nuit (MAD)</label>
@@ -1227,8 +1226,7 @@ export default function ReservationsPage() {
                   )}
                 </div>
               )}
-            </div>
-          )}
+          </div>
 
           {/* ── Section : Détails ── */}
           <div className="border-t border-brun/8 pt-4">
@@ -1309,7 +1307,7 @@ export default function ReservationsPage() {
                   <span className="text-brun-mid/60">Plateforme</span>
                   <span className="text-brun font-medium">{editing.plateforme ?? '—'}</span>
                 </div>
-                {isSuperAdmin && prixNuit != null && prixNuit > 0 && (
+                {prixNuit != null && prixNuit > 0 && (
                   <>
                     <div className="flex justify-between">
                       <span className="text-brun-mid/60">Prix / nuit</span>
