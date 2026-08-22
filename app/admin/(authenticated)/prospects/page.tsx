@@ -41,6 +41,7 @@ const STATUT_STEPS = [
 const STATUT_MAP = Object.fromEntries(STATUT_STEPS.map(s => [s.key, s]))
 
 const SOURCES = ['Bouche à oreille', 'Facebook', 'Instagram', 'Avito', 'Terrain', 'Site web', 'Autre']
+const VILLES = ['Mansouria', 'Mohammedia', 'Benslimane', 'Bouznika', 'Autre']
 const TYPES_BIEN = ['Appartement', 'Villa', 'Maison', 'Riad', 'Studio', 'Duplex', 'Autre']
 
 function Modal({ open, onClose, children }: { open: boolean; onClose: () => void; children: React.ReactNode }) {
@@ -443,8 +444,11 @@ export default function ProspectsPage() {
             <p className="text-[10px] uppercase tracking-widest text-brun-mid/40 font-medium mb-3">Bien</p>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className={labelClass}>Ville / Quartier</label>
-                <input className={inputClass} value={editing.ville ?? ''} onChange={(e) => setEditing(p => ({ ...p, ville: e.target.value }))} placeholder="Mansouria" />
+                <label className={labelClass}>Ville</label>
+                <AdminSelect value={editing.ville ?? ''} onChange={(e) => setEditing(p => ({ ...p, ville: e.target.value || null }))}>
+                  <option value="">— Sélectionner —</option>
+                  {VILLES.map(v => <option key={v}>{v}</option>)}
+                </AdminSelect>
               </div>
               <div>
                 <label className={labelClass}>Adresse</label>
