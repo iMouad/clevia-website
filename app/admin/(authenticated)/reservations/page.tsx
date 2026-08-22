@@ -111,6 +111,7 @@ export default function ReservationsPage() {
   const [voyageurQuery, setVoyageurQuery] = useState('')
   const [voyageurDropdownOpen, setVoyageurDropdownOpen] = useState(false)
   const [selectedVoyageur, setSelectedVoyageur] = useState<VoyageurOption | null>(null)
+  const [prixNuit, setPrixNuit] = useState<number | null>(null)
   const voyageurRef = useRef<HTMLDivElement>(null)
 
   const platNames = plateformes.filter((p) => p.actif).map((p) => p.nom)
@@ -231,6 +232,8 @@ export default function ReservationsPage() {
       ? voyageurs.find(v => v.telephone === data.voyageur_phone) ?? null
       : voyageurs.find(v => v.nom === data.voyageur_nom) ?? null
     setSelectedVoyageur(match)
+    const n = nuits(data.date_arrivee ?? '', data.date_depart ?? '')
+    setPrixNuit(data.montant != null && n > 0 ? Math.round((data.montant / n) * 100) / 100 : null)
     setModalOpen(true)
   }
   function openAdd() { openModal({ ...EMPTY_RES, bien_id: biens.find((b) => b.disponible !== false)?.id ?? null }) }
@@ -1113,11 +1116,23 @@ export default function ReservationsPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className={labelClass}>Arrivée *</label>
-                <input type="date" className={inputClass} value={editing.date_arrivee ?? ''} onChange={(e) => setEditing((p) => ({ ...p, date_arrivee: e.target.value }))} />
+                <input type="date" className={inputClass} value={editing.date_arrivee ?? ''} onChange={(e) => {
+                  const newDate = e.target.value
+                  setEditing((p) => {
+                    const n = nuits(newDate, p.date_depart ?? '')
+                    return { ...p, date_arrivee: newDate, montant: prixNuit != null && n > 0 ? prixNuit * n : p.montant }
+                  })
+                }} />
               </div>
               <div>
                 <label className={labelClass}>Départ *</label>
-                <input type="date" className={inputClass} value={editing.date_depart ?? ''} onChange={(e) => setEditing((p) => ({ ...p, date_depart: e.target.value }))} />
+                <input type="date" className={inputClass} value={editing.date_depart ?? ''} onChange={(e) => {
+                  const newDate = e.target.value
+                  setEditing((p) => {
+                    const n = nuits(p.date_arrivee ?? '', newDate)
+                    return { ...p, date_depart: newDate, montant: prixNuit != null && n > 0 ? prixNuit * n : p.montant }
+                  })
+                }} />
               </div>
             </div>
             {editing.date_arrivee && editing.date_depart && (
@@ -1151,8 +1166,13 @@ export default function ReservationsPage() {
               <p className="text-[10px] uppercase tracking-widest text-brun-mid/40 font-medium mb-3">Financier</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className={labelClass}>Montant (MAD)</label>
-                  <input type="number" min={0} className={inputClass} value={editing.montant ?? ''} onChange={(e) => setEditing((p) => ({ ...p, montant: e.target.value === '' ? null : Number(e.target.value) }))} placeholder="1500" />
+                  <label className={labelClass}>Prix / nuit (MAD)</label>
+                  <input type="number" min={0} className={inputClass} value={prixNuit ?? ''} onChange={(e) => {
+                    const val = e.target.value === '' ? null : Number(e.target.value)
+                    setPrixNuit(val)
+                    const n = nuits(editing.date_arrivee ?? '', editing.date_depart ?? '')
+                    setEditing((p) => ({ ...p, montant: val != null && n > 0 ? val * n : null }))
+                  }} placeholder="500" />
                 </div>
                 <div>
                   <label className={labelClass}>Commission</label>
@@ -1191,14 +1211,20 @@ export default function ReservationsPage() {
                   )}
                 </div>
               </div>
-              {editing.montant != null && editing.montant > 0 && (
-                <div className="bg-terra/10 rounded-xl px-4 py-3 text-sm mt-3">
-                  {commissionVal === 0
-                    ? <span className="text-brun-mid">Sans commission</span>
-                    : editing.commission_fixe != null
-                      ? <><span className="text-brun-mid">Commission fixe : </span><span className="text-terra font-medium">{commission} MAD</span></>
-                      : <><span className="text-brun-mid">Commission ({editing.taux_commission}%) : </span><span className="text-terra font-medium">{commission} MAD</span></>
-                  }
+              {prixNuit != null && prixNuit > 0 && editing.date_arrivee && editing.date_depart && (
+                <div className="bg-terra/10 rounded-xl px-4 py-3 text-sm mt-3 flex flex-col gap-1">
+                  <div className="flex justify-between">
+                    <span className="text-brun-mid">{prixNuit} MAD × {nuits(editing.date_arrivee, editing.date_depart)} nuit(s)</span>
+                    <span className="text-brun font-medium">{editing.montant} MAD</span>
+                  </div>
+                  {commissionVal > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-brun-mid/70 text-xs">
+                        Commission {editing.commission_fixe != null ? 'fixe' : `(${editing.taux_commission}%)`}
+                      </span>
+                      <span className="text-terra font-medium text-xs">{commission} MAD</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -1283,10 +1309,14 @@ export default function ReservationsPage() {
                   <span className="text-brun-mid/60">Plateforme</span>
                   <span className="text-brun font-medium">{editing.plateforme ?? '—'}</span>
                 </div>
-                {isSuperAdmin && editing.montant != null && editing.montant > 0 && (
+                {isSuperAdmin && prixNuit != null && prixNuit > 0 && (
                   <>
                     <div className="flex justify-between">
-                      <span className="text-brun-mid/60">Montant</span>
+                      <span className="text-brun-mid/60">Prix / nuit</span>
+                      <span className="text-brun font-medium">{prixNuit} MAD</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-brun-mid/60">Total</span>
                       <span className="text-brun font-medium">{editing.montant} MAD</span>
                     </div>
                     <div className="flex justify-between">
