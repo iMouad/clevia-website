@@ -56,6 +56,7 @@ export default function AdminDashboard() {
   const [whatsappClicsMois, setWhatsappClicsMois] = useState(0)
   const [lastWhatsappClics, setLastWhatsappClics] = useState<any[]>([])
   const [plateformes, setPlateformes] = useState<Plateforme[]>([])
+  const [prospectsData, setProspectsData] = useState<any[]>([])
 
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
@@ -77,6 +78,7 @@ export default function AdminDashboard() {
       supabase.from('reservations').select('voyageur_nom, date_arrivee, date_depart, plateforme, bien_id, biens(nom)').eq('date_depart', demainStr).in('statut', ['confirmee', 'terminee']),
       supabase.from('reservations').select('voyageur_nom, date_arrivee, date_depart, plateforme, bien_id, biens(nom)').eq('date_arrivee', demainStr).in('statut', ['confirmee']),
       supabase.from('plateformes').select('*').eq('actif', true).order('ordre'),
+      supabase.from('prospects').select('id,nom,statut,date_relance,source,ville').neq('statut', 'perdu'),
     ]).then(([
       { data: { user } },
       { data: biensData, count: biensCount },
@@ -91,6 +93,7 @@ export default function AdminDashboard() {
       { data: checkoutDemain },
       { data: checkinDemain },
       { data: platData },
+      { data: prospectsRaw },
     ]) => {
       setIsSuperAdmin(user?.app_metadata?.role !== 'admin')
       setAdminName(user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Admin')
@@ -107,6 +110,7 @@ export default function AdminDashboard() {
       setCheckoutDemainData(checkoutDemain ?? [])
       setCheckinDemainData(checkinDemain ?? [])
       setPlateformes(platData ?? [])
+      setProspectsData(prospectsRaw ?? [])
       setLoading(false)
     })
   }, [])
@@ -312,6 +316,91 @@ export default function AdminDashboard() {
               )}
             </div>
           </div>
+
+          {/* Widget Prospects */}
+          {prospectsData.length > 0 && (() => {
+            const stageLabels: Record<string, string> = {
+              premier_contact: '1er contact',
+              visite_planifiee: 'Visite planifiée',
+              visite_faite: 'Visite faite',
+              negociation: 'Négociation',
+              signe: 'Signé',
+            }
+            const stageColors: Record<string, string> = {
+              premier_contact: '#6B4C35',
+              visite_planifiee: '#C97B4B',
+              visite_faite: '#E8A87C',
+              negociation: '#F0997B',
+              signe: '#22c55e',
+            }
+            const stages = ['premier_contact', 'visite_planifiee', 'visite_faite', 'negociation', 'signe']
+            const counts: Record<string, number> = {}
+            stages.forEach(s => { counts[s] = prospectsData.filter(p => p.statut === s).length })
+            const total = prospectsData.length
+            const today = new Date().toISOString().split('T')[0]
+            const enRetard = prospectsData.filter(p => p.date_relance && p.date_relance < today && p.statut !== 'signe')
+            const relanceAujourdhui = prospectsData.filter(p => p.date_relance === today && p.statut !== 'signe')
+
+            return (
+              <div className="bg-white rounded-2xl border border-brun/10 overflow-hidden mb-6">
+                <div className="px-6 py-4 border-b border-brun/8 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">👥</span>
+                    <h2 className="text-base font-medium text-brun">Pipeline Prospects</h2>
+                    <span className="text-xs text-brun-mid/50 ml-1">({total} actif{total > 1 ? 's' : ''})</span>
+                  </div>
+                  <a href="/admin/prospects" className="text-xs text-terra hover:text-brun transition-colors font-medium">
+                    Voir tout →
+                  </a>
+                </div>
+                <div className="px-6 py-5">
+                  {/* Barre de pipeline */}
+                  <div className="flex gap-1 mb-4 h-3 rounded-full overflow-hidden bg-brun/5">
+                    {stages.map(s => counts[s] > 0 && (
+                      <div
+                        key={s}
+                        className="h-full transition-all duration-500"
+                        style={{
+                          width: `${(counts[s] / total) * 100}%`,
+                          backgroundColor: stageColors[s],
+                        }}
+                        title={`${stageLabels[s]}: ${counts[s]}`}
+                      />
+                    ))}
+                  </div>
+                  {/* Compteurs par étape */}
+                  <div className="flex flex-wrap gap-3 mb-4">
+                    {stages.map(s => (
+                      <div key={s} className="flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: stageColors[s] }} />
+                        <span className="text-xs text-brun-mid">{stageLabels[s]}</span>
+                        <span className="text-xs font-semibold text-brun">{counts[s]}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Alertes relance */}
+                  {(enRetard.length > 0 || relanceAujourdhui.length > 0) && (
+                    <div className="border-t border-brun/8 pt-3 flex flex-col gap-2">
+                      {enRetard.length > 0 && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
+                          <span className="text-red-600 font-medium">{enRetard.length} relance{enRetard.length > 1 ? 's' : ''} en retard</span>
+                          <span className="text-brun-mid/50 text-xs">— {enRetard.map(p => p.nom).join(', ')}</span>
+                        </div>
+                      )}
+                      {relanceAujourdhui.length > 0 && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
+                          <span className="text-amber-600 font-medium">{relanceAujourdhui.length} relance{relanceAujourdhui.length > 1 ? 's' : ''} aujourd&apos;hui</span>
+                          <span className="text-brun-mid/50 text-xs">— {relanceAujourdhui.map(p => p.nom).join(', ')}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          })()}
 
           {/* Séjours en cours aujourd'hui */}
           {enCoursData.length > 0 && (
