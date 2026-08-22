@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase'
 import AdminSelect from '@/components/admin/AdminSelect'
 import type { Plateforme } from '@/lib/plateformes'
 import { platBg } from '@/lib/plateformes'
+import { PREFIXES, getFlag, getPrefix, getNumber } from '@/lib/phone'
 
 type Reservation = {
   id: string
@@ -365,7 +366,7 @@ export default function ReservationsPage() {
           <div class="info-label">Voyageur</div>
           <div class="info-value">${esc(r.voyageur_nom)}</div>
           ${r.voyageur_email ? `<div style="font-size:11px;color:#6B4C35;margin-top:2px">${esc(r.voyageur_email)}</div>` : ''}
-          ${r.voyageur_phone ? `<div style="font-size:11px;color:#6B4C35">${esc(r.voyageur_phone)}</div>` : ''}
+          ${r.voyageur_phone ? `<div style="font-size:11px;color:#6B4C35">${getFlag(r.voyageur_phone)} ${esc(r.voyageur_phone)}</div>` : ''}
         </div>
         <div class="info-box">
           <div class="info-label">Bien</div>
@@ -1061,7 +1062,7 @@ export default function ReservationsPage() {
                       }}
                     >
                       <span className="text-brun font-medium truncate">{v.nom}</span>
-                      {v.telephone && <span className="text-brun-mid/60 text-xs shrink-0">{v.telephone}</span>}
+                      {v.telephone && <span className="text-brun-mid/60 text-xs shrink-0">{getFlag(v.telephone)} {v.telephone}</span>}
                     </button>
                   ))}
                 </div>
@@ -1082,32 +1083,20 @@ export default function ReservationsPage() {
                 <label className={labelClass}>Téléphone</label>
                 <div className="flex gap-1.5">
                   <select
-                    className="border border-brun/20 rounded-xl px-2 py-2.5 text-sm text-brun focus:outline-none focus:border-terra focus:ring-1 focus:ring-terra transition-colors w-[90px] shrink-0"
-                    value={(editing.voyageur_phone ?? '').match(/^(\+\d{1,4})/)?.[1] ?? '+212'}
+                    className="border border-brun/20 rounded-xl px-2 py-2.5 text-sm text-brun focus:outline-none focus:border-terra focus:ring-1 focus:ring-terra transition-colors w-[110px] shrink-0"
+                    value={getPrefix(editing.voyageur_phone)}
                     onChange={(e) => {
-                      const num = (editing.voyageur_phone ?? '').replace(/^\+\d{1,4}\s?/, '')
+                      const num = getNumber(editing.voyageur_phone)
                       setEditing((p) => ({ ...p, voyageur_phone: e.target.value + ' ' + num }))
                     }}
                   >
-                    <option value="+212">+212</option>
-                    <option value="+33">+33</option>
-                    <option value="+34">+34</option>
-                    <option value="+44">+44</option>
-                    <option value="+49">+49</option>
-                    <option value="+1">+1</option>
-                    <option value="+39">+39</option>
-                    <option value="+32">+32</option>
-                    <option value="+31">+31</option>
-                    <option value="+216">+216</option>
-                    <option value="+213">+213</option>
-                    <option value="+966">+966</option>
-                    <option value="+971">+971</option>
+                    {PREFIXES.map(p => <option key={p.code} value={p.code}>{p.flag} {p.code}</option>)}
                   </select>
                   <input
                     className={inputClass}
-                    value={(editing.voyageur_phone ?? '').replace(/^\+\d{1,4}\s?/, '')}
+                    value={getNumber(editing.voyageur_phone)}
                     onChange={(e) => {
-                      const prefix = (editing.voyageur_phone ?? '').match(/^(\+\d{1,4})/)?.[1] ?? '+212'
+                      const prefix = getPrefix(editing.voyageur_phone)
                       setEditing((p) => ({ ...p, voyageur_phone: prefix + ' ' + e.target.value }))
                     }}
                     placeholder="6 12 34 56 78"

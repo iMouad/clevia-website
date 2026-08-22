@@ -5,6 +5,7 @@ import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { createClient } from '@/lib/supabase'
 import AdminSelect from '@/components/admin/AdminSelect'
+import { PREFIXES, getFlag, getPrefix, getNumber } from '@/lib/phone'
 
 type Prospect = {
   id: string
@@ -355,7 +356,7 @@ export default function ProspectsPage() {
               </span>
             </div>
             <div className="flex items-center gap-3 flex-wrap text-xs text-brun-mid/60 mb-2" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-              {p.telephone && <span>{p.telephone}</span>}
+              {p.telephone && <span>{getFlag(p.telephone)} {p.telephone}</span>}
               {p.type_bien && <span>{p.type_bien}</span>}
               {p.source && <span className="text-brun-mid/40">{p.source}</span>}
             </div>
@@ -427,7 +428,7 @@ export default function ProspectsPage() {
                         : format(new Date(p.created_at), 'dd/MM/yy')}
                     </span>
                   </td>
-                  <td className="px-3 py-3 text-brun-mid text-xs">{p.telephone ?? '—'}</td>
+                  <td className="px-3 py-3 text-brun-mid text-xs whitespace-nowrap">{p.telephone ? <>{getFlag(p.telephone)} {p.telephone}</> : '—'}</td>
                   {/* Bien : ville/adresse + type */}
                   <td className="px-3 py-3 text-brun-mid">
                     <span>{p.ville ?? '—'}</span>
@@ -531,32 +532,20 @@ export default function ProspectsPage() {
                 <label className={labelClass}>Téléphone</label>
                 <div className="flex gap-1.5">
                   <select
-                    className="border border-brun/20 rounded-xl px-2 py-2.5 text-sm text-brun focus:outline-none focus:border-terra focus:ring-1 focus:ring-terra transition-colors w-[90px] shrink-0"
-                    value={(editing.telephone ?? '').match(/^(\+\d{1,4})/)?.[1] ?? '+212'}
+                    className="border border-brun/20 rounded-xl px-2 py-2.5 text-sm text-brun focus:outline-none focus:border-terra focus:ring-1 focus:ring-terra transition-colors w-[110px] shrink-0"
+                    value={getPrefix(editing.telephone)}
                     onChange={(e) => {
-                      const num = (editing.telephone ?? '').replace(/^\+\d{1,4}\s?/, '')
+                      const num = getNumber(editing.telephone)
                       setEditing(p => ({ ...p, telephone: e.target.value + ' ' + num }))
                     }}
                   >
-                    <option value="+212">+212</option>
-                    <option value="+33">+33</option>
-                    <option value="+34">+34</option>
-                    <option value="+44">+44</option>
-                    <option value="+49">+49</option>
-                    <option value="+1">+1</option>
-                    <option value="+39">+39</option>
-                    <option value="+32">+32</option>
-                    <option value="+31">+31</option>
-                    <option value="+216">+216</option>
-                    <option value="+213">+213</option>
-                    <option value="+966">+966</option>
-                    <option value="+971">+971</option>
+                    {PREFIXES.map(p => <option key={p.code} value={p.code}>{p.flag} {p.code}</option>)}
                   </select>
                   <input
                     className={inputClass}
-                    value={(editing.telephone ?? '').replace(/^\+\d{1,4}\s?/, '')}
+                    value={getNumber(editing.telephone)}
                     onChange={(e) => {
-                      const prefix = (editing.telephone ?? '').match(/^(\+\d{1,4})/)?.[1] ?? '+212'
+                      const prefix = getPrefix(editing.telephone)
                       setEditing(p => ({ ...p, telephone: prefix + ' ' + e.target.value }))
                     }}
                     placeholder="6 12 34 56 78"
