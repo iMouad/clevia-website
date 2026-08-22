@@ -236,8 +236,8 @@ export default function AdminSidebar() {
     <>
       {/* ── DESKTOP sidebar ─────────────────────── */}
       <aside className="hidden lg:flex w-60 flex-shrink-0 bg-brun flex-col h-screen sticky top-0">
-        <div className="px-6 py-6 border-b border-creme/10">
-          <Image src="/logo-light.svg" alt="Clévia" width={130} height={37} />
+        <div className="px-5 py-5 border-b border-creme/10">
+          <Image src="/logo-light.svg" alt="Clévia Immobilier" width={180} height={50} />
         </div>
         <nav className="flex-1 px-3 py-4 overflow-y-auto flex flex-col gap-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-creme/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-creme/40">
           <NavLinks />
@@ -280,7 +280,7 @@ export default function AdminSidebar() {
           >
             {/* Header drawer */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-creme/10">
-              <Image src="/logo-light.svg" alt="Clévia" width={110} height={30} />
+              <Image src="/logo-light.svg" alt="Clévia Immobilier" width={150} height={42} />
               <button
                 onClick={() => setDrawerOpen(false)}
                 className="w-9 h-9 flex items-center justify-center text-creme/60 hover:text-creme rounded-xl hover:bg-creme/10 transition-all"
