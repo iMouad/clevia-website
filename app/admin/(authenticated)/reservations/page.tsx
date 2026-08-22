@@ -485,25 +485,22 @@ export default function ReservationsPage() {
   }
 
   function exportCSV() {
-    const headers = isSuperAdmin
-      ? ['Voyageur', 'Intermédiaire', 'Email', 'Téléphone', 'Bien', 'Arrivée', 'Départ', 'Nuits', 'Plateforme', 'Montant MAD', 'Commission MAD', 'Statut', 'Notes']
-      : ['Voyageur', 'Intermédiaire', 'Email', 'Bien', 'Arrivée', 'Départ', 'Nuits', 'Plateforme', 'Statut', 'Notes']
+    const headers = ['Voyageur', 'Intermédiaire', 'Email', 'Téléphone', 'Bien', 'Arrivée', 'Départ', 'Nuits', 'Plateforme', 'Montant MAD', 'Commission MAD', 'Statut', 'Créé par', 'Notes']
     const csvRows = filtered.map((r) => {
       const row: (string | number | null)[] = [
         r.voyageur_nom,
         r.intermediaire ?? '',
         r.voyageur_email ?? '',
-        ...(isSuperAdmin ? [r.voyageur_phone ?? ''] : []),
+        r.voyageur_phone ?? '',
         (r as any).biens?.nom ?? '',
         r.date_arrivee,
         r.date_depart,
         nuits(r.date_arrivee, r.date_depart),
         r.plateforme ?? '',
-        ...(isSuperAdmin ? [
-          r.montant ?? '',
-          r.montant ? calcCommission(r).toFixed(2) : '',
-        ] : []),
+        r.montant ?? '',
+        r.montant ? calcCommission(r).toFixed(2) : '',
         STATUT_LABELS[r.statut] ?? r.statut,
+        r.created_by?.split('@')[0] ?? '',
         r.notes ?? '',
       ]
       return row
@@ -647,15 +644,13 @@ export default function ReservationsPage() {
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" strokeLinecap="round" strokeLinejoin="round" /></svg>
             Export CSV
           </button>
-          {isSuperAdmin && (
-            <button
-              onClick={() => { setRapportOpen(true); setRapportGenere(false) }}
-              className="flex items-center gap-2 border border-brun/20 text-brun-mid text-sm font-medium rounded-full px-4 py-2.5 hover:border-terra hover:text-terra transition-all"
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="2" /><path d="M9 7h6M9 11h6M9 15h4" strokeLinecap="round" /></svg>
-              Rapport
-            </button>
-          )}
+          <button
+            onClick={() => { setRapportOpen(true); setRapportGenere(false) }}
+            className="flex items-center gap-2 border border-brun/20 text-brun-mid text-sm font-medium rounded-full px-4 py-2.5 hover:border-terra hover:text-terra transition-all"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="2" /><path d="M9 7h6M9 11h6M9 15h4" strokeLinecap="round" /></svg>
+            Rapport
+          </button>
           <button onClick={openAdd} className="flex items-center gap-2 bg-terra text-creme text-sm font-medium rounded-full px-5 py-2.5 hover:bg-brun transition-all">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
             Ajouter
@@ -805,20 +800,19 @@ export default function ReservationsPage() {
                 {r.plateforme ?? '—'}
               </span>
             </div>
-            {isSuperAdmin && (
-              <div className="flex items-center gap-3 mb-3">
-                {r.montant ? (
-                  <>
-                    <span className="text-sm font-medium text-brun" style={{ fontFamily: 'var(--font-dm-sans)' }}>{r.montant} MAD</span>
-                    <span className="text-xs text-terra" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                      {calcCommission(r) === 0 ? 'Sans commission' : `Commission : ${calcCommission(r).toFixed(0)} MAD`}
-                    </span>
-                  </>
-                ) : (
-                  <span className="text-sm text-brun-mid/40">Montant —</span>
-                )}
-              </div>
-            )}
+            <div className="flex items-center gap-3 mb-3">
+              {r.montant ? (
+                <>
+                  <span className="text-sm font-medium text-brun" style={{ fontFamily: 'var(--font-dm-sans)' }}>{r.montant} MAD</span>
+                  <span className="text-xs text-terra" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                    {calcCommission(r) === 0 ? 'Sans commission' : `Commission : ${calcCommission(r).toFixed(0)} MAD`}
+                  </span>
+                </>
+              ) : (
+                <span className="text-sm text-brun-mid/40">Montant —</span>
+              )}
+              {r.created_by && <span className="text-[10px] text-brun-mid/40 ml-auto" style={{ fontFamily: 'var(--font-dm-sans)' }}>{r.created_by.split('@')[0]}</span>}
+            </div>
             <div className="flex gap-2 pt-3 border-t border-brun/8">
               <button onClick={() => openEdit(r)} className="flex-1 flex items-center justify-center gap-1.5 bg-terra/10 text-terra text-sm font-medium rounded-xl py-2 hover:bg-terra/20 transition-all" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
@@ -859,11 +853,10 @@ export default function ReservationsPage() {
                   { label: 'Départ', col: 'date_depart' },
                   { label: 'Nuits', col: 'nuits' },
                   { label: 'Plateforme', col: 'plateforme' },
-                  ...(isSuperAdmin ? [
-                    { label: 'Montant', col: 'montant' },
-                    { label: 'Commission', col: 'commission' },
-                  ] : []),
+                  { label: 'Montant', col: 'montant' },
+                  { label: 'Commission', col: 'commission' },
                   { label: 'Statut', col: 'statut' },
+                  { label: 'Par', col: '' },
                   { label: '', col: '' },
                 ].map(({ label, col }) => (
                   <th
@@ -878,9 +871,9 @@ export default function ReservationsPage() {
             </thead>
             <tbody className="divide-y divide-brun/5">
               {loading ? (
-                <tr><td colSpan={isSuperAdmin ? 11 : 9} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
+                <tr><td colSpan={12} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
               ) : !filtered.length ? (
-                <tr><td colSpan={isSuperAdmin ? 11 : 9} className="px-4 py-10 text-center text-brun-mid/50">Aucune réservation</td></tr>
+                <tr><td colSpan={12} className="px-4 py-10 text-center text-brun-mid/50">Aucune réservation</td></tr>
               ) : paginated.map((r) => (
                 <tr key={r.id} className={`transition-colors ${isCheckinDemain(r) ? 'bg-blue-50/60 border-l-2 border-l-blue-400' : isCheckoutDemain(r) ? 'bg-orange-50/60 border-l-2 border-l-orange-400' : isEnCours(r) ? 'bg-green-50/60 border-l-2 border-l-green-400' : 'hover:bg-creme/40'} ${selected.has(r.id) ? 'bg-terra/5' : ''}`}>
                   <td className="px-3 py-3">
@@ -904,21 +897,18 @@ export default function ReservationsPage() {
                       {r.plateforme ?? '—'}
                     </span>
                   </td>
-                  {isSuperAdmin && (
-                    <>
-                      <td className="px-3 py-3 text-brun-mid whitespace-nowrap">{r.montant ? `${r.montant} MAD` : '—'}</td>
-                      <td className="px-3 py-3 font-medium text-terra whitespace-nowrap">
-                        {r.montant
-                          ? calcCommission(r) === 0
-                            ? <span className="text-brun-mid/40 font-normal text-xs">Sans</span>
-                            : `${calcCommission(r).toFixed(0)} MAD`
-                          : '—'}
-                      </td>
-                    </>
-                  )}
+                  <td className="px-3 py-3 text-brun-mid whitespace-nowrap">{r.montant ? `${r.montant} MAD` : '—'}</td>
+                  <td className="px-3 py-3 font-medium text-terra whitespace-nowrap">
+                    {r.montant
+                      ? calcCommission(r) === 0
+                        ? <span className="text-brun-mid/40 font-normal text-xs">Sans</span>
+                        : `${calcCommission(r).toFixed(0)} MAD`
+                      : '—'}
+                  </td>
                   <td className="px-3 py-3">
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUT_COLORS[r.statut]}`}>{STATUT_LABELS[r.statut] ?? r.statut}</span>
                   </td>
+                  <td className="px-3 py-3 text-[10px] text-brun-mid/50 whitespace-nowrap">{r.created_by?.split('@')[0] ?? '—'}</td>
                   <td className="px-3 py-3">
                     <div className="flex gap-2">
                       <button onClick={() => openEdit(r)} className="text-terra text-xs underline underline-offset-2">Modifier</button>
@@ -937,13 +927,9 @@ export default function ReservationsPage() {
                   <td className="px-3 py-3 text-brun font-semibold text-sm" colSpan={5}>Total ({filtered.length} résa{filtered.length > 1 ? 's' : ''})</td>
                   <td className="px-3 py-3 text-center text-brun font-semibold text-sm">{totNuits}</td>
                   <td className="px-3 py-3"></td>
-                  {isSuperAdmin && (
-                    <>
-                      <td className="px-3 py-3 text-brun font-semibold text-sm whitespace-nowrap">{totMontant.toLocaleString('fr-MA')} MAD</td>
-                      <td className="px-3 py-3 font-semibold text-terra text-sm whitespace-nowrap">{Math.round(totCommission).toLocaleString('fr-MA')} MAD</td>
-                    </>
-                  )}
-                  <td className="px-3 py-3" colSpan={2}></td>
+                  <td className="px-3 py-3 text-brun font-semibold text-sm whitespace-nowrap">{totMontant.toLocaleString('fr-MA')} MAD</td>
+                  <td className="px-3 py-3 font-semibold text-terra text-sm whitespace-nowrap">{Math.round(totCommission).toLocaleString('fr-MA')} MAD</td>
+                  <td className="px-3 py-3" colSpan={3}></td>
                 </tr>
               </tfoot>
             )}
