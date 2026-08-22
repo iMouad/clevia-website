@@ -468,7 +468,7 @@ export default function ProspectsPage() {
                             setAvancerMenu(prev => prev?.id === p.id ? null : { id: p.id, x: rect.right, y: rect.bottom + 4 })
                           }}
                         >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 18l6-6-6-6" /></svg>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M7 18l5-6-5-6" /><path d="M13 18l5-6-5-6" /></svg>
                         </button>
                       )}
                       {/* Créer bien */}
