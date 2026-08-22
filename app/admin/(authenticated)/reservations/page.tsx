@@ -23,6 +23,8 @@ type Reservation = {
   statut: string
   notes: string | null
   created_by: string | null
+  updated_by: string | null
+  updated_at: string | null
   created_at: string
   biens?: { nom: string } | null
 }
@@ -416,11 +418,11 @@ export default function ReservationsPage() {
       if (!ok) return
     }
     setSaving(true)
-    const { id, created_at, created_by, biens: _b, ...fields } = editing as any
+    const { id, created_at, created_by, updated_by: _ub, updated_at: _ua, biens: _b, ...fields } = editing as any
     const isNew = !editing.id
     if (editing.id) {
       const original = rows.find((r) => r.id === editing.id)
-      await supabase.from('reservations').update(fields).eq('id', editing.id)
+      await supabase.from('reservations').update({ ...fields, updated_by: userEmail, updated_at: new Date().toISOString() }).eq('id', editing.id)
       const changes: Record<string, { avant: any; apres: any }> = {}
       if (original) {
         for (const key of Object.keys(fields)) {
@@ -856,7 +858,8 @@ export default function ReservationsPage() {
                   { label: 'Montant', col: 'montant' },
                   { label: 'Commission', col: 'commission' },
                   { label: 'Statut', col: 'statut' },
-                  { label: 'Par', col: '' },
+                  { label: 'Créé par', col: '' },
+                  { label: 'Dernière modif.', col: '' },
                   { label: '', col: '' },
                 ].map(({ label, col }) => (
                   <th
@@ -871,9 +874,9 @@ export default function ReservationsPage() {
             </thead>
             <tbody className="divide-y divide-brun/5">
               {loading ? (
-                <tr><td colSpan={12} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
+                <tr><td colSpan={13} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
               ) : !filtered.length ? (
-                <tr><td colSpan={12} className="px-4 py-10 text-center text-brun-mid/50">Aucune réservation</td></tr>
+                <tr><td colSpan={13} className="px-4 py-10 text-center text-brun-mid/50">Aucune réservation</td></tr>
               ) : paginated.map((r) => (
                 <tr key={r.id} className={`transition-colors ${isCheckinDemain(r) ? 'bg-blue-50/60 border-l-2 border-l-blue-400' : isCheckoutDemain(r) ? 'bg-orange-50/60 border-l-2 border-l-orange-400' : isEnCours(r) ? 'bg-green-50/60 border-l-2 border-l-green-400' : 'hover:bg-creme/40'} ${selected.has(r.id) ? 'bg-terra/5' : ''}`}>
                   <td className="px-3 py-3">
@@ -909,6 +912,16 @@ export default function ReservationsPage() {
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUT_COLORS[r.statut]}`}>{STATUT_LABELS[r.statut] ?? r.statut}</span>
                   </td>
                   <td className="px-3 py-3 text-[10px] text-brun-mid/50 whitespace-nowrap">{r.created_by?.split('@')[0] ?? '—'}</td>
+                  <td className="px-3 py-3 whitespace-nowrap">
+                    {r.updated_at ? (
+                      <div>
+                        <span className="text-[10px] text-brun-mid/50">{format(new Date(r.updated_at), 'dd/MM/yy HH:mm')}</span>
+                        {r.updated_by && <span className="block text-[10px] text-brun-mid/40">par {r.updated_by.split('@')[0]}</span>}
+                      </div>
+                    ) : (
+                      <span className="text-[10px] text-brun-mid/30">—</span>
+                    )}
+                  </td>
                   <td className="px-3 py-3">
                     <div className="flex gap-2">
                       <button onClick={() => openEdit(r)} className="text-terra text-xs underline underline-offset-2">Modifier</button>
@@ -929,7 +942,7 @@ export default function ReservationsPage() {
                   <td className="px-3 py-3"></td>
                   <td className="px-3 py-3 text-brun font-semibold text-sm whitespace-nowrap">{totMontant.toLocaleString('fr-MA')} MAD</td>
                   <td className="px-3 py-3 font-semibold text-terra text-sm whitespace-nowrap">{Math.round(totCommission).toLocaleString('fr-MA')} MAD</td>
-                  <td className="px-3 py-3" colSpan={3}></td>
+                  <td className="px-3 py-3" colSpan={4}></td>
                 </tr>
               </tfoot>
             )}
