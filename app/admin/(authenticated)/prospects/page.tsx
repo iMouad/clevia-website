@@ -72,6 +72,7 @@ export default function ProspectsPage() {
   const [toast, setToast] = useState('')
   const [convertModalOpen, setConvertModalOpen] = useState(false)
   const [convertingProspect, setConvertingProspect] = useState<Prospect | null>(null)
+  const [avancerMenu, setAvancerMenu] = useState<{ id: string; x: number; y: number } | null>(null)
 
   async function fetchData() {
     const { data } = await supabase.from('prospects').select('*').order('created_at', { ascending: false })
@@ -212,7 +213,7 @@ export default function ProspectsPage() {
       )}
 
       {/* Pipeline visuel */}
-      <div className="grid grid-cols-5 gap-2 mb-6">
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-6">
         {STATUT_STEPS.filter(s => s.key !== 'perdu').map((s) => (
           <button
             key={s.key}
@@ -286,7 +287,20 @@ export default function ProspectsPage() {
                 {p.date_relance === today && ' (aujourd\'hui)'}
               </div>
             )}
-            <div className="flex gap-2 pt-3 border-t border-brun/8">
+            {p.statut !== 'signe' && p.statut !== 'perdu' && (
+              <div className="flex gap-1.5 flex-wrap pt-3 border-t border-brun/8 mb-2">
+                {STATUT_STEPS.filter(s => s.key !== p.statut && s.key !== 'perdu').map(s => (
+                  <button key={s.key} onClick={() => quickStatut(p.id, s.key)} className={`text-[11px] font-medium rounded-lg px-2.5 py-1.5 transition-all flex items-center gap-1 ${s.color}`} style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                    <div className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
+                    {s.label}
+                  </button>
+                ))}
+                <button onClick={() => quickStatut(p.id, 'perdu')} className="text-[11px] font-medium rounded-lg px-2.5 py-1.5 transition-all bg-red-50 text-red-400" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                  Perdu
+                </button>
+              </div>
+            )}
+            <div className={`flex gap-2 ${p.statut === 'signe' || p.statut === 'perdu' ? 'pt-3 border-t border-brun/8' : ''}`}>
               <button onClick={() => openEdit(p)} className="flex-1 flex items-center justify-center gap-1.5 bg-terra/10 text-terra text-sm font-medium rounded-xl py-2 hover:bg-terra/20 transition-all" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                 Modifier
               </button>
@@ -352,17 +366,15 @@ export default function ProspectsPage() {
                     <div className="flex gap-2">
                       <button onClick={() => openEdit(p)} className="text-terra text-xs underline underline-offset-2">Modifier</button>
                       {p.statut !== 'signe' && p.statut !== 'perdu' && (
-                        <div className="relative group">
-                          <button className="text-brun-mid/60 text-xs underline underline-offset-2">Avancer</button>
-                          <div className="hidden group-hover:block absolute right-0 top-full mt-1 bg-white border border-brun/15 rounded-xl shadow-lg z-20 py-1 min-w-[140px]">
-                            {STATUT_STEPS.filter(s => s.key !== p.statut).map(s => (
-                              <button key={s.key} onClick={() => quickStatut(p.id, s.key)} className="w-full text-left px-3 py-1.5 text-xs hover:bg-creme transition-colors flex items-center gap-2">
-                                <div className={`w-2 h-2 rounded-full ${s.dot}`} />
-                                {s.label}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
+                        <button
+                          className="text-brun-mid/60 text-xs underline underline-offset-2"
+                          onClick={(e) => {
+                            const rect = (e.target as HTMLElement).getBoundingClientRect()
+                            setAvancerMenu(prev => prev?.id === p.id ? null : { id: p.id, x: rect.right, y: rect.bottom + 4 })
+                          }}
+                        >
+                          Avancer
+                        </button>
                       )}
                       {p.statut === 'signe' && (
                         <button onClick={() => { setConvertingProspect(p); setConvertModalOpen(true) }} className="text-green-600 text-xs underline underline-offset-2">Créer bien</button>
@@ -376,6 +388,24 @@ export default function ProspectsPage() {
           </table>
         </div>
       </div>
+
+      {/* Menu Avancer (desktop) */}
+      {avancerMenu && (
+        <div className="fixed inset-0 z-40" onClick={() => setAvancerMenu(null)}>
+          <div
+            className="fixed bg-white border border-brun/15 rounded-xl shadow-lg py-1 min-w-[150px]"
+            style={{ top: avancerMenu.y, left: avancerMenu.x, transform: 'translateX(-100%)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {STATUT_STEPS.filter(s => s.key !== rows.find(r => r.id === avancerMenu.id)?.statut).map(s => (
+              <button key={s.key} onClick={() => { quickStatut(avancerMenu.id, s.key); setAvancerMenu(null) }} className="w-full text-left px-3 py-2 text-xs hover:bg-creme transition-colors flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${s.dot}`} />
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Modal ajout/édition */}
       <Modal open={modalOpen} onClose={() => closeModal()}>
