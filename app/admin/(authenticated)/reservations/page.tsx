@@ -818,7 +818,7 @@ export default function ReservationsPage() {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                 Modifier
               </button>
-              {canFacture(r) && (
+              {(
                 <button onClick={() => generateFacture(r as Reservation)} className="flex-1 flex items-center justify-center gap-1.5 bg-brun/5 text-brun-mid text-sm font-medium rounded-xl py-2 hover:bg-brun/10 transition-all" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="2" /><path d="M9 7h6M9 11h6M9 15h4" strokeLinecap="round" /></svg>
                   Facture
@@ -912,7 +912,7 @@ export default function ReservationsPage() {
                   <td className="px-3 py-3">
                     <div className="flex gap-2">
                       <button onClick={() => openEdit(r)} className="text-terra text-xs underline underline-offset-2">Modifier</button>
-                      {canFacture(r) && <button onClick={() => generateFacture(r)} className="text-brun-mid text-xs underline underline-offset-2">Facture</button>}
+                      {<button onClick={() => generateFacture(r)} className="text-brun-mid text-xs underline underline-offset-2">Facture</button>}
                       <button onClick={() => { setHistoriqueOpen(true); fetchHistorique(r.id) }} className="text-brun-mid/60 text-xs underline underline-offset-2">Histo.</button>
                       <button onClick={() => openDuplicate(r)} className="text-brun-mid text-xs underline underline-offset-2">Dupliquer</button>
                       <button onClick={() => handleDelete(r.id)} className="text-red-400 text-xs underline underline-offset-2">Suppr.</button>
@@ -1320,7 +1320,7 @@ export default function ReservationsPage() {
 
         <div className="p-5 border-t border-brun/10 flex items-center justify-between">
           <div className="flex gap-2">
-            {editing.id && canFacture(editing as Reservation) && (
+            {editing.id && (
               <button onClick={() => generateFacture(editing as Reservation)} className="flex items-center gap-1.5 border border-brun/20 text-brun-mid text-xs font-medium rounded-full px-3 py-2 hover:border-terra hover:text-terra transition-all">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="2" /><path d="M9 7h6M9 11h6M9 15h4" strokeLinecap="round" /></svg>
                 Facture PDF
