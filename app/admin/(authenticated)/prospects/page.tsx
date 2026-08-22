@@ -18,6 +18,7 @@ type Prospect = {
   statut: string
   source: string | null
   commission_proposee: number | null
+  date_premier_contact: string | null
   date_relance: string | null
   notes: string | null
   created_at: string
@@ -33,7 +34,7 @@ type Commentaire = {
 const EMPTY_PROSPECT: Partial<Prospect> = {
   nom: '', telephone: '', email: '', ville: '', adresse: '', type_bien: 'appartement',
   capacite: null, statut: 'premier_contact', source: null, commission_proposee: 20,
-  date_relance: null, notes: '',
+  date_premier_contact: new Date().toISOString().split('T')[0], date_relance: null, notes: '',
 }
 
 const STATUT_STEPS = [
@@ -238,9 +239,10 @@ export default function ProspectsPage() {
 
   function DaysInStatus({ p }: { p: Prospect }) {
     if (p.statut === 'signe' || p.statut === 'perdu') return null
-    const days = daysSince(p.created_at)
+    const ref = p.date_premier_contact ?? p.created_at
+    const days = daysSince(ref)
     const color = days > 30 ? 'text-red-500' : days > 14 ? 'text-orange-500' : 'text-brun-mid/40'
-    return <span className={`text-[10px] ${color}`} title="Jours dans le pipeline">{days}j</span>
+    return <span className={`text-[10px] ${color}`} title="Jours depuis le premier contact">{days}j</span>
   }
 
   return (
@@ -401,37 +403,43 @@ export default function ProspectsPage() {
           <table className="w-full text-sm">
             <thead className="bg-brun/4">
               <tr>
-                {['Nom', 'Téléphone', 'Ville / Adresse', 'Type', 'Source', 'Comm.', 'Statut', 'Ancienneté', 'Relance', ''].map((h) => (
+                {['Prospect', 'Téléphone', 'Bien', 'Source', 'Comm.', 'Statut', 'Relance', ''].map((h) => (
                   <th key={h || '_actions'} className="px-3 py-3 text-left text-xs text-brun-mid uppercase tracking-wide font-medium whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-brun/5">
               {loading ? (
-                <tr><td colSpan={10} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
+                <tr><td colSpan={8} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
               ) : !filtered.length ? (
-                <tr><td colSpan={10} className="px-4 py-10 text-center text-brun-mid/50">Aucun prospect</td></tr>
+                <tr><td colSpan={8} className="px-4 py-10 text-center text-brun-mid/50">Aucun prospect</td></tr>
               ) : filtered.map((p) => (
                 <tr key={p.id} className={`transition-colors ${isRelancePassee(p) ? 'bg-red-50/40' : isRelanceAujourdhui(p) ? 'bg-orange-50/40' : 'hover:bg-creme/40'}`}>
+                  {/* Prospect : nom + ancienneté */}
                   <td className="px-3 py-3">
-                    <span className="text-brun font-medium">{p.nom}</span>
-                    <span className="block text-[10px] text-brun-mid/40">{format(new Date(p.created_at), 'dd/MM/yy')}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-brun font-medium">{p.nom}</span>
+                      <DaysInStatus p={p} />
+                    </div>
+                    <span className="block text-[10px] text-brun-mid/40">
+                      {p.date_premier_contact
+                        ? format(new Date(p.date_premier_contact), 'dd/MM/yy')
+                        : format(new Date(p.created_at), 'dd/MM/yy')}
+                    </span>
                   </td>
-                  <td className="px-3 py-3 text-brun-mid">{p.telephone ?? '—'}</td>
+                  <td className="px-3 py-3 text-brun-mid text-xs">{p.telephone ?? '—'}</td>
+                  {/* Bien : ville/adresse + type */}
                   <td className="px-3 py-3 text-brun-mid">
-                    {p.ville ?? '—'}
+                    <span>{p.ville ?? '—'}</span>
+                    {p.type_bien && <span className="text-brun-mid/40"> · {p.type_bien}</span>}
                     {p.adresse && <span className="block text-[10px] text-brun-mid/40">{p.adresse}</span>}
                   </td>
-                  <td className="px-3 py-3 text-brun-mid capitalize">{p.type_bien ?? '—'}</td>
                   <td className="px-3 py-3 text-brun-mid/60 text-xs">{p.source ?? '—'}</td>
-                  <td className="px-3 py-3 text-brun-mid">{p.commission_proposee != null ? `${p.commission_proposee}%` : '—'}</td>
+                  <td className="px-3 py-3 text-brun-mid text-xs">{p.commission_proposee != null ? `${p.commission_proposee}%` : '—'}</td>
                   <td className="px-3 py-3">
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUT_MAP[p.statut]?.color ?? 'bg-gray-100 text-gray-600'}`}>
                       {STATUT_MAP[p.statut]?.label ?? p.statut}
                     </span>
-                  </td>
-                  <td className="px-3 py-3 whitespace-nowrap">
-                    <DaysInStatus p={p} />
                   </td>
                   <td className="px-3 py-3 whitespace-nowrap">
                     {p.date_relance && p.statut !== 'signe' && p.statut !== 'perdu' ? (
@@ -443,24 +451,36 @@ export default function ProspectsPage() {
                       <span className="text-brun-mid/30">—</span>
                     )}
                   </td>
+                  {/* Actions icônes */}
                   <td className="px-3 py-3">
-                    <div className="flex gap-2">
-                      <button onClick={() => openEdit(p)} className="text-terra text-xs underline underline-offset-2">Modifier</button>
+                    <div className="flex items-center gap-1">
+                      {/* Modifier */}
+                      <button onClick={() => openEdit(p)} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-terra/10 text-terra transition-colors" title="Modifier">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                      </button>
+                      {/* Avancer */}
                       {p.statut !== 'signe' && p.statut !== 'perdu' && (
                         <button
-                          className="text-brun-mid/60 text-xs underline underline-offset-2"
+                          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-blue-50 text-brun-mid/60 transition-colors"
+                          title="Avancer"
                           onClick={(e) => {
-                            const rect = (e.target as HTMLElement).getBoundingClientRect()
+                            const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
                             setAvancerMenu(prev => prev?.id === p.id ? null : { id: p.id, x: rect.right, y: rect.bottom + 4 })
                           }}
                         >
-                          Avancer
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 18l6-6-6-6" /></svg>
                         </button>
                       )}
+                      {/* Créer bien */}
                       {p.statut === 'signe' && (
-                        <button onClick={() => { setConvertingProspect(p); setConvertModalOpen(true) }} className="text-green-600 text-xs underline underline-offset-2">Créer bien</button>
+                        <button onClick={() => { setConvertingProspect(p); setConvertModalOpen(true) }} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-green-50 text-green-600 transition-colors" title="Créer le bien">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
+                        </button>
                       )}
-                      <button onClick={() => handleDelete(p.id)} className="text-red-400 text-xs underline underline-offset-2">Suppr.</button>
+                      {/* Supprimer */}
+                      <button onClick={() => handleDelete(p.id)} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 text-red-400 transition-colors" title="Supprimer">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" /></svg>
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -620,9 +640,15 @@ export default function ProspectsPage() {
                 <input type="number" min={0} max={100} step={0.5} className={inputClass} value={editing.commission_proposee ?? ''} onChange={(e) => setEditing(p => ({ ...p, commission_proposee: e.target.value === '' ? null : Number(e.target.value) }))} placeholder="%" />
               </div>
             </div>
-            <div className="mt-3">
-              <label className={labelClass}>Date de relance</label>
-              <input type="date" className={inputClass} value={editing.date_relance ?? ''} onChange={(e) => setEditing(p => ({ ...p, date_relance: e.target.value || null }))} />
+            <div className="grid grid-cols-2 gap-3 mt-3">
+              <div>
+                <label className={labelClass}>Premier contact</label>
+                <input type="date" className={inputClass} value={editing.date_premier_contact ?? ''} onChange={(e) => setEditing(p => ({ ...p, date_premier_contact: e.target.value || null }))} />
+              </div>
+              <div>
+                <label className={labelClass}>Date de relance</label>
+                <input type="date" className={inputClass} value={editing.date_relance ?? ''} onChange={(e) => setEditing(p => ({ ...p, date_relance: e.target.value || null }))} />
+              </div>
             </div>
           </div>
 
