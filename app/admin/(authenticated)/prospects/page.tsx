@@ -23,6 +23,13 @@ type Prospect = {
   created_at: string
 }
 
+type Commentaire = {
+  id: string
+  contenu: string
+  auteur_email: string | null
+  created_at: string
+}
+
 const EMPTY_PROSPECT: Partial<Prospect> = {
   nom: '', telephone: '', email: '', ville: '', adresse: '', type_bien: 'appartement',
   capacite: null, statut: 'premier_contact', source: null, commission_proposee: 20,
@@ -43,6 +50,10 @@ const STATUT_MAP = Object.fromEntries(STATUT_STEPS.map(s => [s.key, s]))
 const SOURCES = ['Bouche à oreille', 'Facebook', 'Instagram', 'Avito', 'Terrain', 'Site web', 'Autre']
 const VILLES = ['Mansouria', 'Mohammedia', 'Benslimane', 'Bouznika', 'Autre']
 const TYPES_BIEN = ['Appartement', 'Villa', 'Maison', 'Riad', 'Studio', 'Duplex', 'Autre']
+
+function daysSince(dateStr: string) {
+  return Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000)
+}
 
 function Modal({ open, onClose, children }: { open: boolean; onClose: () => void; children: React.ReactNode }) {
   useEffect(() => {
@@ -68,11 +79,16 @@ export default function ProspectsPage() {
   const [initialEditing, setInitialEditing] = useState('')
   const [saving, setSaving] = useState(false)
   const [filterStatut, setFilterStatut] = useState('')
+  const [filterSource, setFilterSource] = useState('')
   const [search, setSearch] = useState('')
   const [toast, setToast] = useState('')
   const [convertModalOpen, setConvertModalOpen] = useState(false)
   const [convertingProspect, setConvertingProspect] = useState<Prospect | null>(null)
   const [avancerMenu, setAvancerMenu] = useState<{ id: string; x: number; y: number } | null>(null)
+  const [userEmail, setUserEmail] = useState('')
+  const [commentaires, setCommentaires] = useState<Commentaire[]>([])
+  const [newComment, setNewComment] = useState('')
+  const [savingComment, setSavingComment] = useState(false)
 
   async function fetchData() {
     const { data } = await supabase.from('prospects').select('*').order('created_at', { ascending: false })
@@ -80,7 +96,12 @@ export default function ProspectsPage() {
     setLoading(false)
   }
 
-  useEffect(() => { fetchData() }, [])
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUserEmail(user?.email ?? '')
+    })
+    fetchData()
+  }, [])
 
   const today = new Date().toISOString().split('T')[0]
 
@@ -91,8 +112,25 @@ export default function ProspectsPage() {
     return p.date_relance === today && p.statut !== 'signe' && p.statut !== 'perdu'
   }
 
+  function sortByRelance(a: Prospect, b: Prospect): number {
+    const aActive = a.statut !== 'signe' && a.statut !== 'perdu'
+    const bActive = b.statut !== 'signe' && b.statut !== 'perdu'
+    if (aActive && bActive) {
+      const aRelance = a.date_relance ?? '9999'
+      const bRelance = b.date_relance ?? '9999'
+      const aOverdue = a.date_relance && a.date_relance < today ? 0 : a.date_relance === today ? 1 : 2
+      const bOverdue = b.date_relance && b.date_relance < today ? 0 : b.date_relance === today ? 1 : 2
+      if (aOverdue !== bOverdue) return aOverdue - bOverdue
+      if (aRelance !== bRelance) return aRelance < bRelance ? -1 : 1
+    }
+    if (aActive && !bActive) return -1
+    if (!aActive && bActive) return 1
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  }
+
   const filtered = rows.filter((p) => {
     if (filterStatut && p.statut !== filterStatut) return false
+    if (filterSource && p.source !== filterSource) return false
     if (search) {
       const q = search.toLowerCase()
       const match = p.nom.toLowerCase().includes(q)
@@ -102,25 +140,47 @@ export default function ProspectsPage() {
       if (!match) return false
     }
     return true
-  })
+  }).sort(sortByRelance)
 
   const relancesAujourdhui = rows.filter(isRelanceAujourdhui).length
   const relancesEnRetard = rows.filter(p => p.date_relance && p.date_relance < today && p.statut !== 'signe' && p.statut !== 'perdu').length
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(''), 3000) }
 
+  async function fetchCommentaires(prospectId: string) {
+    const { data } = await supabase.from('commentaires_prospects').select('*').eq('prospect_id', prospectId).order('created_at', { ascending: true })
+    setCommentaires(data ?? [])
+  }
+
+  async function addComment() {
+    if (!newComment.trim() || !editing.id) return
+    setSavingComment(true)
+    await supabase.from('commentaires_prospects').insert({ prospect_id: editing.id, contenu: newComment.trim(), auteur_email: userEmail })
+    setNewComment('')
+    await fetchCommentaires(editing.id)
+    setSavingComment(false)
+  }
+
+  async function deleteComment(commentId: string) {
+    if (!editing.id) return
+    await supabase.from('commentaires_prospects').delete().eq('id', commentId)
+    await fetchCommentaires(editing.id)
+  }
+
   function openModal(data: Partial<Prospect>) {
     setEditing(data)
     setInitialEditing(JSON.stringify(data))
+    setCommentaires([])
+    setNewComment('')
     setModalOpen(true)
   }
   function openAdd() { openModal({ ...EMPTY_PROSPECT }) }
-  function openEdit(p: Prospect) { openModal({ ...p }) }
+  function openEdit(p: Prospect) { openModal({ ...p }); fetchCommentaires(p.id) }
   function closeModal(force = false) {
     if (!force && JSON.stringify(editing) !== initialEditing) {
       if (!confirm('Des modifications non sauvegardées seront perdues. Fermer quand même ?')) return
     }
-    setModalOpen(false); setEditing(EMPTY_PROSPECT)
+    setModalOpen(false); setEditing(EMPTY_PROSPECT); setCommentaires([]); setNewComment('')
   }
 
   async function handleSave() {
@@ -171,8 +231,17 @@ export default function ProspectsPage() {
     return acc
   }, {})
 
+  const sourcesActives = [...new Set(rows.map(r => r.source).filter(Boolean))] as string[]
+
   const inputClass = 'w-full border border-brun/20 rounded-xl px-3 py-2.5 text-sm text-brun focus:outline-none focus:border-terra focus:ring-1 focus:ring-terra transition-colors'
   const labelClass = 'block text-xs font-medium text-brun-mid mb-1.5 uppercase tracking-wide'
+
+  function DaysInStatus({ p }: { p: Prospect }) {
+    if (p.statut === 'signe' || p.statut === 'perdu') return null
+    const days = daysSince(p.created_at)
+    const color = days > 30 ? 'text-red-500' : days > 14 ? 'text-orange-500' : 'text-brun-mid/40'
+    return <span className={`text-[10px] ${color}`} title="Jours dans le pipeline">{days}j</span>
+  }
 
   return (
     <div>
@@ -246,9 +315,15 @@ export default function ProspectsPage() {
             {s.label}
           </button>
         ))}
-        {(filterStatut || search) && (
+        {sourcesActives.length > 0 && (
+          <AdminSelect className="!py-2 !px-3 !w-auto !min-w-[130px]" value={filterSource} onChange={(e) => setFilterSource(e.target.value)}>
+            <option value="">Toutes sources</option>
+            {sourcesActives.map(s => <option key={s}>{s}</option>)}
+          </AdminSelect>
+        )}
+        {(filterStatut || filterSource || search) && (
           <button
-            onClick={() => { setFilterStatut(''); setSearch('') }}
+            onClick={() => { setFilterStatut(''); setFilterSource(''); setSearch('') }}
             className="text-xs text-terra hover:text-brun transition-colors self-center underline underline-offset-2"
           >
             Réinitialiser
@@ -267,7 +342,10 @@ export default function ProspectsPage() {
           <div key={p.id} className={`rounded-2xl border p-4 ${isRelancePassee(p) ? 'bg-red-50/60 border-red-300' : isRelanceAujourdhui(p) ? 'bg-orange-50/60 border-orange-300' : 'bg-white border-brun/10'}`}>
             <div className="flex items-center justify-between gap-2 mb-2">
               <div>
-                <p className="font-medium text-brun text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>{p.nom}</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-brun text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>{p.nom}</p>
+                  <DaysInStatus p={p} />
+                </div>
                 {p.ville && <p className="text-xs text-brun-mid/60 mt-0.5" style={{ fontFamily: 'var(--font-dm-sans)' }}>{p.ville}{p.adresse ? ` — ${p.adresse}` : ''}</p>}
               </div>
               <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${STATUT_MAP[p.statut]?.color ?? 'bg-gray-100 text-gray-600'}`}>
@@ -323,16 +401,16 @@ export default function ProspectsPage() {
           <table className="w-full text-sm">
             <thead className="bg-brun/4">
               <tr>
-                {['Nom', 'Téléphone', 'Ville / Adresse', 'Type', 'Source', 'Commission', 'Statut', 'Relance', ''].map((h) => (
+                {['Nom', 'Téléphone', 'Ville / Adresse', 'Type', 'Source', 'Comm.', 'Statut', 'Ancienneté', 'Relance', ''].map((h) => (
                   <th key={h || '_actions'} className="px-3 py-3 text-left text-xs text-brun-mid uppercase tracking-wide font-medium whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-brun/5">
               {loading ? (
-                <tr><td colSpan={9} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
+                <tr><td colSpan={10} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
               ) : !filtered.length ? (
-                <tr><td colSpan={9} className="px-4 py-10 text-center text-brun-mid/50">Aucun prospect</td></tr>
+                <tr><td colSpan={10} className="px-4 py-10 text-center text-brun-mid/50">Aucun prospect</td></tr>
               ) : filtered.map((p) => (
                 <tr key={p.id} className={`transition-colors ${isRelancePassee(p) ? 'bg-red-50/40' : isRelanceAujourdhui(p) ? 'bg-orange-50/40' : 'hover:bg-creme/40'}`}>
                   <td className="px-3 py-3">
@@ -351,6 +429,9 @@ export default function ProspectsPage() {
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUT_MAP[p.statut]?.color ?? 'bg-gray-100 text-gray-600'}`}>
                       {STATUT_MAP[p.statut]?.label ?? p.statut}
                     </span>
+                  </td>
+                  <td className="px-3 py-3 whitespace-nowrap">
+                    <DaysInStatus p={p} />
                   </td>
                   <td className="px-3 py-3 whitespace-nowrap">
                     {p.date_relance && p.statut !== 'signe' && p.statut !== 'perdu' ? (
@@ -545,11 +626,51 @@ export default function ProspectsPage() {
             </div>
           </div>
 
-          {/* Notes */}
+          {/* Notes rapides */}
           <div className="border-t border-brun/8 pt-4">
             <label className={labelClass}>Notes</label>
-            <textarea className={`${inputClass} resize-none`} rows={3} value={editing.notes ?? ''} onChange={(e) => setEditing(p => ({ ...p, notes: e.target.value }))} placeholder="Historique des échanges, observations sur le bien..." />
+            <textarea className={`${inputClass} resize-none`} rows={2} value={editing.notes ?? ''} onChange={(e) => setEditing(p => ({ ...p, notes: e.target.value }))} placeholder="Info générale sur le prospect..." />
           </div>
+
+          {/* Commentaires horodatés */}
+          {editing.id && (
+            <div className="border-t border-brun/10 pt-4 mt-4">
+              <label className={labelClass}>Historique des échanges</label>
+              {commentaires.length > 0 && (
+                <div className="flex flex-col gap-2 mb-3 max-h-48 overflow-y-auto">
+                  {commentaires.map((c) => (
+                    <div key={c.id} className="bg-creme/60 rounded-xl px-3 py-2 group relative">
+                      <p className="text-xs text-brun" style={{ fontFamily: 'var(--font-dm-sans)' }}>{c.contenu}</p>
+                      <div className="flex items-center justify-between mt-1">
+                        <p className="text-[10px] text-brun-mid/40">
+                          {c.auteur_email?.split('@')[0] ?? '—'} · {format(new Date(c.created_at), 'dd/MM/yy HH:mm')}
+                        </p>
+                        <button onClick={() => deleteComment(c.id)} className="text-[10px] text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                          supprimer
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="flex gap-2">
+                <input
+                  className={inputClass + ' flex-1'}
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Appelé le..., il hésite sur..., visite prévue..."
+                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addComment() } }}
+                />
+                <button
+                  onClick={addComment}
+                  disabled={savingComment || !newComment.trim()}
+                  className="bg-terra text-creme text-xs font-medium rounded-xl px-3 py-2 hover:bg-brun transition-all disabled:opacity-40"
+                >
+                  {savingComment ? '…' : 'Ajouter'}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="p-5 border-t border-brun/10 flex items-center justify-end gap-3">
