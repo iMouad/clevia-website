@@ -851,15 +851,13 @@ export default function ReservationsPage() {
                 {[
                   { label: 'Voyageur', col: 'voyageur_nom' },
                   { label: 'Bien', col: 'bien' },
-                  { label: 'Arrivée', col: 'date_arrivee' },
-                  { label: 'Départ', col: 'date_depart' },
+                  { label: 'Séjour', col: 'date_arrivee' },
                   { label: 'Nuits', col: 'nuits' },
-                  { label: 'Plateforme', col: 'plateforme' },
+                  { label: 'Platef.', col: 'plateforme' },
                   { label: 'Montant', col: 'montant' },
-                  { label: 'Commission', col: 'commission' },
+                  { label: 'Comm.', col: 'commission' },
                   { label: 'Statut', col: 'statut' },
-                  { label: 'Créé par', col: '' },
-                  { label: 'Dernière modif.', col: '' },
+                  { label: 'Suivi', col: '' },
                   { label: '', col: '' },
                 ].map(({ label, col }) => (
                   <th
@@ -874,9 +872,9 @@ export default function ReservationsPage() {
             </thead>
             <tbody className="divide-y divide-brun/5">
               {loading ? (
-                <tr><td colSpan={13} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
+                <tr><td colSpan={11} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
               ) : !filtered.length ? (
-                <tr><td colSpan={13} className="px-4 py-10 text-center text-brun-mid/50">Aucune réservation</td></tr>
+                <tr><td colSpan={11} className="px-4 py-10 text-center text-brun-mid/50">Aucune réservation</td></tr>
               ) : paginated.map((r) => (
                 <tr key={r.id} className={`transition-colors ${isCheckinDemain(r) ? 'bg-blue-50/60 border-l-2 border-l-blue-400' : isCheckoutDemain(r) ? 'bg-orange-50/60 border-l-2 border-l-orange-400' : isEnCours(r) ? 'bg-green-50/60 border-l-2 border-l-green-400' : 'hover:bg-creme/40'} ${selected.has(r.id) ? 'bg-terra/5' : ''}`}>
                   <td className="px-3 py-3">
@@ -891,35 +889,31 @@ export default function ReservationsPage() {
                     </div>
                     {r.intermediaire && <span className="block text-[10px] text-brun-mid/50">via {r.intermediaire}</span>}
                   </td>
-                  <td className="px-3 py-3 text-brun-mid">{(r as any).biens?.nom ?? '—'}</td>
-                  <td className="px-3 py-3 text-brun-mid whitespace-nowrap">{format(new Date(r.date_arrivee), 'dd/MM/yy')}</td>
-                  <td className="px-3 py-3 text-brun-mid whitespace-nowrap">{format(new Date(r.date_depart), 'dd/MM/yy')}</td>
+                  <td className="px-3 py-3 text-brun-mid text-xs">{(r as any).biens?.nom ?? '—'}</td>
+                  <td className="px-3 py-3 text-brun-mid whitespace-nowrap text-xs">{format(new Date(r.date_arrivee), 'dd/MM')} → {format(new Date(r.date_depart), 'dd/MM')}</td>
                   <td className="px-3 py-3 text-center text-brun-mid">{nuits(r.date_arrivee, r.date_depart)}</td>
                   <td className="px-3 py-3">
-                    <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: platBg(platColorMap[r.plateforme ?? ''] ?? '#6B4C35'), color: platColorMap[r.plateforme ?? ''] ?? '#6B4C35' }}>
+                    <span className="text-[11px] px-1.5 py-0.5 rounded-full font-medium" style={{ backgroundColor: platBg(platColorMap[r.plateforme ?? ''] ?? '#6B4C35'), color: platColorMap[r.plateforme ?? ''] ?? '#6B4C35' }}>
                       {r.plateforme ?? '—'}
                     </span>
                   </td>
-                  <td className="px-3 py-3 text-brun-mid whitespace-nowrap">{r.montant ? `${r.montant} MAD` : '—'}</td>
-                  <td className="px-3 py-3 font-medium text-terra whitespace-nowrap">
+                  <td className="px-3 py-3 text-brun-mid whitespace-nowrap text-xs">{r.montant ?? '—'}</td>
+                  <td className="px-3 py-3 font-medium text-terra whitespace-nowrap text-xs">
                     {r.montant
                       ? calcCommission(r) === 0
-                        ? <span className="text-brun-mid/40 font-normal text-xs">Sans</span>
-                        : `${calcCommission(r).toFixed(0)} MAD`
+                        ? <span className="text-brun-mid/40 font-normal text-[11px]">—</span>
+                        : calcCommission(r).toFixed(0)
                       : '—'}
                   </td>
                   <td className="px-3 py-3">
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUT_COLORS[r.statut]}`}>{STATUT_LABELS[r.statut] ?? r.statut}</span>
+                    <span className={`text-[11px] font-medium px-1.5 py-0.5 rounded-full ${STATUT_COLORS[r.statut]}`}>{STATUT_LABELS[r.statut] ?? r.statut}</span>
                   </td>
-                  <td className="px-3 py-3 text-[10px] text-brun-mid/50 whitespace-nowrap">{r.created_by?.split('@')[0] ?? '—'}</td>
                   <td className="px-3 py-3 whitespace-nowrap">
-                    {r.updated_at ? (
-                      <div>
-                        <span className="text-[10px] text-brun-mid/50">{format(new Date(r.updated_at), 'dd/MM/yy HH:mm')}</span>
-                        {r.updated_by && <span className="block text-[10px] text-brun-mid/40">par {r.updated_by.split('@')[0]}</span>}
-                      </div>
-                    ) : (
-                      <span className="text-[10px] text-brun-mid/30">—</span>
+                    <span className="text-[10px] text-brun-mid/50">{r.created_by?.split('@')[0] ?? '—'}</span>
+                    {r.updated_at && (
+                      <span className="block text-[10px] text-brun-mid/40" title={`Modifié le ${format(new Date(r.updated_at), 'dd/MM/yy HH:mm')} par ${r.updated_by?.split('@')[0] ?? '—'}`}>
+                        ✎ {r.updated_by?.split('@')[0] ?? '—'} · {format(new Date(r.updated_at), 'dd/MM HH:mm')}
+                      </span>
                     )}
                   </td>
                   <td className="px-3 py-3">
@@ -947,12 +941,12 @@ export default function ReservationsPage() {
             {filtered.length > 0 && (
               <tfoot className="bg-brun/4 border-t-2 border-brun/15">
                 <tr>
-                  <td className="px-3 py-3 text-brun font-semibold text-sm" colSpan={5}>Total ({filtered.length} résa{filtered.length > 1 ? 's' : ''})</td>
+                  <td className="px-3 py-3 text-brun font-semibold text-sm" colSpan={4}>Total ({filtered.length} résa{filtered.length > 1 ? 's' : ''})</td>
                   <td className="px-3 py-3 text-center text-brun font-semibold text-sm">{totNuits}</td>
                   <td className="px-3 py-3"></td>
-                  <td className="px-3 py-3 text-brun font-semibold text-sm whitespace-nowrap">{totMontant.toLocaleString('fr-MA')} MAD</td>
-                  <td className="px-3 py-3 font-semibold text-terra text-sm whitespace-nowrap">{Math.round(totCommission).toLocaleString('fr-MA')} MAD</td>
-                  <td className="px-3 py-3" colSpan={4}></td>
+                  <td className="px-3 py-3 text-brun font-semibold text-sm whitespace-nowrap">{totMontant.toLocaleString('fr-MA')}</td>
+                  <td className="px-3 py-3 font-semibold text-terra text-sm whitespace-nowrap">{Math.round(totCommission).toLocaleString('fr-MA')}</td>
+                  <td className="px-3 py-3" colSpan={3}></td>
                 </tr>
               </tfoot>
             )}
