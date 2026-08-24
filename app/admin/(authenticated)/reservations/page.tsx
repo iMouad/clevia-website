@@ -115,6 +115,8 @@ export default function ReservationsPage() {
   const [voyageurQuery, setVoyageurQuery] = useState('')
   const [voyageurDropdownOpen, setVoyageurDropdownOpen] = useState(false)
   const [selectedVoyageur, setSelectedVoyageur] = useState<VoyageurOption | null>(null)
+  const [voyageurHistory, setVoyageurHistory] = useState<{ id: string; date_arrivee: string; date_depart: string; plateforme: string | null; montant: number | null; statut: string; biens?: { nom: string } | null }[]>([])
+  const [voyageurHistoryLoading, setVoyageurHistoryLoading] = useState(false)
   const [prixNuit, setPrixNuit] = useState<number | null>(null)
   const voyageurRef = useRef<HTMLDivElement>(null)
 
@@ -228,6 +230,19 @@ export default function ReservationsPage() {
 
   const sortIcon = (col: string) => sortCol === col ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ''
 
+  async function fetchVoyageurHistory(phone: string | null, nom: string, currentId?: string) {
+    setVoyageurHistoryLoading(true)
+    let query = supabase.from('reservations').select('id,date_arrivee,date_depart,plateforme,montant,statut,biens(nom)').order('date_arrivee', { ascending: false })
+    if (phone) {
+      query = query.eq('voyageur_phone', phone)
+    } else {
+      query = query.eq('voyageur_nom', nom)
+    }
+    const { data } = await query
+    setVoyageurHistory(((data ?? []) as any[]).filter(r => r.id !== currentId))
+    setVoyageurHistoryLoading(false)
+  }
+
   function openModal(data: Partial<Reservation>) {
     setEditing(data)
     setInitialEditing(JSON.stringify(data))
@@ -239,10 +254,15 @@ export default function ReservationsPage() {
     setSelectedVoyageur(match)
     const n = nuits(data.date_arrivee ?? '', data.date_depart ?? '')
     setPrixNuit(data.montant != null && n > 0 ? Math.round((data.montant / n) * 100) / 100 : null)
+    setVoyageurHistory([])
     setModalOpen(true)
   }
   function openAdd() { openModal({ ...EMPTY_RES, bien_id: biens.find((b) => b.disponible !== false)?.id ?? null }) }
-  function openEdit(r: Reservation) { openModal({ ...r }); fetchCommentaires(r.id) }
+  function openEdit(r: Reservation) {
+    openModal({ ...r })
+    fetchCommentaires(r.id)
+    fetchVoyageurHistory(r.voyageur_phone, r.voyageur_nom, r.id)
+  }
   function openDuplicate(r: Reservation) {
     const { id, created_at, statut, ...rest } = r as any
     openModal({ ...rest, id: undefined, created_at: undefined, statut: 'confirmee', date_arrivee: '', date_depart: '', notes: '' })
@@ -1236,6 +1256,43 @@ export default function ReservationsPage() {
               <textarea className={`${inputClass} resize-none`} rows={2} value={editing.notes ?? ''} onChange={(e) => setEditing((p) => ({ ...p, notes: e.target.value }))} placeholder="Remarques éventuelles..." />
             </div>
           </div>
+
+          {/* Historique voyageur */}
+          {editing.id && voyageurHistory.length > 0 && (
+            <div className="border-t border-brun/8 pt-4">
+              <p className="text-[10px] uppercase tracking-widest text-brun-mid/40 font-medium mb-3 flex items-center gap-1.5">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
+                Séjours précédents ({voyageurHistory.length})
+              </p>
+              <div className="flex flex-col gap-1.5 max-h-36 overflow-y-auto">
+                {voyageurHistory.map((h) => {
+                  const n = nuits(h.date_arrivee, h.date_depart)
+                  const statutColor = h.statut === 'confirmee' ? 'text-green-600' : h.statut === 'annulee' ? 'text-red-500' : 'text-brun-mid/50'
+                  return (
+                    <div key={h.id} className="flex items-center justify-between bg-creme/50 rounded-lg px-3 py-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-xs text-brun font-medium">{format(new Date(h.date_arrivee), 'dd/MM/yy')}</span>
+                        <span className="text-brun-mid/30">→</span>
+                        <span className="text-xs text-brun font-medium">{format(new Date(h.date_depart), 'dd/MM/yy')}</span>
+                        <span className="text-[10px] text-brun-mid/50">{n}n</span>
+                        {(h as any).biens?.nom && <span className="text-[10px] text-brun-mid/40 truncate">· {(h as any).biens.nom}</span>}
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {h.plateforme && <span className="text-[10px] text-brun-mid/50">{h.plateforme}</span>}
+                        {h.montant != null && <span className="text-[10px] text-terra font-medium">{h.montant.toLocaleString('fr-MA')} MAD</span>}
+                        <span className={`text-[10px] font-medium ${statutColor}`}>{STATUT_LABELS[h.statut] ?? h.statut}</span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+          {editing.id && voyageurHistoryLoading && (
+            <div className="border-t border-brun/8 pt-4">
+              <p className="text-xs text-brun-mid/40 text-center py-2">Chargement historique…</p>
+            </div>
+          )}
 
           {editing.id && (
             <div className="border-t border-brun/10 pt-4">

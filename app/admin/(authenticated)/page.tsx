@@ -78,7 +78,7 @@ export default function AdminDashboard() {
       supabase.from('reservations').select('voyageur_nom, date_arrivee, date_depart, plateforme, bien_id, biens(nom)').eq('date_depart', demainStr).in('statut', ['confirmee', 'terminee']),
       supabase.from('reservations').select('voyageur_nom, date_arrivee, date_depart, plateforme, bien_id, biens(nom)').eq('date_arrivee', demainStr).in('statut', ['confirmee']),
       supabase.from('plateformes').select('*').eq('actif', true).order('ordre'),
-      supabase.from('prospects').select('id,nom,statut,date_relance,source,ville').neq('statut', 'perdu'),
+      supabase.from('prospects').select('id,nom,statut,date_relance,source,ville,created_at'),
     ]).then(([
       { data: { user } },
       { data: biensData, count: biensCount },
@@ -336,10 +336,17 @@ export default function AdminDashboard() {
             const stages = ['premier_contact', 'visite_planifiee', 'visite_faite', 'negociation', 'signe']
             const counts: Record<string, number> = {}
             stages.forEach(s => { counts[s] = prospectsData.filter(p => p.statut === s).length })
-            const total = prospectsData.length
+            const actifs = prospectsData.filter(p => p.statut !== 'perdu')
+            const total = actifs.length
+            const perdus = prospectsData.filter(p => p.statut === 'perdu').length
+            const signes = counts['signe'] ?? 0
+            const totalTraites = signes + perdus
+            const tauxConversion = totalTraites > 0 ? Math.round((signes / totalTraites) * 100) : null
             const today = new Date().toISOString().split('T')[0]
-            const enRetard = prospectsData.filter(p => p.date_relance && p.date_relance < today && p.statut !== 'signe')
-            const relanceAujourdhui = prospectsData.filter(p => p.date_relance === today && p.statut !== 'signe')
+            const enRetard = actifs.filter(p => p.date_relance && p.date_relance < today && p.statut !== 'signe')
+            const relanceAujourdhui = actifs.filter(p => p.date_relance === today && p.statut !== 'signe')
+            const thisMonth = now.toISOString().slice(0, 7)
+            const nouveauxCeMois = prospectsData.filter(p => p.created_at?.startsWith(thisMonth)).length
 
             return (
               <div className="bg-white rounded-2xl border border-brun/10 overflow-hidden mb-6">
@@ -354,29 +361,62 @@ export default function AdminDashboard() {
                   </a>
                 </div>
                 <div className="px-6 py-5">
-                  {/* Barre de pipeline */}
-                  <div className="flex gap-1 mb-4 h-3 rounded-full overflow-hidden bg-brun/5">
-                    {stages.map(s => counts[s] > 0 && (
-                      <div
-                        key={s}
-                        className="h-full transition-all duration-500"
-                        style={{
-                          width: `${(counts[s] / total) * 100}%`,
-                          backgroundColor: stageColors[s],
-                        }}
-                        title={`${stageLabels[s]}: ${counts[s]}`}
-                      />
-                    ))}
+                  {/* KPI rapides */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+                    <div className="text-center">
+                      <p className="text-2xl text-brun" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300 }}>{total}</p>
+                      <p className="text-[10px] text-brun-mid/50 uppercase tracking-wide">Actifs</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl text-green-600" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300 }}>{signes}</p>
+                      <p className="text-[10px] text-brun-mid/50 uppercase tracking-wide">Signés</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl text-terra" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300 }}>
+                        {tauxConversion != null ? `${tauxConversion}%` : '—'}
+                      </p>
+                      <p className="text-[10px] text-brun-mid/50 uppercase tracking-wide">Taux conversion</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl text-brun-mid" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300 }}>
+                        {nouveauxCeMois}
+                      </p>
+                      <p className="text-[10px] text-brun-mid/50 uppercase tracking-wide">Nouveaux ce mois</p>
+                    </div>
                   </div>
-                  {/* Compteurs par étape */}
-                  <div className="flex flex-wrap gap-3 mb-4">
-                    {stages.map(s => (
-                      <div key={s} className="flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: stageColors[s] }} />
-                        <span className="text-xs text-brun-mid">{stageLabels[s]}</span>
-                        <span className="text-xs font-semibold text-brun">{counts[s]}</span>
+                  {/* Funnel visuel */}
+                  <div className="flex flex-col gap-1.5 mb-4">
+                    {stages.map((s, i) => {
+                      const count = counts[s]
+                      const maxCount = Math.max(...stages.map(st => counts[st] || 0), 1)
+                      const pct = Math.max((count / maxCount) * 100, 8)
+                      return (
+                        <div key={s} className="flex items-center gap-2">
+                          <span className="text-[10px] text-brun-mid/50 w-20 text-right truncate">{stageLabels[s]}</span>
+                          <div className="flex-1 h-5 relative">
+                            <div
+                              className="h-full rounded-r-md flex items-center transition-all duration-500"
+                              style={{ width: `${pct}%`, backgroundColor: stageColors[s] }}
+                            >
+                              <span className="text-[10px] font-semibold text-white px-2">{count}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                    {perdus > 0 && (
+                      <div className="flex items-center gap-2 opacity-50">
+                        <span className="text-[10px] text-brun-mid/50 w-20 text-right">Perdus</span>
+                        <div className="flex-1 h-5 relative">
+                          <div
+                            className="h-full rounded-r-md flex items-center"
+                            style={{ width: `${Math.max((perdus / Math.max(...stages.map(st => counts[st] || 0), 1)) * 100, 8)}%`, backgroundColor: '#ef4444' }}
+                          >
+                            <span className="text-[10px] font-semibold text-white px-2">{perdus}</span>
+                          </div>
+                        </div>
                       </div>
-                    ))}
+                    )}
                   </div>
                   {/* Alertes relance */}
                   {(enRetard.length > 0 || relanceAujourdhui.length > 0) && (
