@@ -38,13 +38,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     )
     const { data: biens } = await supabase
       .from('biens')
-      .select('id, updated_at')
+      .select('id, slug, updated_at')
       .eq('statut', 'actif')
 
     for (const bien of biens ?? []) {
+      const identifier = bien.slug || bien.id
       for (const locale of LOCALES) {
         entries.push({
-          url: `${BASE_URL}/${locale}/biens/${bien.id}`,
+          url: `${BASE_URL}/${locale}/biens/${identifier}`,
           lastModified: bien.updated_at ? new Date(bien.updated_at) : new Date(),
           changeFrequency: 'weekly',
           priority: 0.8,
