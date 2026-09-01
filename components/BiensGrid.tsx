@@ -223,7 +223,7 @@ export default function BiensGrid({ biens, allLabel, emptyLabel }: Props) {
           {hasCapaciteData && (
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-medium text-brun-mid/40 uppercase tracking-wider mr-1 w-full sm:w-auto">
-                Voyageurs
+                {modeFilter === 'longue_duree' ? 'Capacité' : 'Voyageurs'}
               </span>
               <button onClick={() => setCapaciteFilter(null)} className={chip(capaciteFilter === null)}>
                 Tous

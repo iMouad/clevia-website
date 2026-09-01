@@ -125,11 +125,14 @@ export default async function BienDetailPage({ params }: Props) {
   }))
 
   // JSON-LD
+  const isLD = bien.mode_location === 'longue_duree'
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'LodgingBusiness',
+    '@type': isLD ? 'RealEstateListing' : 'LodgingBusiness',
     name: bien.nom,
-    description: bien.description ?? `Location courte durée à ${bien.ville ?? 'Maroc'}, géré par Clévia Immobilier - Conciergerie.`,
+    description: bien.description ?? (isLD
+      ? `Location longue durée à ${bien.ville ?? 'Maroc'}, géré par Clévia Immobilier - Conciergerie.`
+      : `Location courte durée à ${bien.ville ?? 'Maroc'}, géré par Clévia Immobilier - Conciergerie.`),
     url: `${siteUrl}/${locale}/biens/${id}`,
     image: photos.slice(0, 5),
     address: {
@@ -506,6 +509,25 @@ export default async function BienDetailPage({ params }: Props) {
                   </div>
                 )}
 
+                {/* Planifier une visite — longue durée */}
+                {isLD && (
+                  <a
+                    href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Bonjour, je souhaite planifier une visite pour le bien "${bien.nom}" (location longue durée). Quand est-ce possible ?`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-2 bg-terra text-creme font-medium rounded-full px-6 py-3.5 hover:bg-brun transition-all duration-200"
+                    style={{ fontFamily: 'var(--font-dm-sans)' }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <rect x="3" y="4" width="18" height="18" rx="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    {t('planifierVisite')}
+                  </a>
+                )}
+
                 {/* WhatsApp CTA */}
                 <a
                   href={`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMsg}`}
@@ -527,7 +549,7 @@ export default async function BienDetailPage({ params }: Props) {
                   className="w-full flex items-center justify-center gap-2 border-2 border-brun text-brun font-medium rounded-full px-6 py-3.5 hover:bg-brun hover:text-creme transition-all duration-200"
                   style={{ fontFamily: 'var(--font-dm-sans)' }}
                 >
-                  {t('contacter')}
+                  {isLD ? t('contacterLouer') : t('contacter')}
                 </Link>
 
                 {/* Platform links — courte durée uniquement */}

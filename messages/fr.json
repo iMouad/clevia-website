@@ -429,7 +429,9 @@
     "reserverSur": "Réserver directement sur :",
     "cautionLabel": "Caution",
     "disponibleLe": "Disponible à partir du",
-    "conditionsLabel": "Conditions"
+    "conditionsLabel": "Conditions",
+    "planifierVisite": "Planifier une visite",
+    "contacterLouer": "Contacter pour louer"
   },
   "vente": {
     "tag": "Immobilier",

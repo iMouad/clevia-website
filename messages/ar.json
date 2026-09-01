@@ -429,7 +429,9 @@
     "reserverSur": "احجز مباشرة عبر :",
     "cautionLabel": "مبلغ الضمان",
     "disponibleLe": "متاح ابتداءً من",
-    "conditionsLabel": "الشروط"
+    "conditionsLabel": "الشروط",
+    "planifierVisite": "حجز زيارة",
+    "contacterLouer": "تواصل للاستئجار"
   },
   "vente": {
     "tag": "عقارات",

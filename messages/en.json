@@ -429,7 +429,9 @@
     "reserverSur": "Book directly on:",
     "cautionLabel": "Security deposit",
     "disponibleLe": "Available from",
-    "conditionsLabel": "Conditions"
+    "conditionsLabel": "Conditions",
+    "planifierVisite": "Schedule a visit",
+    "contacterLouer": "Contact to rent"
   },
   "vente": {
     "tag": "Real Estate",
