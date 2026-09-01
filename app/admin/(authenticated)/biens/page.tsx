@@ -455,7 +455,10 @@ export default function BiensPage() {
       switch (sortCol) {
         case 'nom': va = a.nom?.toLowerCase() ?? ''; vb = b.nom?.toLowerCase() ?? ''; break
         case 'ville': va = a.ville?.toLowerCase() ?? ''; vb = b.ville?.toLowerCase() ?? ''; break
-        case 'prix_nuit': va = a.prix_nuit ?? 0; vb = b.prix_nuit ?? 0; break
+        case 'prix_nuit':
+          va = a.mode_location === 'longue_duree' ? (a.prix_mensuel ?? 0) : (a.prix_nuit ?? 0)
+          vb = b.mode_location === 'longue_duree' ? (b.prix_mensuel ?? 0) : (b.prix_nuit ?? 0)
+          break
         case 'vues': va = visitesParBien(a.id).length; vb = visitesParBien(b.id).length; break
         case 'reservations': va = resCount[a.id] ?? 0; vb = resCount[b.id] ?? 0; break
         case 'statut': va = a.statut; vb = b.statut; break

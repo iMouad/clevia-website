@@ -379,10 +379,12 @@ export default async function BienDetailPage({ params }: Props) {
                 </div>
               )}
 
-              {/* Disponibilités */}
-              <div className="border border-brun/8 rounded-2xl p-6 bg-creme/30">
-                <BienDisponibilite bienId={bien.id} />
-              </div>
+              {/* Disponibilités — courte durée uniquement */}
+              {bien.mode_location !== 'longue_duree' && (
+                <div className="border border-brun/8 rounded-2xl p-6 bg-creme/30">
+                  <BienDisponibilite bienId={bien.id} />
+                </div>
+              )}
 
               {/* Localisation */}
               <div>
@@ -497,8 +499,8 @@ export default async function BienDetailPage({ params }: Props) {
                   {t('contacter')}
                 </Link>
 
-                {/* Platform links */}
-                {(bien.airbnb_url || bien.booking_url || bien.avito_url) && (
+                {/* Platform links — courte durée uniquement */}
+                {bien.mode_location !== 'longue_duree' && (bien.airbnb_url || bien.booking_url || bien.avito_url) && (
                   <div className="border-t border-brun/8 pt-4 flex flex-col gap-2">
                     <p className="text-xs text-brun-mid/50 text-center mb-1" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                       Réserver directement sur :

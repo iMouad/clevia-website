@@ -14,11 +14,18 @@ const CAPACITE_OPTIONS = [
   { label: '7+',  min: 7, max: 99 },
 ]
 
-const PRIX_OPTIONS = [
+const PRIX_NUIT_OPTIONS = [
   { label: '< 300 MAD',    min: 0,   max: 299  },
   { label: '300–500 MAD',  min: 300, max: 500  },
   { label: '500–800 MAD',  min: 501, max: 800  },
   { label: '800+ MAD',     min: 801, max: 99999 },
+]
+
+const PRIX_MOIS_OPTIONS = [
+  { label: '< 2 500 MAD',      min: 0,    max: 2499  },
+  { label: '2 500–4 000 MAD',  min: 2500, max: 4000  },
+  { label: '4 000–6 000 MAD',  min: 4001, max: 6000  },
+  { label: '6 000+ MAD',       min: 6001, max: 999999 },
 ]
 
 type SortOption = 'default' | 'prix_asc' | 'prix_desc'
@@ -51,6 +58,7 @@ export default function BiensGrid({ biens, allLabel, emptyLabel }: Props) {
     return CITIES_LOCATION.filter((c) => [...villes].some((v) => v.toLowerCase().includes(c.toLowerCase())))
   }, [biens])
 
+  const prixOptions = modeFilter === 'longue_duree' ? PRIX_MOIS_OPTIONS : PRIX_NUIT_OPTIONS
   const hasPrixData = useMemo(() => biens.some((b) => b.prix_nuit != null || b.prix_mensuel != null), [biens])
   const hasCapaciteData = useMemo(() => biens.some((b) => b.capacite_max != null || b.capacite != null), [biens])
   const hasLongueDuree = useMemo(() => biens.some((b) => b.mode_location === 'longue_duree'), [biens])
@@ -70,8 +78,8 @@ export default function BiensGrid({ biens, allLabel, emptyLabel }: Props) {
         return cap >= min && cap <= max
       })
     }
-    if (prixFilter !== null) {
-      const { min, max } = PRIX_OPTIONS[prixFilter]
+    if (prixFilter !== null && prixFilter < prixOptions.length) {
+      const { min, max } = prixOptions[prixFilter]
       result = result.filter((b) => {
         const prix = modeFilter === 'longue_duree' ? (b.prix_mensuel ?? 0) : (b.prix_nuit ?? 0)
         return prix >= min && prix <= max
@@ -173,7 +181,7 @@ export default function BiensGrid({ biens, allLabel, emptyLabel }: Props) {
                 ['courte_duree', 'Courte durée'],
                 ['longue_duree', 'Longue durée'],
               ] as [ModeOption, string][]).map(([val, label]) => (
-                <button key={val} onClick={() => setModeFilter(val)} className={chip(modeFilter === val)}>
+                <button key={val} onClick={() => { setModeFilter(val); setPrixFilter(null) }} className={chip(modeFilter === val)}>
                   {label}
                 </button>
               ))}
@@ -232,12 +240,12 @@ export default function BiensGrid({ biens, allLabel, emptyLabel }: Props) {
           {hasPrixData && (
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-medium text-brun-mid/40 uppercase tracking-wider mr-1 w-full sm:w-auto">
-                Budget / nuit
+                {modeFilter === 'longue_duree' ? 'Budget / mois' : 'Budget / nuit'}
               </span>
               <button onClick={() => setPrixFilter(null)} className={chip(prixFilter === null)}>
                 Tous
               </button>
-              {PRIX_OPTIONS.map((opt, i) => (
+              {prixOptions.map((opt, i) => (
                 <button key={opt.label} onClick={() => setPrixFilter(i === prixFilter ? null : i)} className={chip(prixFilter === i)}>
                   {opt.label}
                 </button>
