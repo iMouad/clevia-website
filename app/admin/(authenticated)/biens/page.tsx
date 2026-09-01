@@ -45,6 +45,8 @@ type Bien = {
   caution: number | null
   disponible_le: string | null
   conditions: string | null
+  locataire_nom: string | null
+  locataire_tel: string | null
   description: string | null
   statut: 'actif' | 'en_attente' | 'loue' | 'inactif'
   photos: string[] | null
@@ -79,6 +81,7 @@ const EMPTY: Partial<Bien> = {
   capacite: null, prix_nuit: null, prix_mensuel: null, mode_location: 'courte_duree',
   charges_incluses: false, meuble: true, duree_min_mois: null,
   caution: null, disponible_le: null, conditions: null,
+  locataire_nom: null, locataire_tel: null,
   description: '', statut: 'actif', photos: [],
   airbnb_url: '', booking_url: '', avito_url: '', video_url: null,
   chambres: 1, salles_de_bain: 1, capacite_max: 2, surface: null,
@@ -283,7 +286,7 @@ export default function BiensPage() {
         if (error) throw error
         const changes: Record<string, { avant: any; apres: any }> = {}
         if (original) {
-          for (const key of ['nom', 'ville', 'type', 'statut', 'capacite', 'prix_nuit', 'prix_mensuel', 'mode_location', 'disponible'] as const) {
+          for (const key of ['nom', 'ville', 'type', 'statut', 'capacite', 'prix_nuit', 'prix_mensuel', 'mode_location', 'disponible', 'locataire_nom', 'locataire_tel'] as const) {
             if ((original as any)[key] !== (payload as any)[key]) changes[key] = { avant: (original as any)[key], apres: (payload as any)[key] }
           }
         }
@@ -532,23 +535,31 @@ export default function BiensPage() {
             style={{ fontFamily: 'var(--font-dm-sans)' }}
           />
         </div>
-        <div className="flex gap-1.5">
-          {['tous', ...STATUT_OPTIONS].map((s) => (
-            <button key={s} onClick={() => setFiltreStatut(s)}
-              className={`text-sm font-medium rounded-full px-4 py-2 transition-all ${filtreStatut === s ? 'bg-terra text-creme' : 'border border-brun/20 text-brun-mid hover:border-terra hover:text-terra'}`}
-              style={{ fontFamily: 'var(--font-dm-sans)' }}>
-              {s === 'tous' ? 'Tous' : STATUT_LABELS[s]}
-            </button>
-          ))}
+        <div className="flex gap-1.5 flex-wrap">
+          {['tous', ...STATUT_OPTIONS].map((s) => {
+            const count = s === 'tous' ? biens.length : biens.filter(b => b.statut === s).length
+            return (
+              <button key={s} onClick={() => setFiltreStatut(s)}
+                className={`text-sm font-medium rounded-full px-3.5 py-2 transition-all flex items-center gap-1.5 ${filtreStatut === s ? 'bg-terra text-creme' : 'border border-brun/20 text-brun-mid hover:border-terra hover:text-terra'}`}
+                style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                {s === 'tous' ? 'Tous' : STATUT_LABELS[s]}
+                <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${filtreStatut === s ? 'bg-white/20' : 'bg-brun/8'}`}>{count}</span>
+              </button>
+            )
+          })}
         </div>
         <div className="flex gap-1.5">
-          {['tous', 'courte_duree', 'longue_duree'].map((m) => (
-            <button key={m} onClick={() => setFiltreMode(m)}
-              className={`text-sm font-medium rounded-full px-4 py-2 transition-all ${filtreMode === m ? 'bg-brun text-creme' : 'border border-brun/20 text-brun-mid hover:border-brun hover:text-brun'}`}
-              style={{ fontFamily: 'var(--font-dm-sans)' }}>
-              {m === 'tous' ? 'Tous modes' : MODE_LABELS[m]}
-            </button>
-          ))}
+          {['tous', 'courte_duree', 'longue_duree'].map((m) => {
+            const count = m === 'tous' ? biens.length : biens.filter(b => b.mode_location === m).length
+            return (
+              <button key={m} onClick={() => setFiltreMode(m)}
+                className={`text-sm font-medium rounded-full px-3.5 py-2 transition-all flex items-center gap-1.5 ${filtreMode === m ? 'bg-brun text-creme' : 'border border-brun/20 text-brun-mid hover:border-brun hover:text-brun'}`}
+                style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                {m === 'tous' ? 'Tous modes' : MODE_LABELS[m]}
+                <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${filtreMode === m ? 'bg-white/20' : 'bg-brun/8'}`}>{count}</span>
+              </button>
+            )
+          })}
         </div>
         <div className="flex gap-1.5">
           {(['7j', '30j', 'tout'] as const).map((p) => (
@@ -562,9 +573,10 @@ export default function BiensPage() {
       </div>
 
       {/* Stats globales */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
-          { label: 'Biens actifs', value: biens.filter((b) => b.statut === 'actif').length, icon: '🏠' },
+          { label: 'Biens actifs', value: biens.filter((b) => b.statut === 'actif').length, icon: '🏠', sub: `${biens.filter(b => b.statut === 'actif' && b.mode_location === 'courte_duree').length} courte · ${biens.filter(b => b.statut === 'actif' && b.mode_location === 'longue_duree').length} longue` },
+          { label: 'Biens loués', value: biens.filter((b) => b.statut === 'loue').length, icon: '🔑' },
           { label: 'Total vues', value: totalVisites, icon: '👁' },
           { label: 'Plus consulté', value: bienPlusConsulte && visitesParBien(bienPlusConsulte.id).length > 0 ? `${visitesParBien(bienPlusConsulte.id).length} vues` : '—', icon: '⭐', sub: bienPlusConsulte && visitesParBien(bienPlusConsulte.id).length > 0 ? bienPlusConsulte.nom : undefined },
         ].map(({ label, value, icon, sub }) => (
@@ -619,13 +631,25 @@ export default function BiensPage() {
                 <span className="text-xs text-terra" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                   {visitesParBien(b.id).length} vues
                 </span>
-                <span className="text-xs text-brun-mid/60" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                  {resCount[b.id] ?? 0} rés.
-                </span>
+                {b.mode_location === 'courte_duree' && (
+                  <span className="text-xs text-brun-mid/60" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                    {resCount[b.id] ?? 0} rés.
+                  </span>
+                )}
+                {b.statut === 'loue' && b.locataire_nom && (
+                  <span className="text-xs text-blue-600" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                    {b.locataire_nom}
+                  </span>
+                )}
+                {b.mode_location === 'longue_duree' && b.disponible_le && b.statut !== 'loue' && (
+                  <span className="text-xs text-brun-mid/50" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                    Dispo : {new Date(b.disponible_le).toLocaleDateString('fr')}
+                  </span>
+                )}
               </div>
-              {/* Plateformes */}
+              {/* Plateformes + lien site */}
               <div className="flex items-center gap-1.5 mt-2">
-                <PlatformIcons b={b} />
+                {b.mode_location === 'courte_duree' && <PlatformIcons b={b} />}
                 <a
                   href={`/${locale}/biens/${b.slug ?? b.id}`}
                   target="_blank"
@@ -688,19 +712,13 @@ export default function BiensPage() {
               <tr>
                 <th className="px-3 py-3 text-left text-xs text-brun-mid uppercase tracking-wide font-medium w-14"></th>
                 {[
-                  { key: 'nom', label: 'Nom' },
-                  { key: 'ville', label: 'Ville' },
-                  { key: '', label: 'Type' },
-                  { key: '', label: 'Mode' },
+                  { key: 'nom', label: 'Bien' },
                   { key: 'prix_nuit', label: 'Prix' },
                   { key: 'statut', label: 'Statut' },
-                  { key: '', label: 'Dispo' },
-                  { key: 'vues', label: 'Vues' },
-                  { key: 'reservations', label: 'Rés.' },
-                  { key: '', label: 'Plateformes' },
-                  { key: '', label: 'Actions' },
+                  { key: 'vues', label: 'Activité' },
+                  { key: '', label: '' },
                 ].map(({ key, label }) => (
-                  <th key={label}
+                  <th key={label || 'actions'}
                     className={`px-4 py-3 text-left text-xs text-brun-mid uppercase tracking-wide font-medium ${key ? 'cursor-pointer hover:text-terra select-none' : ''}`}
                     onClick={() => key && toggleSort(key)}
                     style={{ fontFamily: 'var(--font-dm-sans)' }}
@@ -712,12 +730,13 @@ export default function BiensPage() {
             </thead>
             <tbody className="divide-y divide-brun/5">
               {loading ? (
-                <tr><td colSpan={12} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
+                <tr><td colSpan={6} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
               ) : !biensFiltered.length ? (
-                <tr><td colSpan={12} className="px-4 py-10 text-center text-brun-mid/50">{biens.length ? 'Aucun résultat.' : 'Aucun bien'}</td></tr>
+                <tr><td colSpan={6} className="px-4 py-10 text-center text-brun-mid/50">{biens.length ? 'Aucun résultat.' : 'Aucun bien'}</td></tr>
               ) : biensFiltered.map((b) => (
                 <Fragment key={b.id}>
                   <tr className="hover:bg-creme/40 transition-colors">
+                    {/* Photo */}
                     <td className="px-3 py-2">
                       <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-brun/5 flex-shrink-0">
                         {(b.photos ?? []).length > 0 ? (
@@ -731,50 +750,68 @@ export default function BiensPage() {
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-brun font-medium">{b.nom}</td>
-                    <td className="px-4 py-3 text-brun-mid">{b.ville ?? '—'}</td>
-                    <td className="px-4 py-3 text-brun-mid">{b.type ?? '—'}</td>
+                    {/* Bien (nom + ville · type + mode badge) */}
                     <td className="px-4 py-3">
-                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${MODE_COLORS[b.mode_location]}`}>
-                        {MODE_LABELS[b.mode_location]}
-                      </span>
+                      <p className="text-brun font-medium" style={{ fontFamily: 'var(--font-dm-sans)' }}>{b.nom}</p>
+                      <p className="text-xs text-brun-mid/60 mt-0.5" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                        {b.ville ?? '—'}{b.type ? ` · ${b.type}` : ''}
+                      </p>
+                      {b.mode_location === 'longue_duree' && (
+                        <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${MODE_COLORS.longue_duree} inline-block mt-1`}>
+                          Longue durée
+                        </span>
+                      )}
                     </td>
-                    <td className="px-4 py-3 text-brun-mid">
+                    {/* Prix */}
+                    <td className="px-4 py-3 whitespace-nowrap" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                       {b.mode_location === 'longue_duree'
-                        ? (b.prix_mensuel ? `${b.prix_mensuel.toLocaleString()} MAD/mois` : '—')
-                        : (b.prix_nuit ? `${b.prix_nuit} MAD/nuit` : '—')
+                        ? (b.prix_mensuel ? <><span className="font-medium text-brun">{b.prix_mensuel.toLocaleString()}</span> <span className="text-xs text-brun-mid/60">MAD/mois</span></> : <span className="text-brun-mid/40">—</span>)
+                        : (b.prix_nuit ? <><span className="font-medium text-brun">{b.prix_nuit}</span> <span className="text-xs text-brun-mid/60">MAD/nuit</span></> : <span className="text-brun-mid/40">—</span>)
                       }
                     </td>
+                    {/* Statut + dispo indicator */}
                     <td className="px-4 py-3">
-                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUT_COLORS[b.statut]}`}>
-                        {STATUT_LABELS[b.statut]}
-                      </span>
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${b.disponible !== false ? 'bg-green-500' : 'bg-gray-300'}`} />
+                          <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUT_COLORS[b.statut]}`}>
+                            {STATUT_LABELS[b.statut]}
+                          </span>
+                        </div>
+                        {b.statut === 'loue' && b.locataire_nom && (
+                          <p className="text-[11px] text-brun-mid/60 pl-3" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                            {b.locataire_nom}
+                          </p>
+                        )}
+                        {b.mode_location === 'longue_duree' && b.disponible_le && b.statut !== 'loue' && (
+                          <p className="text-[11px] text-brun-mid/50 pl-3" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                            Dispo : {new Date(b.disponible_le).toLocaleDateString('fr')}
+                          </p>
+                        )}
+                      </div>
                     </td>
+                    {/* Activité */}
                     <td className="px-4 py-3">
-                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${b.disponible !== false ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                        {b.disponible !== false ? 'Oui' : 'Non'}
-                      </span>
+                      <div className="flex flex-col gap-0.5">
+                        <button
+                          onClick={() => setStatsOpen(statsOpen === b.id ? null : b.id)}
+                          className="flex items-center gap-1 text-terra hover:underline text-sm"
+                          style={{ fontFamily: 'var(--font-dm-sans)' }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                          {visitesParBien(b.id).length} vues
+                        </button>
+                        {b.mode_location === 'courte_duree' && (
+                          <span className="text-xs text-brun-mid/50" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                            {resCount[b.id] ?? 0} réservations
+                          </span>
+                        )}
+                      </div>
                     </td>
-                    <td className="px-4 py-3">
-                      <button
-                        onClick={() => setStatsOpen(statsOpen === b.id ? null : b.id)}
-                        className="flex items-center gap-1 text-terra hover:underline"
-                        style={{ fontFamily: 'var(--font-dm-sans)' }}
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
-                        {visitesParBien(b.id).length}
-                      </button>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="text-sm text-brun font-medium" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                        {resCount[b.id] ?? 0}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <PlatformIcons b={b} />
-                    </td>
+                    {/* Actions */}
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
+                        {b.mode_location === 'courte_duree' && <PlatformIcons b={b} />}
                         <a
                           href={`/${locale}/biens/${b.slug ?? b.id}`}
                           target="_blank"
@@ -793,7 +830,7 @@ export default function BiensPage() {
                     const stats = getStatsBien(b.id)
                     return (
                       <tr key={`stats-${b.id}`}>
-                        <td colSpan={12} className="px-6 pb-4 pt-2 bg-creme/60">
+                        <td colSpan={6} className="px-6 pb-4 pt-2 bg-creme/60">
                           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                             <div>
                               <p className="text-xs font-medium text-brun-mid/50 uppercase tracking-wide mb-2">7 derniers jours</p>
@@ -1022,25 +1059,45 @@ export default function BiensPage() {
                 <input type="number" min={0} className={inputClass} value={editing.prix_nuit ?? ''} onChange={(e) => setEditing((p) => ({ ...p, prix_nuit: Number(e.target.value) || null }))} placeholder="350" />
               </div>
             )}
-            {editing.mode_location === 'longue_duree' && (
-              <div>
-                <label className={labelClass}>Prix / mois (MAD)</label>
-                <input type="number" min={0} className={inputClass} value={editing.prix_mensuel ?? ''} onChange={(e) => setEditing((p) => ({ ...p, prix_mensuel: Number(e.target.value) || null }))} placeholder="3500" />
-              </div>
-            )}
             <div>
               <label className={labelClass}>Statut</label>
-              <AdminSelect value={editing.statut ?? 'actif'} onChange={(e) => setEditing((p) => ({ ...p, statut: e.target.value as any }))}>
-                {STATUT_OPTIONS.map((s) => <option key={s} value={s}>{STATUT_LABELS[s]}</option>)}
+              <AdminSelect value={editing.statut ?? 'actif'} onChange={(e) => {
+                const newStatut = e.target.value as any
+                setEditing((p) => ({ ...p, statut: newStatut, ...(newStatut === 'loue' ? { disponible: false } : {}) }))
+              }}>
+                {(editing.mode_location === 'longue_duree' ? STATUT_OPTIONS : STATUT_OPTIONS.filter(s => s !== 'loue')).map((s) => <option key={s} value={s}>{STATUT_LABELS[s]}</option>)}
               </AdminSelect>
             </div>
           </div>
 
-          <Toggle
-            checked={editing.disponible !== false}
-            onChange={(v) => setEditing((p) => ({ ...p, disponible: v }))}
-            label="Bien disponible à la location"
-          />
+          {editing.statut !== 'loue' && (
+            <Toggle
+              checked={editing.disponible !== false}
+              onChange={(v) => setEditing((p) => ({ ...p, disponible: v }))}
+              label="Bien disponible à la location"
+            />
+          )}
+          {editing.statut === 'loue' && (
+            <p className="text-xs text-blue-600 bg-blue-50 rounded-xl px-4 py-2.5" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+              Le bien est marqué comme loué — il n&apos;apparaîtra pas sur le site public.
+            </p>
+          )}
+
+          {/* Locataire actuel (longue durée + loué) */}
+          {editing.mode_location === 'longue_duree' && editing.statut === 'loue' && (
+            <Section title="Locataire actuel">
+              <div className="grid grid-cols-2 gap-3 bg-blue-50/50 rounded-xl p-4 border border-blue-200/50">
+                <div>
+                  <label className={labelClass}>Nom du locataire</label>
+                  <input className={inputClass} value={editing.locataire_nom ?? ''} onChange={(e) => setEditing((p) => ({ ...p, locataire_nom: e.target.value || null }))} placeholder="Nom complet" />
+                </div>
+                <div>
+                  <label className={labelClass}>Téléphone</label>
+                  <input className={inputClass} value={editing.locataire_tel ?? ''} onChange={(e) => setEditing((p) => ({ ...p, locataire_tel: e.target.value || null }))} placeholder="+212 6..." />
+                </div>
+              </div>
+            </Section>
+          )}
 
           <div>
             <label className={labelClass}>Description</label>
@@ -1091,8 +1148,8 @@ export default function BiensPage() {
             </div>
           </Section>
 
-          {/* Platform URLs */}
-          <Section title="Liens de réservation (optionnel)">
+          {/* Platform URLs — courte durée uniquement */}
+          {editing.mode_location !== 'longue_duree' && <Section title="Liens de réservation (optionnel)">
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-medium text-white bg-[#FF5A5F] rounded-full px-2.5 py-1 w-20 text-center flex-shrink-0" style={{ fontFamily: 'var(--font-dm-sans)' }}>Airbnb</span>
@@ -1107,7 +1164,7 @@ export default function BiensPage() {
                 <input className={inputClass} value={editing.avito_url ?? ''} onChange={(e) => setEditing((p) => ({ ...p, avito_url: e.target.value || null }))} placeholder="https://avito.ma/annonce/..." />
               </div>
             </div>
-          </Section>
+          </Section>}
 
           {/* Vidéo */}
           <Section title="Vidéo (optionnel)">
