@@ -6,6 +6,7 @@ import { AnimateIn } from '@/components/ui/AnimateIn'
 import BiensGrid from '@/components/BiensGrid'
 import type { BienPublic } from '@/components/BienCard'
 import { getPageSeo } from '@/lib/seo'
+import { getBreadcrumbJsonLd } from '@/lib/schemas'
 
 type Props = { params: Promise<{ locale: string }> }
 
@@ -72,8 +73,32 @@ export default async function BiensPage({ params }: Props) {
     vues_mois: vuesParBien[b.id] ?? 0,
   }))
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.cleviamaroc.com'
+  const itemListJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: t('title'),
+    url: `${siteUrl}/${locale}/biens`,
+    numberOfItems: biens.length,
+    itemListElement: biens.slice(0, 10).map((b, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: `${siteUrl}/${locale}/biens/${b.slug ?? b.id}`,
+      name: b.nom,
+    })),
+  }
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(getBreadcrumbJsonLd(locale, [{ name: t('title'), path: '/biens' }])) }}
+      />
+
       {/* ── Page Hero ── */}
       <section className="bg-creme py-20 px-4 relative overflow-hidden">
         <div

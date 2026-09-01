@@ -140,7 +140,7 @@ export default function HomePage() {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
     name: 'Clévia Immobilier - Conciergerie',
-    description: 'Conciergerie de location courte durée à Mansouria-Mohammedia, Maroc. Gestion complète de votre bien sur Airbnb, Booking et Avito.',
+    description: 'Conciergerie de location courte et longue durée à Mansouria-Mohammedia, Maroc. Gestion complète de votre bien sur Airbnb, Booking et Avito. Location meublée et non meublée.',
     url: 'https://www.cleviamaroc.com',
     logo: 'https://www.cleviamaroc.com/logo.svg',
     image: 'https://www.cleviamaroc.com/logo.svg',

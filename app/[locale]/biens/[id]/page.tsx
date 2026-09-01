@@ -10,6 +10,7 @@ import BienShare from '@/components/biens/BienShare'
 import BienCard from '@/components/BienCard'
 import type { BienPublic } from '@/components/BienCard'
 import { EQUIPEMENTS_MAP, REGLES_OPTIONS } from '@/lib/equipements'
+import { getBreadcrumbJsonLd } from '@/lib/schemas'
 
 type Props = { params: Promise<{ locale: string; id: string }> }
 
@@ -176,6 +177,13 @@ export default async function BienDetailPage({ params }: Props) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(getBreadcrumbJsonLd(locale, [
+          { name: t('title'), path: '/biens' },
+          { name: bien.nom, path: `/biens/${(bien as any).slug ?? id}` },
+        ])) }}
       />
 
       {/* ── Back link ── */}
