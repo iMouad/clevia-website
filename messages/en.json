@@ -453,7 +453,9 @@
     "prixDesc": "Price ↓",
     "biensCount": "{count} property(ies)",
     "biensTrouves": "{count} property(ies) found",
-    "supprimerFiltres": "Remove filters"
+    "supprimerFiltres": "Remove filters",
+    "situation": "Floor",
+    "autresBiens": "Other available properties"
   },
   "vente": {
     "tag": "Real Estate",

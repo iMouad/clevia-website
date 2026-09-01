@@ -308,7 +308,7 @@ export default async function BienDetailPage({ params }: Props) {
                       </div>
                       <div>
                         <p className="text-sm text-brun font-medium leading-tight" style={{ fontFamily: 'var(--font-dm-sans)' }}>{bien.etage}</p>
-                        <p className="text-xs text-brun-mid/70" style={{ fontFamily: 'var(--font-dm-sans)' }}>Situation</p>
+                        <p className="text-xs text-brun-mid/70" style={{ fontFamily: 'var(--font-dm-sans)' }}>{t('situation')}</p>
                       </div>
                     </div>
                   )}
@@ -462,7 +462,7 @@ export default async function BienDetailPage({ params }: Props) {
                       )}
                       {bien.duree_min_mois && (
                         <span className="text-xs px-2.5 py-1 rounded-full bg-violet-50 text-violet-700" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                          Min. {bien.duree_min_mois} mois
+                          {t('dureeMin', { mois: bien.duree_min_mois })}
                         </span>
                       )}
                     </div>
@@ -591,7 +591,7 @@ export default async function BienDetailPage({ params }: Props) {
           <section className="border-t border-brun/8 py-14 px-4 mt-4">
             <div className="max-w-7xl mx-auto">
               <h2 className="text-3xl text-brun mb-8" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
-                Autres biens disponibles
+                {t('autresBiens')}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {autresBiens.map((b) => (

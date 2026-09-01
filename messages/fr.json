@@ -453,7 +453,9 @@
     "prixDesc": "Prix ↓",
     "biensCount": "{count} bien(s)",
     "biensTrouves": "{count} bien(s) trouvé(s)",
-    "supprimerFiltres": "Supprimer les filtres"
+    "supprimerFiltres": "Supprimer les filtres",
+    "situation": "Situation",
+    "autresBiens": "Autres biens disponibles"
   },
   "vente": {
     "tag": "Immobilier",

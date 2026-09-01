@@ -453,7 +453,9 @@
     "prixDesc": "السعر ↓",
     "biensCount": "{count} عقار(ات)",
     "biensTrouves": "{count} عقار(ات)",
-    "supprimerFiltres": "إزالة التصفية"
+    "supprimerFiltres": "إزالة التصفية",
+    "situation": "الموقع",
+    "autresBiens": "عقارات أخرى متاحة"
   },
   "vente": {
     "tag": "عقارات",
