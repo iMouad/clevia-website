@@ -5,6 +5,7 @@ export const EQUIPEMENT_KEYS = [
   'ascenseur', 'gardien', 'digicode', 'fer_a_repasser',
   'machine_cafe', 'micro_ondes', 'lave_vaisselle',
   'baignoire', 'douche_italienne',
+  'chauffe_eau', 'rangements', 'cave', 'chauffage',
 ] as const
 
 export type EquipementKey = (typeof EQUIPEMENT_KEYS)[number]
@@ -121,6 +122,26 @@ export const EQUIPEMENTS: EquipementDef[] = [
     label: { fr: 'Douche italienne', ar: 'دوش إيطالي', en: 'Walk-in shower' },
     path: 'M9 6a3 3 0 1 0 6 0M12 9v13M5 12h14M5 12v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8',
   },
+  {
+    key: 'chauffe_eau',
+    label: { fr: 'Chauffe-eau', ar: 'سخان مياه', en: 'Water heater' },
+    path: 'M12 2a5 5 0 0 0-5 5v6a5 5 0 0 0 10 0V7a5 5 0 0 0-5-5zm0 4v4m-6 8h12',
+  },
+  {
+    key: 'rangements',
+    label: { fr: 'Rangements / Placards', ar: 'خزائن', en: 'Storage / Closets' },
+    path: 'M4 2h16a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm8 0v20M7 12h2m5 0h2',
+  },
+  {
+    key: 'cave',
+    label: { fr: 'Cave / Stockage', ar: 'قبو / تخزين', en: 'Cellar / Storage' },
+    path: 'M3 21h18M5 21V10l7-7 7 7v11M9 21v-4a3 3 0 0 1 6 0v4M5 10h14',
+  },
+  {
+    key: 'chauffage',
+    label: { fr: 'Chauffage', ar: 'تدفئة', en: 'Heating' },
+    path: 'M12 2c-1 4-4 6-4 10a4 4 0 0 0 8 0c0-4-3-6-4-10zm0 18v2M8 20h8',
+  },
 ]
 
 export const EQUIPEMENTS_MAP: Record<string, EquipementDef> = Object.fromEntries(
@@ -130,6 +151,8 @@ export const EQUIPEMENTS_MAP: Record<string, EquipementDef> = Object.fromEntries
 export const REGLES_OPTIONS = [
   { key: 'non_fumeur', label: { fr: 'Non-fumeur', ar: 'ممنوع التدخين', en: 'No smoking' } },
   { key: 'pas_animaux', label: { fr: 'Pas d\'animaux', ar: 'ممنوع الحيوانات', en: 'No pets' } },
+  { key: 'animaux_acceptes', label: { fr: 'Animaux acceptés', ar: 'الحيوانات مسموحة', en: 'Pets allowed' } },
   { key: 'pas_fetes', label: { fr: 'Pas de fêtes', ar: 'ممنوع الحفلات', en: 'No parties' } },
   { key: 'checkin_flexible', label: { fr: 'Check-in flexible', ar: 'تسجيل وصول مرن', en: 'Flexible check-in' } },
+  { key: 'garant_exige', label: { fr: 'Garant exigé', ar: 'ضامن مطلوب', en: 'Guarantor required' } },
 ]

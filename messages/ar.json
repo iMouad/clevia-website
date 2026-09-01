@@ -426,7 +426,10 @@
     "courteDuree": "إيجار قصير الأمد",
     "filterDuree": "المدة",
     "filterTous": "الكل",
-    "reserverSur": "احجز مباشرة عبر :"
+    "reserverSur": "احجز مباشرة عبر :",
+    "cautionLabel": "مبلغ الضمان",
+    "disponibleLe": "متاح ابتداءً من",
+    "conditionsLabel": "الشروط"
   },
   "vente": {
     "tag": "عقارات",

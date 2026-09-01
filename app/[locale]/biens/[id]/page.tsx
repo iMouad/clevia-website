@@ -102,7 +102,7 @@ export default async function BienDetailPage({ params }: Props) {
   // Autres biens
   const { data: autresBiensRaw } = await supabase
     .from('biens')
-    .select('id, nom, ville, adresse, type, capacite, chambres, salles_de_bain, capacite_max, surface, equipements, prix_nuit, prix_mensuel, mode_location, charges_incluses, meuble, duree_min_mois, description, photos, distance_mer, disponible, airbnb_url, booking_url, avito_url')
+    .select('id, nom, ville, adresse, type, capacite, chambres, salles_de_bain, capacite_max, surface, equipements, prix_nuit, prix_mensuel, mode_location, charges_incluses, meuble, duree_min_mois, caution, disponible_le, conditions, description, photos, distance_mer, disponible, airbnb_url, booking_url, avito_url')
     .eq('statut', 'actif')
     .neq('id', id)
     .limit(3)
@@ -116,6 +116,8 @@ export default async function BienDetailPage({ params }: Props) {
     mode_location: b.mode_location ?? 'courte_duree',
     charges_incluses: b.charges_incluses ?? null, meuble: b.meuble ?? null,
     duree_min_mois: b.duree_min_mois ?? null,
+    caution: b.caution ?? null, disponible_le: b.disponible_le ?? null,
+    conditions: b.conditions ?? null,
     description: b.description ?? null, photos: b.photos ?? null,
     distance_mer: b.distance_mer ?? null, disponible: b.disponible ?? null,
     airbnb_url: b.airbnb_url ?? null, booking_url: b.booking_url ?? null,
@@ -479,6 +481,30 @@ export default async function BienDetailPage({ params }: Props) {
                 >
                   {isDisponible ? t('disponible') : t('nonDisponible')}
                 </div>
+
+                {/* Infos longue durée */}
+                {bien.mode_location === 'longue_duree' && (bien.caution || bien.disponible_le || bien.conditions) && (
+                  <div className="flex flex-col gap-2 border border-brun/8 rounded-xl p-4 bg-creme/30" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                    {bien.caution && (
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-brun-mid">{t('cautionLabel')}</span>
+                        <span className="text-brun font-medium">{Number(bien.caution).toLocaleString()} MAD</span>
+                      </div>
+                    )}
+                    {bien.disponible_le && (
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-brun-mid">{t('disponibleLe')}</span>
+                        <span className="text-brun font-medium">{new Date(bien.disponible_le).toLocaleDateString(locale === 'ar' ? 'ar-MA' : locale === 'en' ? 'en-GB' : 'fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                      </div>
+                    )}
+                    {bien.conditions && (
+                      <div className="text-sm border-t border-brun/8 pt-2 mt-1">
+                        <p className="text-brun-mid text-xs uppercase tracking-wide mb-1">{t('conditionsLabel')}</p>
+                        <p className="text-brun whitespace-pre-line">{bien.conditions}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* WhatsApp CTA */}
                 <a

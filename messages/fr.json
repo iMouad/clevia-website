@@ -426,7 +426,10 @@
     "courteDuree": "Courte durée",
     "filterDuree": "Durée",
     "filterTous": "Tous",
-    "reserverSur": "Réserver directement sur :"
+    "reserverSur": "Réserver directement sur :",
+    "cautionLabel": "Caution",
+    "disponibleLe": "Disponible à partir du",
+    "conditionsLabel": "Conditions"
   },
   "vente": {
     "tag": "Immobilier",

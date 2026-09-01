@@ -426,7 +426,10 @@
     "courteDuree": "Short-term rental",
     "filterDuree": "Duration",
     "filterTous": "All",
-    "reserverSur": "Book directly on:"
+    "reserverSur": "Book directly on:",
+    "cautionLabel": "Security deposit",
+    "disponibleLe": "Available from",
+    "conditionsLabel": "Conditions"
   },
   "vente": {
     "tag": "Real Estate",

@@ -42,6 +42,9 @@ type Bien = {
   charges_incluses: boolean
   meuble: boolean
   duree_min_mois: number | null
+  caution: number | null
+  disponible_le: string | null
+  conditions: string | null
   description: string | null
   statut: 'actif' | 'en_attente' | 'inactif'
   photos: string[] | null
@@ -71,6 +74,7 @@ const EMPTY: Partial<Bien> = {
   nom: '', ville: '', adresse: '', latitude: null, longitude: null, type: 'Appartement',
   capacite: null, prix_nuit: null, prix_mensuel: null, mode_location: 'courte_duree',
   charges_incluses: false, meuble: true, duree_min_mois: null,
+  caution: null, disponible_le: null, conditions: null,
   description: '', statut: 'actif', photos: [],
   airbnb_url: '', booking_url: '', avito_url: '', video_url: null,
   chambres: 1, salles_de_bain: 1, capacite_max: 2, surface: null,
@@ -937,6 +941,20 @@ export default function BiensPage() {
                     onChange={(v) => setEditing((p) => ({ ...p, charges_incluses: v }))}
                     label="Charges incluses"
                   />
+                </div>
+                <div className="grid grid-cols-2 gap-3 mt-3">
+                  <div>
+                    <label className={labelClass}>Caution (MAD)</label>
+                    <input type="number" min={0} className={inputClass} value={editing.caution ?? ''} onChange={(e) => setEditing((p) => ({ ...p, caution: Number(e.target.value) || null }))} placeholder="Ex : 7000" />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Disponible à partir du</label>
+                    <input type="date" className={inputClass} value={editing.disponible_le ?? ''} onChange={(e) => setEditing((p) => ({ ...p, disponible_le: e.target.value || null }))} />
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <label className={labelClass}>Conditions particulières</label>
+                  <textarea className={`${inputClass} resize-none`} rows={2} value={editing.conditions ?? ''} onChange={(e) => setEditing((p) => ({ ...p, conditions: e.target.value || null }))} placeholder="Ex : Garant requis, caution 2 mois..." />
                 </div>
               </div>
             )}

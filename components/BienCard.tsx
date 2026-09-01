@@ -23,6 +23,9 @@ export type BienPublic = {
   charges_incluses: boolean | null
   meuble: boolean | null
   duree_min_mois: number | null
+  caution: number | null
+  disponible_le: string | null
+  conditions: string | null
   description: string | null
   photos: string[] | null
   distance_mer: string | null
