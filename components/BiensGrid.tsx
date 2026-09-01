@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useTranslations } from 'next-intl'
 import BienCard from './BienCard'
 import type { BienPublic } from './BienCard'
 
@@ -39,6 +40,7 @@ type Props = {
 }
 
 export default function BiensGrid({ biens, allLabel, emptyLabel }: Props) {
+  const t = useTranslations('biens')
   const [modeFilter,      setModeFilter]      = useState<ModeOption>('tous')
   const [typeFilter,      setTypeFilter]      = useState<string | null>(null)
   const [villeFilter,     setVilleFilter]     = useState<string | null>(null)
@@ -131,7 +133,7 @@ export default function BiensGrid({ biens, allLabel, emptyLabel }: Props) {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-terra flex-shrink-0">
               <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
             </svg>
-            <span className="text-sm font-medium text-brun">Filtres</span>
+            <span className="text-sm font-medium text-brun">{t('filtres')}</span>
             {activeCount > 0 && (
               <span className="bg-terra text-creme text-xs font-semibold rounded-full w-5 h-5 flex items-center justify-center">
                 {activeCount}
@@ -141,14 +143,14 @@ export default function BiensGrid({ biens, allLabel, emptyLabel }: Props) {
           <div className="flex items-center gap-3">
             {/* Compteur résultats */}
             <span className="text-xs text-brun-mid/50 hidden sm:block">
-              {filtered.length} bien{filtered.length !== 1 ? 's' : ''}
+              {t('biensCount', { count: filtered.length })}
             </span>
             {activeCount > 0 && (
               <button
                 onClick={resetAll}
                 className="text-xs text-brun-mid/60 hover:text-terra underline underline-offset-2 transition-colors"
               >
-                Réinitialiser
+                {t('reinitialiser')}
               </button>
             )}
             {/* Toggle mobile */}
@@ -156,7 +158,7 @@ export default function BiensGrid({ biens, allLabel, emptyLabel }: Props) {
               onClick={() => setFiltersOpen((v) => !v)}
               className="sm:hidden flex items-center gap-1.5 text-sm text-brun-mid border border-brun/20 rounded-full px-3 py-1.5 hover:border-terra hover:text-terra transition-all"
             >
-              {filtersOpen ? 'Fermer' : 'Afficher'}
+              {filtersOpen ? t('fermer') : t('afficher')}
               <svg
                 width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
                 className={`transition-transform duration-200 ${filtersOpen ? 'rotate-180' : ''}`}
@@ -174,12 +176,12 @@ export default function BiensGrid({ biens, allLabel, emptyLabel }: Props) {
           {hasMultipleModes && (
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-medium text-brun-mid/40 uppercase tracking-wider mr-1 w-full sm:w-auto">
-                Durée
+                {t('filterDuree')}
               </span>
               {([
-                ['tous', 'Tous'],
-                ['courte_duree', 'Courte durée'],
-                ['longue_duree', 'Longue durée'],
+                ['tous', t('tousLabel')],
+                ['courte_duree', t('courteDuree')],
+                ['longue_duree', t('longueDuree')],
               ] as [ModeOption, string][]).map(([val, label]) => (
                 <button key={val} onClick={() => { setModeFilter(val); setPrixFilter(null) }} className={chip(modeFilter === val)}>
                   {label}
@@ -206,10 +208,10 @@ export default function BiensGrid({ biens, allLabel, emptyLabel }: Props) {
           {availableCities.length > 1 && (
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-medium text-brun-mid/40 uppercase tracking-wider mr-1 w-full sm:w-auto">
-                Ville
+                {t('villeLabel')}
               </span>
               <button onClick={() => setVilleFilter(null)} className={chip(!villeFilter)}>
-                Toutes
+                {t('toutesVilles')}
               </button>
               {availableCities.map((city) => (
                 <button key={city} onClick={() => setVilleFilter(city)} className={chip(villeFilter === city)}>
@@ -223,14 +225,14 @@ export default function BiensGrid({ biens, allLabel, emptyLabel }: Props) {
           {hasCapaciteData && (
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-medium text-brun-mid/40 uppercase tracking-wider mr-1 w-full sm:w-auto">
-                {modeFilter === 'longue_duree' ? 'Capacité' : 'Voyageurs'}
+                {modeFilter === 'longue_duree' ? t('capaciteLabel') : t('voyageursLabel')}
               </span>
               <button onClick={() => setCapaciteFilter(null)} className={chip(capaciteFilter === null)}>
-                Tous
+                {t('tousLabel')}
               </button>
               {CAPACITE_OPTIONS.map((opt, i) => (
                 <button key={opt.label} onClick={() => setCapaciteFilter(i === capaciteFilter ? null : i)} className={chip(capaciteFilter === i)}>
-                  {opt.label} pers.
+                  {opt.label} {t('persLabel')}
                 </button>
               ))}
             </div>
@@ -240,10 +242,10 @@ export default function BiensGrid({ biens, allLabel, emptyLabel }: Props) {
           {hasPrixData && (
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-medium text-brun-mid/40 uppercase tracking-wider mr-1 w-full sm:w-auto">
-                {modeFilter === 'longue_duree' ? 'Budget / mois' : 'Budget / nuit'}
+                {modeFilter === 'longue_duree' ? t('budgetMois') : t('budgetNuit')}
               </span>
               <button onClick={() => setPrixFilter(null)} className={chip(prixFilter === null)}>
-                Tous
+                {t('tousLabel')}
               </button>
               {prixOptions.map((opt, i) => (
                 <button key={opt.label} onClick={() => setPrixFilter(i === prixFilter ? null : i)} className={chip(prixFilter === i)}>
@@ -264,15 +266,15 @@ export default function BiensGrid({ biens, allLabel, emptyLabel }: Props) {
               }`}
             >
               <span className={`w-2 h-2 rounded-full flex-shrink-0 ${disponibleOnly ? 'bg-white' : 'bg-green-500'}`} />
-              Disponible uniquement
+              {t('dispoUniquement')}
             </button>
 
             <div className="flex items-center gap-1.5">
-              <span className="text-xs text-brun-mid/40 mr-1">Trier :</span>
+              <span className="text-xs text-brun-mid/40 mr-1">{t('trierLabel')}</span>
               {([
-                ['default', 'Par défaut'],
-                ['prix_asc',  'Prix ↑'],
-                ['prix_desc', 'Prix ↓'],
+                ['default', t('parDefaut')],
+                ['prix_asc',  t('prixAsc')],
+                ['prix_desc', t('prixDesc')],
               ] as [SortOption, string][]).map(([val, label]) => (
                 <button
                   key={val}
@@ -294,7 +296,7 @@ export default function BiensGrid({ biens, allLabel, emptyLabel }: Props) {
 
       {/* Compteur mobile */}
       <p className="sm:hidden text-xs text-brun-mid/50 mb-4 -mt-4" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-        {filtered.length} bien{filtered.length !== 1 ? 's' : ''} trouvé{filtered.length !== 1 ? 's' : ''}
+        {t('biensTrouves', { count: filtered.length })}
       </p>
 
       {/* ── Grille ── */}
@@ -314,7 +316,7 @@ export default function BiensGrid({ biens, allLabel, emptyLabel }: Props) {
               className="text-sm text-terra underline underline-offset-2"
               style={{ fontFamily: 'var(--font-dm-sans)' }}
             >
-              Supprimer les filtres
+              {t('supprimerFiltres')}
             </button>
           )}
         </div>

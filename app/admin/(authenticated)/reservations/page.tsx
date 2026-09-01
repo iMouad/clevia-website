@@ -30,7 +30,7 @@ type Reservation = {
   biens?: { nom: string } | null
 }
 
-type Bien = { id: string; nom: string; disponible?: boolean }
+type Bien = { id: string; nom: string; disponible?: boolean; mode_location?: string }
 type VoyageurOption = { id: string; nom: string; email: string | null; telephone: string | null }
 
 const EMPTY_RES: Partial<Reservation> = {
@@ -127,7 +127,7 @@ export default function ReservationsPage() {
   async function fetchData() {
     const [{ data: resData }, { data: bienData }, { data: voyData }] = await Promise.all([
       supabase.from('reservations').select('*, biens(nom)').order('date_arrivee', { ascending: false }),
-      supabase.from('biens').select('id, nom, disponible').eq('statut', 'actif'),
+      supabase.from('biens').select('id, nom, disponible, mode_location').eq('statut', 'actif').neq('mode_location', 'longue_duree'),
       supabase.from('voyageurs').select('id, nom, email, telephone').order('nom'),
     ])
     const today = new Date().toISOString().split('T')[0]

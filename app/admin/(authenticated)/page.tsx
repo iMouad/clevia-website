@@ -44,7 +44,8 @@ export default function AdminDashboard() {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false)
   const [adminName, setAdminName] = useState('Admin')
   const [biensActifs, setBiensActifs] = useState(0)
-  const [biensActifsData, setBiensActifsData] = useState<{ id: string; nom: string }[]>([])
+  const [biensActifsData, setBiensActifsData] = useState<{ id: string; nom: string; mode_location?: string }[]>([])
+  const [biensLouesData, setBiensLouesData] = useState<{ id: string; nom: string; locataire_nom?: string }[]>([])
   const [reservationsData, setReservationsData] = useState<any[]>([])
   const [lastContacts, setLastContacts] = useState<any[]>([])
   const [lastReservations, setLastReservations] = useState<any[]>([])
@@ -66,7 +67,8 @@ export default function AdminDashboard() {
   useEffect(() => {
     Promise.all([
       supabase.auth.getUser(),
-      supabase.from('biens').select('id,nom', { count: 'exact' }).eq('statut', 'actif').neq('disponible', false),
+      supabase.from('biens').select('id,nom,mode_location', { count: 'exact' }).eq('statut', 'actif').neq('disponible', false),
+      supabase.from('biens').select('id,nom,locataire_nom').eq('statut', 'loue'),
       supabase.from('reservations').select('bien_id,date_arrivee,date_depart,montant,taux_commission,commission_fixe').gt('date_depart', monthStart).lte('date_arrivee', monthEnd).in('statut', ['confirmee', 'terminee']),
       supabase.from('contacts').select('*').eq('traite', false).order('created_at', { ascending: false }).limit(5),
       supabase.from('biens_visites').select('*', { count: 'exact', head: true }).gte('created_at', monthStart),
@@ -82,6 +84,7 @@ export default function AdminDashboard() {
     ]).then(([
       { data: { user } },
       { data: biensData, count: biensCount },
+      { data: biensLoues },
       { data: resData },
       { data: contacts },
       { count: vuesLoc },
@@ -99,6 +102,7 @@ export default function AdminDashboard() {
       setAdminName(user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Admin')
       setBiensActifs(biensCount ?? 0)
       setBiensActifsData(biensData ?? [])
+      setBiensLouesData(biensLoues ?? [])
       setReservationsData(resData ?? [])
       setLastContacts(contacts ?? [])
       setVuesLocation(vuesLoc ?? 0)
@@ -269,7 +273,7 @@ export default function AdminDashboard() {
 
           {/* Stats */}
           <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
-            <StatCard label="Biens actifs" value={biensActifs} sub="en gestion" />
+            <StatCard label="Biens actifs" value={biensActifs} sub={`en gestion${biensLouesData.length > 0 ? ` · ${biensLouesData.length} loué${biensLouesData.length > 1 ? 's' : ''}` : ''}`} />
             <StatCard label="Réservations ce mois" value={reservationsMois} sub="confirmées + terminées" />
             <StatCard label="Taux d'occupation" value={`${tauxOccupation}%`} sub="sur 30 jours" color="brun-mid" />
             {isSuperAdmin && (
@@ -311,7 +315,24 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               ))}
-              {!occupationParBien.length && (
+              {biensLouesData.map((b) => (
+                <div key={b.id} className="px-6 py-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2 min-w-0 mr-4">
+                      <span className="text-sm font-medium text-brun truncate">{b.nom}</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 font-medium flex-shrink-0">Loué</span>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-xs text-brun-mid/60">{b.locataire_nom ?? '—'}</span>
+                      <span className="text-sm font-medium text-green-600 min-w-[3rem] text-right">100%</span>
+                    </div>
+                  </div>
+                  <div className="w-full bg-brun/5 rounded-full h-2.5">
+                    <div className="h-2.5 rounded-full bg-green-500 w-full" />
+                  </div>
+                </div>
+              ))}
+              {!occupationParBien.length && !biensLouesData.length && (
                 <p className="px-6 py-8 text-center text-brun-mid/50 text-sm">Aucun bien actif</p>
               )}
             </div>

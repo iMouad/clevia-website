@@ -3,6 +3,8 @@
 import { useState, useRef } from 'react'
 import Image from 'next/image'
 import { Link } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
+import { useLocale } from 'next-intl'
 import { EQUIPEMENTS_MAP } from '@/lib/equipements'
 
 export type BienPublic = {
@@ -44,6 +46,8 @@ const TYPE_COLORS: Record<string, string> = {
 }
 
 export default function BienCard({ bien }: { bien: BienPublic }) {
+  const t = useTranslations('biens')
+  const locale = useLocale() as 'fr' | 'ar' | 'en'
   const photos = (bien.photos ?? []).filter(Boolean)
   const [idx, setIdx] = useState(0)
   const touchStartX = useRef<number | null>(null)
@@ -171,7 +175,7 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
             }`}
             style={{ fontFamily: 'var(--font-dm-sans)' }}
           >
-            {isDisponible ? 'Disponible' : 'Non disponible'}
+            {isDisponible ? t('disponible') : t('nonDisponible')}
           </span>
         </div>
       </div>
@@ -256,7 +260,7 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
               className="text-xs font-medium px-2.5 py-1 rounded-full bg-amber-50 text-amber-700"
               style={{ fontFamily: 'var(--font-dm-sans)' }}
             >
-              Longue durée
+              {t('longueDuree')}
             </span>
           )}
           {/* Meublé / Non meublé */}
@@ -265,7 +269,7 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
               className={`text-xs px-2.5 py-1 rounded-full ${bien.meuble ? 'bg-emerald-50 text-emerald-700' : 'bg-stone-50 text-stone-600'}`}
               style={{ fontFamily: 'var(--font-dm-sans)' }}
             >
-              {bien.meuble ? 'Meublé' : 'Non meublé'}
+              {bien.meuble ? t('meuble') : t('nonMeuble')}
             </span>
           )}
           {/* Cuisine équipée */}
@@ -274,7 +278,7 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
               className="text-xs px-2.5 py-1 rounded-full bg-sky-50 text-sky-700"
               style={{ fontFamily: 'var(--font-dm-sans)' }}
             >
-              Équipé
+              {t('equipe')}
             </span>
           )}
           {/* Charges incluses (longue durée) */}
@@ -283,7 +287,7 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
               className="text-xs px-2.5 py-1 rounded-full bg-sky-50 text-sky-700"
               style={{ fontFamily: 'var(--font-dm-sans)' }}
             >
-              Charges incluses
+              {t('chargesIncluses')}
             </span>
           )}
           {/* Durée min (longue durée) */}
@@ -292,7 +296,7 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
               className="text-xs px-2.5 py-1 rounded-full bg-violet-50 text-violet-700"
               style={{ fontFamily: 'var(--font-dm-sans)' }}
             >
-              Min. {bien.duree_min_mois} mois
+              {t('dureeMin', { mois: bien.duree_min_mois })}
             </span>
           )}
         </div>
@@ -303,7 +307,7 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
               <path d="M2 16c.5-1 1.5-1.5 3-1.5s2.5.5 3 1.5 1.5 1.5 3 1.5 2.5-.5 3-1.5 1.5-1.5 3-1.5M3 20h18M12 4l3 5H9l3-5zm0 0V9" />
             </svg>
-            {bien.distance_mer} de la mer
+            {bien.distance_mer} {t('distanceMer')}
           </p>
         )}
 
@@ -318,7 +322,7 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
                   className="text-xs px-2.5 py-1 rounded-full bg-creme border border-brun/10 text-brun-mid"
                   style={{ fontFamily: 'var(--font-dm-sans)' }}
                 >
-                  {def.label.fr}
+                  {def.label[locale] ?? def.label.fr}
                 </span>
               )
             })}
@@ -327,7 +331,7 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
                 className="text-xs px-2.5 py-1 rounded-full bg-brun/5 text-brun-mid/70"
                 style={{ fontFamily: 'var(--font-dm-sans)' }}
               >
-                +{extraCount} autres
+                {t('autresEquip', { count: extraCount })}
               </span>
             )}
           </div>
@@ -340,7 +344,7 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
             className="w-full flex items-center justify-center gap-2 bg-terra text-creme text-sm font-medium rounded-full px-6 py-2.5 hover:bg-brun transition-all duration-200"
             style={{ fontFamily: 'var(--font-dm-sans)' }}
           >
-            Voir les détails
+            {t('voirDetails')}
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
