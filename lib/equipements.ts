@@ -1,6 +1,6 @@
 export const EQUIPEMENT_KEYS = [
   'wifi', 'piscine', 'climatisation', 'parking',
-  'cuisine_equipee', 'lave_linge', 'seche_linge', 'televiseur',
+  'salon', 'cuisine_equipee', 'cuisine_separee', 'lave_linge', 'seche_linge', 'televiseur',
   'balcon', 'terrasse', 'vue_mer', 'barbecue',
   'ascenseur', 'gardien', 'digicode', 'fer_a_repasser',
   'machine_cafe', 'micro_ondes', 'lave_vaisselle',
@@ -38,9 +38,19 @@ export const EQUIPEMENTS: EquipementDef[] = [
     path: 'M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3M9 12H7v8h2v-3h2a3 3 0 0 0 0-6H9v1zm0 3v-2h2a1 1 0 1 1 0 2H9zM22 21v-6a2 2 0 0 0-2-2H14v8h2v-3h2v3h2zm-4-5h2',
   },
   {
+    key: 'salon',
+    label: { fr: 'Salon', ar: 'صالون', en: 'Living room' },
+    path: 'M4 18V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10M2 18h20M7 18v-4h10v4',
+  },
+  {
     key: 'cuisine_equipee',
     label: { fr: 'Cuisine équipée', ar: 'مطبخ مجهز', en: 'Equipped kitchen' },
     path: 'M3 11l19-9-9 19-2-8-8-2zM12 12l-3.5 3.5',
+  },
+  {
+    key: 'cuisine_separee',
+    label: { fr: 'Cuisine séparée', ar: 'مطبخ منفصل', en: 'Separate kitchen' },
+    path: 'M3 3h18v18H3V3zm0 9h18M12 12v9',
   },
   {
     key: 'lave_linge',

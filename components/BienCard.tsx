@@ -248,45 +248,54 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
           ) : null}
         </div>
 
-        {/* Infos longue durée */}
-        {bien.mode_location === 'longue_duree' && (
-          <div className="flex flex-wrap gap-1.5">
-            {bien.meuble !== null && (
-              <span
-                className={`text-xs px-2.5 py-1 rounded-full ${bien.meuble ? 'bg-emerald-50 text-emerald-700' : 'bg-stone-50 text-stone-600'}`}
-                style={{ fontFamily: 'var(--font-dm-sans)' }}
-              >
-                {bien.meuble ? 'Meublé' : 'Non meublé'}
-              </span>
-            )}
-            {bien.charges_incluses && (
-              <span
-                className="text-xs px-2.5 py-1 rounded-full bg-sky-50 text-sky-700"
-                style={{ fontFamily: 'var(--font-dm-sans)' }}
-              >
-                Charges incluses
-              </span>
-            )}
-            {bien.duree_min_mois && (
-              <span
-                className="text-xs px-2.5 py-1 rounded-full bg-violet-50 text-violet-700"
-                style={{ fontFamily: 'var(--font-dm-sans)' }}
-              >
-                Min. {bien.duree_min_mois} mois
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Badge mode */}
-        {bien.mode_location === 'longue_duree' && (
-          <span
-            className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full w-fit"
-            style={{ fontFamily: 'var(--font-dm-sans)' }}
-          >
-            Longue durée
-          </span>
-        )}
+        {/* Badges caractéristiques */}
+        <div className="flex flex-wrap gap-1.5">
+          {/* Badge mode longue durée */}
+          {bien.mode_location === 'longue_duree' && (
+            <span
+              className="text-xs font-medium px-2.5 py-1 rounded-full bg-amber-50 text-amber-700"
+              style={{ fontFamily: 'var(--font-dm-sans)' }}
+            >
+              Longue durée
+            </span>
+          )}
+          {/* Meublé / Non meublé */}
+          {bien.meuble !== null && (
+            <span
+              className={`text-xs px-2.5 py-1 rounded-full ${bien.meuble ? 'bg-emerald-50 text-emerald-700' : 'bg-stone-50 text-stone-600'}`}
+              style={{ fontFamily: 'var(--font-dm-sans)' }}
+            >
+              {bien.meuble ? 'Meublé' : 'Non meublé'}
+            </span>
+          )}
+          {/* Cuisine équipée */}
+          {(bien.equipements ?? []).includes('cuisine_equipee') && (
+            <span
+              className="text-xs px-2.5 py-1 rounded-full bg-sky-50 text-sky-700"
+              style={{ fontFamily: 'var(--font-dm-sans)' }}
+            >
+              Équipé
+            </span>
+          )}
+          {/* Charges incluses (longue durée) */}
+          {bien.mode_location === 'longue_duree' && bien.charges_incluses && (
+            <span
+              className="text-xs px-2.5 py-1 rounded-full bg-sky-50 text-sky-700"
+              style={{ fontFamily: 'var(--font-dm-sans)' }}
+            >
+              Charges incluses
+            </span>
+          )}
+          {/* Durée min (longue durée) */}
+          {bien.mode_location === 'longue_duree' && bien.duree_min_mois && (
+            <span
+              className="text-xs px-2.5 py-1 rounded-full bg-violet-50 text-violet-700"
+              style={{ fontFamily: 'var(--font-dm-sans)' }}
+            >
+              Min. {bien.duree_min_mois} mois
+            </span>
+          )}
+        </div>
 
         {/* Distance mer */}
         {bien.distance_mer && (
