@@ -425,7 +425,8 @@
     "longueDuree": "إيجار طويل الأمد",
     "courteDuree": "إيجار قصير الأمد",
     "filterDuree": "المدة",
-    "filterTous": "الكل"
+    "filterTous": "الكل",
+    "reserverSur": "احجز مباشرة عبر :"
   },
   "vente": {
     "tag": "عقارات",

@@ -425,7 +425,8 @@
     "longueDuree": "Longue durée",
     "courteDuree": "Courte durée",
     "filterDuree": "Durée",
-    "filterTous": "Tous"
+    "filterTous": "Tous",
+    "reserverSur": "Réserver directement sur :"
   },
   "vente": {
     "tag": "Immobilier",

@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id, locale } = await params
   const supabase = await createClient()
   const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
-  const { data } = await supabase.from('biens').select('nom, description, photos, ville').eq(isUUID ? 'id' : 'slug', id).single()
+  const { data } = await supabase.from('biens').select('nom, description, photos, ville, mode_location').eq(isUUID ? 'id' : 'slug', id).single()
   if (!data) return { title: 'Bien introuvable' }
 
   const mainPhoto = (data.photos as string[] | null)?.[0] ?? null
@@ -28,7 +28,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   // Description toujours définie
   const ville = (data.ville as string | null) ?? 'Maroc'
-  const fallbackDesc = `Location courte durée à ${ville}, géré par Clévia Immobilier - Conciergerie. Réservez sur Airbnb, Booking ou contactez-nous directement.`
+  const isLongueDuree = (data as any).mode_location === 'longue_duree'
+  const fallbackDesc = isLongueDuree
+    ? `Location longue durée à ${ville}, géré par Clévia Immobilier - Conciergerie. Contactez-nous pour plus d'informations.`
+    : `Location courte durée à ${ville}, géré par Clévia Immobilier - Conciergerie. Réservez sur Airbnb, Booking ou contactez-nous directement.`
   const ogDescription = (data.description as string | null)?.slice(0, 160) ?? fallbackDesc
 
   const slugOrId = (data as any).slug || id
@@ -153,7 +156,9 @@ export default async function BienDetailPage({ params }: Props) {
   }
 
   const whatsappMsg = encodeURIComponent(
-    `Bonjour, je suis intéressé(e) par le bien "${bien.nom}" sur Clévia Immobilier - Conciergerie. Pouvez-vous me donner plus d'informations ?`
+    bien.mode_location === 'longue_duree'
+      ? `Bonjour, je suis intéressé(e) par la location longue durée du bien "${bien.nom}" sur Clévia Immobilier - Conciergerie. Pouvez-vous me donner plus d'informations ?`
+      : `Bonjour, je suis intéressé(e) par le bien "${bien.nom}" sur Clévia Immobilier - Conciergerie. Pouvez-vous me donner plus d'informations ?`
   )
   const contactLink = `/contact?bien=${encodeURIComponent(bien.nom)}`
 
@@ -503,7 +508,7 @@ export default async function BienDetailPage({ params }: Props) {
                 {bien.mode_location !== 'longue_duree' && (bien.airbnb_url || bien.booking_url || bien.avito_url) && (
                   <div className="border-t border-brun/8 pt-4 flex flex-col gap-2">
                     <p className="text-xs text-brun-mid/50 text-center mb-1" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                      Réserver directement sur :
+                      {t('reserverSur')}
                     </p>
                     {bien.airbnb_url && (
                       <a href={bien.airbnb_url} target="_blank" rel="noopener noreferrer"

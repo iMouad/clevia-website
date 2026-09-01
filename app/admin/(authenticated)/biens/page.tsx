@@ -274,7 +274,7 @@ export default function BiensPage() {
         if (error) throw error
         const changes: Record<string, { avant: any; apres: any }> = {}
         if (original) {
-          for (const key of ['nom', 'ville', 'type', 'statut', 'capacite', 'prix_nuit', 'disponible'] as const) {
+          for (const key of ['nom', 'ville', 'type', 'statut', 'capacite', 'prix_nuit', 'prix_mensuel', 'mode_location', 'disponible'] as const) {
             if ((original as any)[key] !== (payload as any)[key]) changes[key] = { avant: (original as any)[key], apres: (payload as any)[key] }
           }
         }

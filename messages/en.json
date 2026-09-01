@@ -425,7 +425,8 @@
     "longueDuree": "Long-term rental",
     "courteDuree": "Short-term rental",
     "filterDuree": "Duration",
-    "filterTous": "All"
+    "filterTous": "All",
+    "reserverSur": "Book directly on:"
   },
   "vente": {
     "tag": "Real Estate",
