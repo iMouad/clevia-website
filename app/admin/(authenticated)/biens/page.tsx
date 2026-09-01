@@ -46,7 +46,7 @@ type Bien = {
   disponible_le: string | null
   conditions: string | null
   description: string | null
-  statut: 'actif' | 'en_attente' | 'inactif'
+  statut: 'actif' | 'en_attente' | 'loue' | 'inactif'
   photos: string[] | null
   airbnb_url: string | null
   booking_url: string | null
@@ -57,13 +57,17 @@ type Bien = {
 }
 
 const TYPE_OPTIONS = ['Appartement', 'Villa', 'Studio', 'Autre']
-const STATUT_OPTIONS = ['actif', 'en_attente', 'inactif']
-const STATUT_LABELS: Record<string, string> = { actif: 'Actif', en_attente: 'En attente', inactif: 'Inactif' }
+const STATUT_OPTIONS = ['actif', 'en_attente', 'loue', 'inactif']
+const STATUT_LABELS: Record<string, string> = { actif: 'Actif', en_attente: 'En attente', loue: 'Loué', inactif: 'Inactif' }
 const STATUT_COLORS: Record<string, string> = {
   actif: 'bg-green-100 text-green-700',
   en_attente: 'bg-orange-100 text-orange-700',
+  loue: 'bg-blue-100 text-blue-700',
   inactif: 'bg-gray-100 text-gray-500',
 }
+
+const MODE_LABELS: Record<string, string> = { courte_duree: 'Courte durée', longue_duree: 'Longue durée' }
+const MODE_COLORS: Record<string, string> = { courte_duree: 'bg-purple-100 text-purple-700', longue_duree: 'bg-amber-100 text-amber-700' }
 
 const MODE_OPTIONS = [
   { value: 'courte_duree', label: 'Courte durée' },
@@ -184,6 +188,7 @@ export default function BiensPage() {
   const [slugsResult, setSlugsResult] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [filtreStatut, setFiltreStatut] = useState<string>('tous')
+  const [filtreMode, setFiltreMode] = useState<string>('tous')
   const [sortCol, setSortCol] = useState<string>('created_at')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [resCount, setResCount] = useState<Record<string, number>>({})
@@ -448,6 +453,7 @@ export default function BiensPage() {
   const biensFiltered = biens
     .filter((b) => {
       if (filtreStatut !== 'tous' && b.statut !== filtreStatut) return false
+      if (filtreMode !== 'tous' && b.mode_location !== filtreMode) return false
       if (search) {
         const q = search.toLowerCase()
         return (b.nom?.toLowerCase().includes(q) || b.ville?.toLowerCase().includes(q) || b.type?.toLowerCase().includes(q))
@@ -536,6 +542,15 @@ export default function BiensPage() {
           ))}
         </div>
         <div className="flex gap-1.5">
+          {['tous', 'courte_duree', 'longue_duree'].map((m) => (
+            <button key={m} onClick={() => setFiltreMode(m)}
+              className={`text-sm font-medium rounded-full px-4 py-2 transition-all ${filtreMode === m ? 'bg-brun text-creme' : 'border border-brun/20 text-brun-mid hover:border-brun hover:text-brun'}`}
+              style={{ fontFamily: 'var(--font-dm-sans)' }}>
+              {m === 'tous' ? 'Tous modes' : MODE_LABELS[m]}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-1.5">
           {(['7j', '30j', 'tout'] as const).map((p) => (
             <button key={p} onClick={() => setPeriode(p)}
               className={`text-xs font-medium rounded-full px-3 py-2 transition-all ${periode === p ? 'bg-brun text-creme' : 'border border-brun/15 text-brun-mid/60 hover:border-brun hover:text-brun'}`}
@@ -587,6 +602,9 @@ export default function BiensPage() {
               <p className="font-medium text-brun truncate text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>{b.nom}</p>
               <p className="text-xs text-brun-mid/60 mt-0.5" style={{ fontFamily: 'var(--font-dm-sans)' }}>{b.ville ?? ''}{b.type ? ` · ${b.type}` : ''}</p>
               <div className="flex items-center gap-2 mt-2 flex-wrap">
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${MODE_COLORS[b.mode_location]}`}>
+                  {MODE_LABELS[b.mode_location]}
+                </span>
                 <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUT_COLORS[b.statut]}`}>
                   {STATUT_LABELS[b.statut]}
                 </span>
@@ -673,6 +691,7 @@ export default function BiensPage() {
                   { key: 'nom', label: 'Nom' },
                   { key: 'ville', label: 'Ville' },
                   { key: '', label: 'Type' },
+                  { key: '', label: 'Mode' },
                   { key: 'prix_nuit', label: 'Prix' },
                   { key: 'statut', label: 'Statut' },
                   { key: '', label: 'Dispo' },
@@ -693,9 +712,9 @@ export default function BiensPage() {
             </thead>
             <tbody className="divide-y divide-brun/5">
               {loading ? (
-                <tr><td colSpan={11} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
+                <tr><td colSpan={12} className="px-4 py-10 text-center text-brun-mid/50">Chargement…</td></tr>
               ) : !biensFiltered.length ? (
-                <tr><td colSpan={11} className="px-4 py-10 text-center text-brun-mid/50">{biens.length ? 'Aucun résultat.' : 'Aucun bien'}</td></tr>
+                <tr><td colSpan={12} className="px-4 py-10 text-center text-brun-mid/50">{biens.length ? 'Aucun résultat.' : 'Aucun bien'}</td></tr>
               ) : biensFiltered.map((b) => (
                 <Fragment key={b.id}>
                   <tr className="hover:bg-creme/40 transition-colors">
@@ -715,6 +734,11 @@ export default function BiensPage() {
                     <td className="px-4 py-3 text-brun font-medium">{b.nom}</td>
                     <td className="px-4 py-3 text-brun-mid">{b.ville ?? '—'}</td>
                     <td className="px-4 py-3 text-brun-mid">{b.type ?? '—'}</td>
+                    <td className="px-4 py-3">
+                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${MODE_COLORS[b.mode_location]}`}>
+                        {MODE_LABELS[b.mode_location]}
+                      </span>
+                    </td>
                     <td className="px-4 py-3 text-brun-mid">
                       {b.mode_location === 'longue_duree'
                         ? (b.prix_mensuel ? `${b.prix_mensuel.toLocaleString()} MAD/mois` : '—')
@@ -769,7 +793,7 @@ export default function BiensPage() {
                     const stats = getStatsBien(b.id)
                     return (
                       <tr key={`stats-${b.id}`}>
-                        <td colSpan={11} className="px-6 pb-4 pt-2 bg-creme/60">
+                        <td colSpan={12} className="px-6 pb-4 pt-2 bg-creme/60">
                           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                             <div>
                               <p className="text-xs font-medium text-brun-mid/50 uppercase tracking-wide mb-2">7 derniers jours</p>
