@@ -416,7 +416,16 @@
     "nuitLabel": "/ night",
     "retour": "Back to properties",
     "nonTrouve": "Property not found",
-    "galerieTitre": "Photo gallery"
+    "galerieTitre": "Photo gallery",
+    "moisLabel": "/ month",
+    "meuble": "Furnished",
+    "nonMeuble": "Unfurnished",
+    "chargesIncluses": "Utilities included",
+    "dureeMin": "Min. {mois} months",
+    "longueDuree": "Long-term rental",
+    "courteDuree": "Short-term rental",
+    "filterDuree": "Duration",
+    "filterTous": "All"
   },
   "vente": {
     "tag": "Real Estate",

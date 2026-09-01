@@ -416,7 +416,16 @@
     "nuitLabel": "/ ليلة",
     "retour": "العودة إلى العقارات",
     "nonTrouve": "العقار غير موجود",
-    "galerieTitre": "معرض الصور"
+    "galerieTitre": "معرض الصور",
+    "moisLabel": "/ شهر",
+    "meuble": "مفروش",
+    "nonMeuble": "غير مفروش",
+    "chargesIncluses": "التكاليف مشمولة",
+    "dureeMin": "الحد الأدنى {mois} أشهر",
+    "longueDuree": "إيجار طويل الأمد",
+    "courteDuree": "إيجار قصير الأمد",
+    "filterDuree": "المدة",
+    "filterTous": "الكل"
   },
   "vente": {
     "tag": "عقارات",

@@ -23,6 +23,8 @@ const PRIX_OPTIONS = [
 
 type SortOption = 'default' | 'prix_asc' | 'prix_desc'
 
+type ModeOption = 'tous' | 'courte_duree' | 'longue_duree'
+
 type Props = {
   biens: BienPublic[]
   allLabel: string
@@ -30,6 +32,7 @@ type Props = {
 }
 
 export default function BiensGrid({ biens, allLabel, emptyLabel }: Props) {
+  const [modeFilter,      setModeFilter]      = useState<ModeOption>('tous')
   const [typeFilter,      setTypeFilter]      = useState<string | null>(null)
   const [villeFilter,     setVilleFilter]     = useState<string | null>(null)
   const [disponibleOnly,  setDisponibleOnly]  = useState(false)
@@ -48,11 +51,15 @@ export default function BiensGrid({ biens, allLabel, emptyLabel }: Props) {
     return CITIES_LOCATION.filter((c) => [...villes].some((v) => v.toLowerCase().includes(c.toLowerCase())))
   }, [biens])
 
-  const hasPrixData = useMemo(() => biens.some((b) => b.prix_nuit != null), [biens])
+  const hasPrixData = useMemo(() => biens.some((b) => b.prix_nuit != null || b.prix_mensuel != null), [biens])
   const hasCapaciteData = useMemo(() => biens.some((b) => b.capacite_max != null || b.capacite != null), [biens])
+  const hasLongueDuree = useMemo(() => biens.some((b) => b.mode_location === 'longue_duree'), [biens])
+  const hasCourteDuree = useMemo(() => biens.some((b) => b.mode_location === 'courte_duree'), [biens])
+  const hasMultipleModes = hasLongueDuree && hasCourteDuree
 
   const filtered = useMemo(() => {
     let result = biens
+    if (modeFilter !== 'tous') result = result.filter((b) => b.mode_location === modeFilter)
     if (typeFilter) result = result.filter((b) => b.type === typeFilter)
     if (villeFilter) result = result.filter((b) => b.ville?.toLowerCase().includes(villeFilter.toLowerCase()))
     if (disponibleOnly) result = result.filter((b) => b.disponible !== false)
@@ -66,19 +73,28 @@ export default function BiensGrid({ biens, allLabel, emptyLabel }: Props) {
     if (prixFilter !== null) {
       const { min, max } = PRIX_OPTIONS[prixFilter]
       result = result.filter((b) => {
-        const prix = b.prix_nuit ?? 0
+        const prix = modeFilter === 'longue_duree' ? (b.prix_mensuel ?? 0) : (b.prix_nuit ?? 0)
         return prix >= min && prix <= max
       })
     }
-    if (sort === 'prix_asc')  result = [...result].sort((a, b) => (a.prix_nuit ?? 0) - (b.prix_nuit ?? 0))
-    if (sort === 'prix_desc') result = [...result].sort((a, b) => (b.prix_nuit ?? 0) - (a.prix_nuit ?? 0))
+    if (sort === 'prix_asc')  result = [...result].sort((a, b) => {
+      const pa = a.mode_location === 'longue_duree' ? (a.prix_mensuel ?? 0) : (a.prix_nuit ?? 0)
+      const pb = b.mode_location === 'longue_duree' ? (b.prix_mensuel ?? 0) : (b.prix_nuit ?? 0)
+      return pa - pb
+    })
+    if (sort === 'prix_desc') result = [...result].sort((a, b) => {
+      const pa = a.mode_location === 'longue_duree' ? (a.prix_mensuel ?? 0) : (a.prix_nuit ?? 0)
+      const pb = b.mode_location === 'longue_duree' ? (b.prix_mensuel ?? 0) : (b.prix_nuit ?? 0)
+      return pb - pa
+    })
     return result
-  }, [biens, typeFilter, villeFilter, disponibleOnly, capaciteFilter, prixFilter, sort])
+  }, [biens, modeFilter, typeFilter, villeFilter, disponibleOnly, capaciteFilter, prixFilter, sort])
 
-  const activeCount = [typeFilter, villeFilter, disponibleOnly || null, capaciteFilter !== null ? 1 : null, prixFilter !== null ? 1 : null]
+  const activeCount = [modeFilter !== 'tous' ? 1 : null, typeFilter, villeFilter, disponibleOnly || null, capaciteFilter !== null ? 1 : null, prixFilter !== null ? 1 : null]
     .filter(Boolean).length
 
   function resetAll() {
+    setModeFilter('tous')
     setTypeFilter(null)
     setVilleFilter(null)
     setDisponibleOnly(false)
@@ -145,6 +161,24 @@ export default function BiensGrid({ biens, allLabel, emptyLabel }: Props) {
 
         {/* Filtres — toujours visibles sur desktop, toggle sur mobile */}
         <div className={`border-t border-brun/8 px-5 pb-5 pt-4 flex flex-col gap-4 sm:flex ${filtersOpen ? 'flex' : 'hidden'}`}>
+
+          {/* Ligne 0 : Mode de location */}
+          {hasMultipleModes && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-medium text-brun-mid/40 uppercase tracking-wider mr-1 w-full sm:w-auto">
+                Durée
+              </span>
+              {([
+                ['tous', 'Tous'],
+                ['courte_duree', 'Courte durée'],
+                ['longue_duree', 'Longue durée'],
+              ] as [ModeOption, string][]).map(([val, label]) => (
+                <button key={val} onClick={() => setModeFilter(val)} className={chip(modeFilter === val)}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Ligne 1 : Type */}
           {availableTypes.length > 1 && (

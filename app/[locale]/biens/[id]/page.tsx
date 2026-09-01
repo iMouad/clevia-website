@@ -99,7 +99,7 @@ export default async function BienDetailPage({ params }: Props) {
   // Autres biens
   const { data: autresBiensRaw } = await supabase
     .from('biens')
-    .select('id, nom, ville, adresse, type, capacite, chambres, salles_de_bain, capacite_max, surface, equipements, prix_nuit, description, photos, distance_mer, disponible, airbnb_url, booking_url, avito_url')
+    .select('id, nom, ville, adresse, type, capacite, chambres, salles_de_bain, capacite_max, surface, equipements, prix_nuit, prix_mensuel, mode_location, charges_incluses, meuble, duree_min_mois, description, photos, distance_mer, disponible, airbnb_url, booking_url, avito_url')
     .eq('statut', 'actif')
     .neq('id', id)
     .limit(3)
@@ -109,10 +109,14 @@ export default async function BienDetailPage({ params }: Props) {
     type: b.type ?? null, capacite: b.capacite ?? null, chambres: b.chambres ?? null,
     salles_de_bain: b.salles_de_bain ?? null, capacite_max: b.capacite_max ?? null,
     surface: b.surface ?? null, equipements: b.equipements ?? null,
-    prix_nuit: b.prix_nuit ?? null, description: b.description ?? null,
-    photos: b.photos ?? null, distance_mer: b.distance_mer ?? null,
-    disponible: b.disponible ?? null, airbnb_url: b.airbnb_url ?? null,
-    booking_url: b.booking_url ?? null, avito_url: b.avito_url ?? null,
+    prix_nuit: b.prix_nuit ?? null, prix_mensuel: b.prix_mensuel ?? null,
+    mode_location: b.mode_location ?? 'courte_duree',
+    charges_incluses: b.charges_incluses ?? null, meuble: b.meuble ?? null,
+    duree_min_mois: b.duree_min_mois ?? null,
+    description: b.description ?? null, photos: b.photos ?? null,
+    distance_mer: b.distance_mer ?? null, disponible: b.disponible ?? null,
+    airbnb_url: b.airbnb_url ?? null, booking_url: b.booking_url ?? null,
+    avito_url: b.avito_url ?? null,
   }))
 
   // JSON-LD
@@ -130,11 +134,13 @@ export default async function BienDetailPage({ params }: Props) {
       addressCountry: 'MA',
     },
     ...(bien.chambres && { numberOfRooms: bien.chambres }),
-    ...(bien.prix_nuit && {
-      priceRange: `${bien.prix_nuit} MAD/nuit`,
+    ...((bien.mode_location === 'longue_duree' ? bien.prix_mensuel : bien.prix_nuit) && {
+      priceRange: bien.mode_location === 'longue_duree'
+        ? `${bien.prix_mensuel} MAD/mois`
+        : `${bien.prix_nuit} MAD/nuit`,
       offers: {
         '@type': 'Offer',
-        price: String(bien.prix_nuit),
+        price: String(bien.mode_location === 'longue_duree' ? bien.prix_mensuel : bien.prix_nuit),
         priceCurrency: 'MAD',
         availability: isDisponible ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       },
@@ -418,7 +424,38 @@ export default async function BienDetailPage({ params }: Props) {
             <div className="lg:col-span-1">
               <div className="sticky top-6 bg-white rounded-2xl border border-brun/10 shadow-lg p-6 flex flex-col gap-5">
                 {/* Prix */}
-                {bien.prix_nuit && (
+                {bien.mode_location === 'longue_duree' && bien.prix_mensuel ? (
+                  <div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-4xl text-brun" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
+                        {Number(bien.prix_mensuel).toLocaleString()}
+                      </span>
+                      <span className="text-brun-mid text-sm" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                        MAD{t('moisLabel')}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 mt-3">
+                      <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-amber-50 text-amber-700" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                        {t('longueDuree')}
+                      </span>
+                      {bien.meuble !== null && (
+                        <span className={`text-xs px-2.5 py-1 rounded-full ${bien.meuble ? 'bg-emerald-50 text-emerald-700' : 'bg-stone-50 text-stone-600'}`} style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                          {bien.meuble ? t('meuble') : t('nonMeuble')}
+                        </span>
+                      )}
+                      {bien.charges_incluses && (
+                        <span className="text-xs px-2.5 py-1 rounded-full bg-sky-50 text-sky-700" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                          {t('chargesIncluses')}
+                        </span>
+                      )}
+                      {bien.duree_min_mois && (
+                        <span className="text-xs px-2.5 py-1 rounded-full bg-violet-50 text-violet-700" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                          Min. {bien.duree_min_mois} mois
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ) : bien.prix_nuit ? (
                   <div className="flex items-baseline gap-1">
                     <span className="text-4xl text-brun" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
                       {bien.prix_nuit}
@@ -427,7 +464,7 @@ export default async function BienDetailPage({ params }: Props) {
                       MAD{t('nuitLabel')}
                     </span>
                   </div>
-                )}
+                ) : null}
 
                 <div
                   className={`text-sm font-medium px-3 py-2 rounded-xl text-center ${isDisponible ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}

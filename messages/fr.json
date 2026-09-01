@@ -416,7 +416,16 @@
     "nuitLabel": "/ nuit",
     "retour": "Retour aux biens",
     "nonTrouve": "Bien introuvable",
-    "galerieTitre": "Galerie photos"
+    "galerieTitre": "Galerie photos",
+    "moisLabel": "/ mois",
+    "meuble": "Meublé",
+    "nonMeuble": "Non meublé",
+    "chargesIncluses": "Charges incluses",
+    "dureeMin": "Min. {mois} mois",
+    "longueDuree": "Longue durée",
+    "courteDuree": "Courte durée",
+    "filterDuree": "Durée",
+    "filterTous": "Tous"
   },
   "vente": {
     "tag": "Immobilier",

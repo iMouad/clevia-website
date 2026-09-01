@@ -18,6 +18,11 @@ export type BienPublic = {
   surface: number | null
   equipements: string[] | null
   prix_nuit: number | null
+  prix_mensuel: number | null
+  mode_location: 'courte_duree' | 'longue_duree'
+  charges_incluses: boolean | null
+  meuble: boolean | null
+  duree_min_mois: number | null
   description: string | null
   photos: string[] | null
   distance_mer: string | null
@@ -223,15 +228,62 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
               {bien.surface} m²
             </span>
           )}
-          {bien.prix_nuit && (
+          {bien.mode_location === 'longue_duree' && bien.prix_mensuel ? (
+            <span className="ml-auto flex-shrink-0">
+              <span className="text-terra font-medium text-base" style={{ fontFamily: 'var(--font-cormorant)' }}>
+                {bien.prix_mensuel.toLocaleString()}
+              </span>
+              <span className="text-brun-mid text-xs"> MAD/mois</span>
+            </span>
+          ) : bien.prix_nuit ? (
             <span className="ml-auto flex-shrink-0">
               <span className="text-terra font-medium text-base" style={{ fontFamily: 'var(--font-cormorant)' }}>
                 {bien.prix_nuit}
               </span>
               <span className="text-brun-mid text-xs"> MAD/nuit</span>
             </span>
-          )}
+          ) : null}
         </div>
+
+        {/* Infos longue durée */}
+        {bien.mode_location === 'longue_duree' && (
+          <div className="flex flex-wrap gap-1.5">
+            {bien.meuble !== null && (
+              <span
+                className={`text-xs px-2.5 py-1 rounded-full ${bien.meuble ? 'bg-emerald-50 text-emerald-700' : 'bg-stone-50 text-stone-600'}`}
+                style={{ fontFamily: 'var(--font-dm-sans)' }}
+              >
+                {bien.meuble ? 'Meublé' : 'Non meublé'}
+              </span>
+            )}
+            {bien.charges_incluses && (
+              <span
+                className="text-xs px-2.5 py-1 rounded-full bg-sky-50 text-sky-700"
+                style={{ fontFamily: 'var(--font-dm-sans)' }}
+              >
+                Charges incluses
+              </span>
+            )}
+            {bien.duree_min_mois && (
+              <span
+                className="text-xs px-2.5 py-1 rounded-full bg-violet-50 text-violet-700"
+                style={{ fontFamily: 'var(--font-dm-sans)' }}
+              >
+                Min. {bien.duree_min_mois} mois
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Badge mode */}
+        {bien.mode_location === 'longue_duree' && (
+          <span
+            className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full w-fit"
+            style={{ fontFamily: 'var(--font-dm-sans)' }}
+          >
+            Longue durée
+          </span>
+        )}
 
         {/* Distance mer */}
         {bien.distance_mer && (

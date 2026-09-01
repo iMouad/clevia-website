@@ -37,6 +37,11 @@ type Bien = {
   distance_mer: string | null
   disponible: boolean
   prix_nuit: number | null
+  prix_mensuel: number | null
+  mode_location: 'courte_duree' | 'longue_duree'
+  charges_incluses: boolean
+  meuble: boolean
+  duree_min_mois: number | null
   description: string | null
   statut: 'actif' | 'en_attente' | 'inactif'
   photos: string[] | null
@@ -57,9 +62,16 @@ const STATUT_COLORS: Record<string, string> = {
   inactif: 'bg-gray-100 text-gray-500',
 }
 
+const MODE_OPTIONS = [
+  { value: 'courte_duree', label: 'Courte durée' },
+  { value: 'longue_duree', label: 'Longue durée' },
+]
+
 const EMPTY: Partial<Bien> = {
   nom: '', ville: '', adresse: '', latitude: null, longitude: null, type: 'Appartement',
-  capacite: null, prix_nuit: null, description: '', statut: 'actif', photos: [],
+  capacite: null, prix_nuit: null, prix_mensuel: null, mode_location: 'courte_duree',
+  charges_incluses: false, meuble: true, duree_min_mois: null,
+  description: '', statut: 'actif', photos: [],
   airbnb_url: '', booking_url: '', avito_url: '', video_url: null,
   chambres: 1, salles_de_bain: 1, capacite_max: 2, surface: null,
   etage: '', equipements: [], regles: [], distance_mer: '', disponible: true,
@@ -574,9 +586,11 @@ export default function BiensPage() {
                 <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${b.disponible !== false ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                   {b.disponible !== false ? 'Disponible' : 'Indisponible'}
                 </span>
-                {b.prix_nuit && (
+                {b.mode_location === 'longue_duree' && b.prix_mensuel ? (
+                  <span className="text-xs text-brun-mid/60" style={{ fontFamily: 'var(--font-dm-sans)' }}>{b.prix_mensuel.toLocaleString()} MAD/mois</span>
+                ) : b.prix_nuit ? (
                   <span className="text-xs text-brun-mid/60" style={{ fontFamily: 'var(--font-dm-sans)' }}>{b.prix_nuit} MAD/nuit</span>
-                )}
+                ) : null}
                 <span className="text-xs text-terra" style={{ fontFamily: 'var(--font-dm-sans)' }}>
                   {visitesParBien(b.id).length} vues
                 </span>
@@ -652,7 +666,7 @@ export default function BiensPage() {
                   { key: 'nom', label: 'Nom' },
                   { key: 'ville', label: 'Ville' },
                   { key: '', label: 'Type' },
-                  { key: 'prix_nuit', label: 'Prix/nuit' },
+                  { key: 'prix_nuit', label: 'Prix' },
                   { key: 'statut', label: 'Statut' },
                   { key: '', label: 'Dispo' },
                   { key: 'vues', label: 'Vues' },
@@ -694,7 +708,12 @@ export default function BiensPage() {
                     <td className="px-4 py-3 text-brun font-medium">{b.nom}</td>
                     <td className="px-4 py-3 text-brun-mid">{b.ville ?? '—'}</td>
                     <td className="px-4 py-3 text-brun-mid">{b.type ?? '—'}</td>
-                    <td className="px-4 py-3 text-brun-mid">{b.prix_nuit ? `${b.prix_nuit} MAD` : '—'}</td>
+                    <td className="px-4 py-3 text-brun-mid">
+                      {b.mode_location === 'longue_duree'
+                        ? (b.prix_mensuel ? `${b.prix_mensuel.toLocaleString()} MAD/mois` : '—')
+                        : (b.prix_nuit ? `${b.prix_nuit} MAD/nuit` : '—')
+                      }
+                    </td>
                     <td className="px-4 py-3">
                       <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUT_COLORS[b.statut]}`}>
                         {STATUT_LABELS[b.statut]}
@@ -872,6 +891,54 @@ export default function BiensPage() {
             </div>
           </div>
 
+          {/* Mode de location */}
+          <Section title="Mode de location">
+            <div className="flex gap-2 mb-3">
+              {MODE_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setEditing((p) => ({ ...p, mode_location: opt.value as any }))}
+                  className={`flex-1 text-sm font-medium rounded-xl px-4 py-3 transition-all ${
+                    editing.mode_location === opt.value
+                      ? 'bg-terra text-creme shadow-sm'
+                      : 'border border-brun/20 text-brun-mid hover:border-terra hover:text-terra'
+                  }`}
+                  style={{ fontFamily: 'var(--font-dm-sans)' }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+
+            {editing.mode_location === 'longue_duree' && (
+              <div className="flex flex-col gap-3 bg-amber-50/50 rounded-xl p-4 border border-amber-200/50">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className={labelClass}>Prix mensuel (MAD) *</label>
+                    <input type="number" min={0} className={inputClass} value={editing.prix_mensuel ?? ''} onChange={(e) => setEditing((p) => ({ ...p, prix_mensuel: Number(e.target.value) || null }))} placeholder="3500" />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Durée minimum (mois)</label>
+                    <input type="number" min={1} className={inputClass} value={editing.duree_min_mois ?? ''} onChange={(e) => setEditing((p) => ({ ...p, duree_min_mois: Number(e.target.value) || null }))} placeholder="6" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <Toggle
+                    checked={editing.meuble !== false}
+                    onChange={(v) => setEditing((p) => ({ ...p, meuble: v }))}
+                    label="Meublé"
+                  />
+                  <Toggle
+                    checked={editing.charges_incluses === true}
+                    onChange={(v) => setEditing((p) => ({ ...p, charges_incluses: v }))}
+                    label="Charges incluses"
+                  />
+                </div>
+              </div>
+            )}
+          </Section>
+
           {/* Caractéristiques */}
           <Section title="Caractéristiques">
             <div className="grid grid-cols-2 gap-3">
@@ -904,10 +971,18 @@ export default function BiensPage() {
 
           {/* Prix + Statut */}
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass}>Prix / nuit (MAD)</label>
-              <input type="number" min={0} className={inputClass} value={editing.prix_nuit ?? ''} onChange={(e) => setEditing((p) => ({ ...p, prix_nuit: Number(e.target.value) || null }))} placeholder="350" />
-            </div>
+            {editing.mode_location !== 'longue_duree' && (
+              <div>
+                <label className={labelClass}>Prix / nuit (MAD)</label>
+                <input type="number" min={0} className={inputClass} value={editing.prix_nuit ?? ''} onChange={(e) => setEditing((p) => ({ ...p, prix_nuit: Number(e.target.value) || null }))} placeholder="350" />
+              </div>
+            )}
+            {editing.mode_location === 'longue_duree' && (
+              <div>
+                <label className={labelClass}>Prix / mois (MAD)</label>
+                <input type="number" min={0} className={inputClass} value={editing.prix_mensuel ?? ''} onChange={(e) => setEditing((p) => ({ ...p, prix_mensuel: Number(e.target.value) || null }))} placeholder="3500" />
+              </div>
+            )}
             <div>
               <label className={labelClass}>Statut</label>
               <AdminSelect value={editing.statut ?? 'actif'} onChange={(e) => setEditing((p) => ({ ...p, statut: e.target.value as any }))}>
