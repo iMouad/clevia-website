@@ -281,7 +281,7 @@ export default async function BienDetailPage({ params }: Props) {
                       </div>
                       <div>
                         <p className="text-lg text-brun font-medium" style={{ fontFamily: 'var(--font-dm-sans)' }}>{bien.capacite_max ?? bien.capacite}</p>
-                        <p className="text-xs text-brun-mid/70" style={{ fontFamily: 'var(--font-dm-sans)' }}>{t('capaciteMax')}</p>
+                        <p className="text-xs text-brun-mid/70" style={{ fontFamily: 'var(--font-dm-sans)' }}>{isLD ? t('capaciteLabel') : t('capaciteMax')}</p>
                       </div>
                     </div>
                   )}

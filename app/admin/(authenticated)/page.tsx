@@ -138,11 +138,12 @@ export default function AdminDashboard() {
     const clampedEnd = d2 > mEnd ? mEnd : d2
     totalNuits += Math.max(0, Math.round((clampedEnd.getTime() - clampedStart.getTime()) / 86400000))
   }
-  const tauxOccupation = biensActifs
-    ? Math.round((totalNuits / (biensActifs * 30)) * 100)
+  const biensCourteDuree = biensActifsData.filter((b) => b.mode_location !== 'longue_duree')
+  const tauxOccupation = biensCourteDuree.length
+    ? Math.round((totalNuits / (biensCourteDuree.length * 30)) * 100)
     : 0
 
-  const occupationParBien = biensActifsData.map((bien) => {
+  const occupationParBien = biensCourteDuree.map((bien) => {
     const resaBien = reservationsData.filter((r: any) => r.bien_id === bien.id)
     let nuits = 0
     for (const r of resaBien) {
