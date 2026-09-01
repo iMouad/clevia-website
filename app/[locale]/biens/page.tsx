@@ -20,11 +20,24 @@ export default async function BiensPage({ params }: Props) {
   const t = await getTranslations({ locale, namespace: 'biens' })
 
   const supabase = await createClient()
-  const { data } = await supabase
-    .from('biens')
-    .select('id, nom, ville, adresse, type, capacite, chambres, salles_de_bain, capacite_max, surface, equipements, prix_nuit, prix_mensuel, mode_location, charges_incluses, meuble, duree_min_mois, caution, disponible_le, conditions, description, photos, distance_mer, disponible, airbnb_url, booking_url, avito_url, slug')
-    .eq('statut', 'actif')
-    .order('created_at', { ascending: false })
+  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
+
+  const [{ data }, { data: visitesData }] = await Promise.all([
+    supabase
+      .from('biens')
+      .select('id, nom, ville, adresse, type, capacite, chambres, salles_de_bain, capacite_max, surface, equipements, prix_nuit, prix_mensuel, mode_location, charges_incluses, meuble, duree_min_mois, caution, disponible_le, conditions, description, photos, distance_mer, disponible, airbnb_url, booking_url, avito_url, slug, created_at')
+      .eq('statut', 'actif')
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('biens_visites')
+      .select('bien_id')
+      .gte('created_at', monthStart),
+  ])
+
+  const vuesParBien: Record<string, number> = {}
+  for (const v of visitesData ?? []) {
+    vuesParBien[v.bien_id] = (vuesParBien[v.bien_id] ?? 0) + 1
+  }
 
   const biens: BienPublic[] = (data ?? []).map((b) => ({
     id: b.id,
@@ -55,6 +68,8 @@ export default async function BiensPage({ params }: Props) {
     booking_url: b.booking_url ?? null,
     avito_url: b.avito_url ?? null,
     slug: (b.slug as string | null) ?? null,
+    created_at: b.created_at ?? null,
+    vues_mois: vuesParBien[b.id] ?? 0,
   }))
 
   return (

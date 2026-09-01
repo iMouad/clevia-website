@@ -455,7 +455,12 @@
     "biensTrouves": "{count} عقار(ات)",
     "supprimerFiltres": "إزالة التصفية",
     "situation": "الموقع",
-    "autresBiens": "عقارات أخرى متاحة"
+    "autresBiens": "عقارات أخرى متاحة",
+    "nouveau": "جديد",
+    "vuesCeMois": "شوهد {count} مرة هذا الشهر",
+    "partager": "مشاركة",
+    "copierLien": "نسخ الرابط",
+    "lienCopie": "تم نسخ الرابط!"
   },
   "vente": {
     "tag": "عقارات",

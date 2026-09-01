@@ -455,7 +455,12 @@
     "biensTrouves": "{count} bien(s) trouvé(s)",
     "supprimerFiltres": "Supprimer les filtres",
     "situation": "Situation",
-    "autresBiens": "Autres biens disponibles"
+    "autresBiens": "Autres biens disponibles",
+    "nouveau": "Nouveau",
+    "vuesCeMois": "Vu {count} fois ce mois",
+    "partager": "Partager",
+    "copierLien": "Copier le lien",
+    "lienCopie": "Lien copié !"
   },
   "vente": {
     "tag": "Immobilier",

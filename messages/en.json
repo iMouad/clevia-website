@@ -455,7 +455,12 @@
     "biensTrouves": "{count} property(ies) found",
     "supprimerFiltres": "Remove filters",
     "situation": "Floor",
-    "autresBiens": "Other available properties"
+    "autresBiens": "Other available properties",
+    "nouveau": "New",
+    "vuesCeMois": "Viewed {count} times this month",
+    "partager": "Share",
+    "copierLien": "Copy link",
+    "lienCopie": "Link copied!"
   },
   "vente": {
     "tag": "Real Estate",

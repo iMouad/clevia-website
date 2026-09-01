@@ -36,6 +36,8 @@ export type BienPublic = {
   booking_url: string | null
   avito_url: string | null
   slug?: string | null
+  created_at?: string | null
+  vues_mois?: number | null
 }
 
 const TYPE_COLORS: Record<string, string> = {
@@ -83,6 +85,7 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
   }
 
   const isDisponible = bien.disponible !== false
+  const isNew = bien.created_at ? (Date.now() - new Date(bien.created_at).getTime()) < 14 * 86400000 : false
 
   return (
     <div className="h-full bg-white rounded-2xl overflow-hidden border border-brun/8 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col group">
@@ -153,17 +156,25 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
           </div>
         )}
 
-        {/* Type badge */}
-        {bien.type && (
-          <div className="absolute top-3 left-3 z-10">
+        {/* Type badge + Nouveau */}
+        <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5">
+          {bien.type && (
             <span
               className={`text-xs font-medium px-2.5 py-1 rounded-full ${TYPE_COLORS[bien.type] ?? 'bg-white/80 text-brun'}`}
               style={{ fontFamily: 'var(--font-dm-sans)' }}
             >
               {bien.type}
             </span>
-          </div>
-        )}
+          )}
+          {isNew && (
+            <span
+              className="text-xs font-semibold px-2.5 py-1 rounded-full bg-terra text-white shadow-sm"
+              style={{ fontFamily: 'var(--font-dm-sans)' }}
+            >
+              {t('nouveau')}
+            </span>
+          )}
+        </div>
 
         {/* Disponible badge */}
         <div className="absolute bottom-3 left-3 z-10">
@@ -335,6 +346,17 @@ export default function BienCard({ bien }: { bien: BienPublic }) {
               </span>
             )}
           </div>
+        )}
+
+        {/* Vues ce mois */}
+        {bien.vues_mois != null && bien.vues_mois > 0 && (
+          <p className="flex items-center gap-1.5 text-xs text-brun-mid/50" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            {t('vuesCeMois', { count: bien.vues_mois })}
+          </p>
         )}
 
         {/* CTA */}
