@@ -68,8 +68,8 @@ export default function Navbar() {
             <Image
               src="/logo.svg"
               alt="Clévia Immobilier"
-              width={130}
-              height={37}
+              width={160}
+              height={46}
               priority
             />
           </Link>

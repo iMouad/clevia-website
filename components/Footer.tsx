@@ -34,8 +34,8 @@ export default function Footer() {
             <Image
               src="/logo-light.svg"
               alt="Clévia Immobilier"
-              width={160}
-              height={45}
+              width={190}
+              height={54}
             />
             <p className="text-creme/60 text-sm leading-relaxed max-w-xs">
               {t('description')}
