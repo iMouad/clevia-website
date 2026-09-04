@@ -44,8 +44,8 @@
   },
   "hero": {
     "tag": "Immobilier · Location · Maroc",
-    "title": "Louez sereinement,",
-    "titleEmphasis": "on gère tout",
+    "title": "Votre bien,",
+    "titleEmphasis": "on s'en occupe.",
     "subtitle": "Location, vente, gestion locative — nous vous accompagnons dans tous vos projets immobiliers à Mohammedia et sa région.",
     "cta1": "Confier mon bien",
     "cta2": "Comment ça marche",
@@ -335,7 +335,7 @@
     }
   },
   "footer": {
-    "tagline": "Votre bien, notre priorité.",
+    "tagline": "Votre bien, notre exigence.",
     "description": "Location · Vente · Gestion locative à Mohammedia · Mansouria · Bouznika · Benslimane · Maroc. Votre bien, notre exigence.",
     "links": {
       "title": "Pages",
