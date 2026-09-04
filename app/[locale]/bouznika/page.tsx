@@ -5,8 +5,8 @@ import { getPageSeo } from '@/lib/seo'
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params
   return {
-    ...getPageSeo(locale, '/bouznika', 'Conciergerie Airbnb à Bouznika — Clévia', 'Clévia gère votre location courte durée à Bouznika. +15 nuits louées/mois, gestion 100% clé en main.'),
-    keywords: ['conciergerie Bouznika', 'gestion location Bouznika', 'Airbnb Bouznika', 'location courte durée Bouznika'],
+    ...getPageSeo(locale, '/bouznika', 'Immobilier à Bouznika — Clévia Immobilier', 'Clévia, votre partenaire immobilier à Bouznika : location, vente, gestion locative, conciergerie. Votre bien, notre exigence.'),
+    keywords: ['immobilier Bouznika', 'gestion locative Bouznika', 'conciergerie Bouznika', 'location Bouznika', 'vente immobilier Bouznika'],
   }
 }
 

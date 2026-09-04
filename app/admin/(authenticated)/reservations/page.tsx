@@ -374,7 +374,7 @@ export default function ReservationsPage() {
       <div class="header">
         <div>
           <div class="logo">CLÉVIA</div>
-          <div class="logo-sub">Conciergerie · Mansouria-Mohammedia</div>
+          <div class="logo-sub">Immobilier · Mansouria-Mohammedia</div>
         </div>
         <div class="facture-id">
           <strong>Facture</strong>
@@ -415,7 +415,7 @@ export default function ReservationsPage() {
         </table>
       </div>
       ${r.notes ? `<div class="section"><div class="section-title">Notes</div><p style="font-size:12px;color:#6B4C35">${esc(r.notes)}</p></div>` : ''}
-      <div class="footer">Clévia Conciergerie · Mansouria-Mohammedia, Maroc · cleviamaroc.com</div>
+      <div class="footer">Clévia Immobilier · Mansouria-Mohammedia, Maroc · cleviamaroc.com</div>
       <script>window.onload=function(){window.print()}</script>
     </body></html>`
     const w = window.open('', '_blank', 'width=900,height=700')
@@ -627,7 +627,7 @@ export default function ReservationsPage() {
           </tr>
         </tbody>
       </table>
-      <div class="footer">Clévia Immobilier - Conciergerie · Mansouria-Mohammedia, Maroc · cleviamaroc.com</div>
+      <div class="footer">Clévia Immobilier · Mansouria-Mohammedia, Maroc · cleviamaroc.com</div>
       <script>window.onload=function(){window.print()}</script>
     </body></html>`
     const w = window.open('', '_blank', 'width=900,height=700')

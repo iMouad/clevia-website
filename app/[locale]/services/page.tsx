@@ -82,7 +82,7 @@ export default function ServicesPage() {
     serviceType: 'Property Management',
     provider: {
       '@type': 'LocalBusiness',
-      name: 'Clévia Immobilier - Conciergerie',
+      name: 'Clévia Immobilier',
       url: 'https://www.cleviamaroc.com',
     },
     areaServed: [

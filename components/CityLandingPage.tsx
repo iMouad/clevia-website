@@ -93,7 +93,7 @@ export default async function CityLandingPage({ locale, city }: Props) {
   }))
 
   const WHATSAPP = '212614268283'
-  const waMsg = encodeURIComponent(`Bonjour, je souhaite en savoir plus sur la gestion de mon bien à ${city.name} avec Clévia Conciergerie.`)
+  const waMsg = encodeURIComponent(`Bonjour, je souhaite en savoir plus sur la gestion de mon bien à ${city.name} avec Clévia Immobilier.`)
 
   return (
     <>
@@ -106,7 +106,7 @@ export default async function CityLandingPage({ locale, city }: Props) {
               Clévia · {city.name}
             </span>
             <h1 className="text-5xl md:text-6xl text-brun mb-3" style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}>
-              Conciergerie à {city.name}
+              Gestion locative à {city.name}
             </h1>
             <p className="text-terra text-lg italic mb-4" style={{ fontFamily: 'var(--font-cormorant)' }}>
               {city.tagline}

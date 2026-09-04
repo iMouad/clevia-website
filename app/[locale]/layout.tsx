@@ -44,8 +44,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: {
-      template: '%s | Clévia Immobilier - Conciergerie',
-      default: 'Clévia Immobilier - Conciergerie · Maroc',
+      template: '%s | Clévia Immobilier',
+      default: 'Clévia Immobilier · Maroc',
     },
     description: t('subtitle'),
     icons: {
@@ -54,23 +54,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       apple: '/icon.svg',
     },
     openGraph: {
-      siteName: 'Clévia Immobilier - Conciergerie',
+      siteName: 'Clévia Immobilier',
       locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_US' : 'fr_MA',
       type: 'website',
       images: [
         {
-          url: `${SITE_URL}/api/og?title=${encodeURIComponent('Clévia Immobilier - Conciergerie')}&subtitle=${encodeURIComponent('Location courte durée · Maroc')}`,
+          url: `${SITE_URL}/api/og?title=${encodeURIComponent('Clévia Immobilier')}&subtitle=${encodeURIComponent('Location courte durée · Maroc')}`,
           width: 1200,
           height: 630,
-          alt: 'Clévia Immobilier - Conciergerie',
+          alt: 'Clévia Immobilier',
         },
       ],
     },
     twitter: {
       card: 'summary_large_image',
-      title: 'Clévia Immobilier - Conciergerie · Maroc',
+      title: 'Clévia Immobilier · Maroc',
       description: t('subtitle'),
-      images: [`${SITE_URL}/api/og?title=${encodeURIComponent('Clévia Immobilier - Conciergerie')}&subtitle=${encodeURIComponent('Location courte durée · Maroc')}`],
+      images: [`${SITE_URL}/api/og?title=${encodeURIComponent('Clévia Immobilier')}&subtitle=${encodeURIComponent('Location courte durée · Maroc')}`],
     },
     alternates: {
       languages: {

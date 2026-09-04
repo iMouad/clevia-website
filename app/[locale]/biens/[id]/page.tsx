@@ -32,19 +32,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ville = (data.ville as string | null) ?? 'Maroc'
   const isLongueDuree = (data as any).mode_location === 'longue_duree'
   const fallbackDesc = isLongueDuree
-    ? `Location longue durée à ${ville}, géré par Clévia Immobilier - Conciergerie. Contactez-nous pour plus d'informations.`
-    : `Location courte durée à ${ville}, géré par Clévia Immobilier - Conciergerie. Réservez sur Airbnb, Booking ou contactez-nous directement.`
+    ? `Location longue durée à ${ville}, géré par Clévia Immobilier. Contactez-nous pour plus d'informations.`
+    : `Location courte durée à ${ville}, géré par Clévia Immobilier. Réservez sur Airbnb, Booking ou contactez-nous directement.`
   const ogDescription = (data.description as string | null)?.slice(0, 160) ?? fallbackDesc
 
   const slugOrId = (data as any).slug || id
   return {
-    title: `${data.nom} — Clévia Immobilier - Conciergerie`,
+    title: `${data.nom} — Clévia Immobilier`,
     description: ogDescription,
     openGraph: {
       title: ogTitle,
       description: ogDescription,
       url: `${siteUrl}/${locale}/biens/${slugOrId}`,
-      siteName: 'Clévia Immobilier - Conciergerie',
+      siteName: 'Clévia Immobilier',
       locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_US' : 'fr_MA',
       type: 'website',
       images: mainPhoto
@@ -133,8 +133,8 @@ export default async function BienDetailPage({ params }: Props) {
     '@type': isLD ? 'RealEstateListing' : 'LodgingBusiness',
     name: bien.nom,
     description: bien.description ?? (isLD
-      ? `Location longue durée à ${bien.ville ?? 'Maroc'}, géré par Clévia Immobilier - Conciergerie.`
-      : `Location courte durée à ${bien.ville ?? 'Maroc'}, géré par Clévia Immobilier - Conciergerie.`),
+      ? `Location longue durée à ${bien.ville ?? 'Maroc'}, géré par Clévia Immobilier.`
+      : `Location courte durée à ${bien.ville ?? 'Maroc'}, géré par Clévia Immobilier.`),
     url: `${siteUrl}/${locale}/biens/${id}`,
     image: photos.slice(0, 5),
     address: {
@@ -164,8 +164,8 @@ export default async function BienDetailPage({ params }: Props) {
 
   const whatsappMsg = encodeURIComponent(
     bien.mode_location === 'longue_duree'
-      ? `Bonjour, je suis intéressé(e) par la location longue durée du bien "${bien.nom}" sur Clévia Immobilier - Conciergerie. Pouvez-vous me donner plus d'informations ?`
-      : `Bonjour, je suis intéressé(e) par le bien "${bien.nom}" sur Clévia Immobilier - Conciergerie. Pouvez-vous me donner plus d'informations ?`
+      ? `Bonjour, je suis intéressé(e) par la location longue durée du bien "${bien.nom}" sur Clévia Immobilier. Pouvez-vous me donner plus d'informations ?`
+      : `Bonjour, je suis intéressé(e) par le bien "${bien.nom}" sur Clévia Immobilier. Pouvez-vous me donner plus d'informations ?`
   )
   const contactLink = `/contact?bien=${encodeURIComponent(bien.nom)}`
 

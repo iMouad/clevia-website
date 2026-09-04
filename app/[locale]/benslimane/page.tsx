@@ -5,8 +5,8 @@ import { getPageSeo } from '@/lib/seo'
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params
   return {
-    ...getPageSeo(locale, '/benslimane', 'Conciergerie Airbnb à Benslimane — Clévia', 'Clévia gère votre location courte durée à Benslimane. +15 nuits louées/mois, gestion 100% clé en main.'),
-    keywords: ['conciergerie Benslimane', 'gestion location Benslimane', 'Airbnb Benslimane', 'location courte durée Benslimane'],
+    ...getPageSeo(locale, '/benslimane', 'Immobilier à Benslimane — Clévia Immobilier', 'Clévia, votre partenaire immobilier à Benslimane : location, vente, gestion locative, conciergerie. Votre bien, notre exigence.'),
+    keywords: ['immobilier Benslimane', 'gestion locative Benslimane', 'conciergerie Benslimane', 'location Benslimane', 'vente immobilier Benslimane'],
   }
 }
 

@@ -155,7 +155,7 @@ export default function RevenusPage() {
           </tr>
         </tbody>
       </table>
-      <div class="footer">Clévia Conciergerie · Mansouria-Mohammedia, Maroc · cleviamaroc.com</div>
+      <div class="footer">Clévia Immobilier · Mansouria-Mohammedia, Maroc · cleviamaroc.com</div>
       <script>window.onload=function(){window.print()}</script>
     </body></html>`
     const w = window.open('', '_blank', 'width=900,height=700')

@@ -14,12 +14,12 @@
   },
   "whatsapp": {
     "aria": "Contact Clévia on WhatsApp",
-    "message": "Hello, I would like to know more about managing my property with Clévia Immobilier - Conciergerie."
+    "message": "Hello, I would like to know more about managing my property with Clévia Immobilier."
   },
   "simulateur": {
     "meta": {
-      "title": "Revenue Estimator — Clévia Immobilier - Conciergerie",
-      "description": "Estimate how much your property in Mohammedia, Mansouria, Bouznika or Benslimane can earn through short-term rental on Airbnb, Booking and Avito."
+      "title": "Revenue Estimator — Clévia Immobilier",
+      "description": "Estimate how much your property in Mohammedia, Mansouria, Bouznika or Benslimane can earn through rental on Airbnb, Booking and Avito."
     },
     "hero": {
       "tag": "Free tool",
@@ -43,10 +43,10 @@
     }
   },
   "hero": {
-    "tag": "Concierge · Morocco",
+    "tag": "Real Estate · Morocco",
     "title": "Rent with confidence,",
     "titleEmphasis": "we handle the rest",
-    "subtitle": "We manage your short-term rentals on Airbnb, Booking and Avito — from listing to guest check-in.",
+    "subtitle": "Rental, sales, property management — we support all your real estate projects in Mohammedia and its region.",
     "cta1": "Entrust your property",
     "cta2": "How it works",
     "ctaWhatsapp": "Message us on WhatsApp"
@@ -142,7 +142,7 @@
   },
   "why": {
     "tag": "Why us",
-    "title": "A 100% legal and transparent concierge",
+    "title": "A 100% legal and transparent real estate partner",
     "subtitle": "Our commitments to every property owner.",
     "list": {
       "contract": "Full management of listings and bookings",
@@ -336,7 +336,7 @@
   },
   "footer": {
     "tagline": "Your home, handled.",
-    "description": "Short-term rental concierge in Mohammedia · Mansouria · Bouznika · Benslimane · Morocco.",
+    "description": "Rental · Sales · Property management in Mohammedia · Mansouria · Bouznika · Benslimane · Morocco. Your property, our commitment.",
     "links": {
       "title": "Pages",
       "services": "Services",
@@ -350,7 +350,7 @@
     "social": {
       "title": "Follow us"
     },
-    "copyright": "© 2026 Clévia Immobilier - Conciergerie · Morocco"
+    "copyright": "© 2026 Clévia Immobilier · Morocco"
   },
   "calculator": {
     "tag": "Revenue estimator",

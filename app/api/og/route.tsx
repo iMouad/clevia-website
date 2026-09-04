@@ -5,7 +5,7 @@ export const runtime = 'edge'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
-  const title = searchParams.get('title') || 'Clévia Immobilier - Conciergerie'
+  const title = searchParams.get('title') || 'Clévia Immobilier'
   const subtitle = searchParams.get('subtitle') || 'Location courte durée · Maroc'
 
   return new ImageResponse(

@@ -33,7 +33,7 @@ export default function Footer() {
           <div className="col-span-2 md:col-span-1 flex flex-col gap-4">
             <Image
               src="/logo-light.svg"
-              alt="Clévia Immobilier - Conciergerie"
+              alt="Clévia Immobilier"
               width={160}
               height={45}
             />

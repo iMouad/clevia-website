@@ -14,12 +14,12 @@
   },
   "whatsapp": {
     "aria": "Contacter Clévia sur WhatsApp",
-    "message": "Bonjour, je souhaite en savoir plus sur la gestion de mon bien avec Clévia Immobilier - Conciergerie."
+    "message": "Bonjour, je souhaite en savoir plus sur la gestion de mon bien avec Clévia Immobilier."
   },
   "simulateur": {
     "meta": {
-      "title": "Simulateur de revenus — Clévia Immobilier - Conciergerie",
-      "description": "Estimez combien peut rapporter votre bien à Mohammedia, Mansouria, Bouznika ou Benslimane en location courte durée sur Airbnb, Booking et Avito."
+      "title": "Simulateur de revenus — Clévia Immobilier",
+      "description": "Estimez combien peut rapporter votre bien à Mohammedia, Mansouria, Bouznika ou Benslimane en location sur Airbnb, Booking et Avito."
     },
     "hero": {
       "tag": "Outil gratuit",
@@ -43,10 +43,10 @@
     }
   },
   "hero": {
-    "tag": "Immobilier · Conciergerie · Maroc",
+    "tag": "Immobilier · Location · Maroc",
     "title": "Louez sereinement,",
     "titleEmphasis": "on gère tout",
-    "subtitle": "Nous gérons vos locations courte durée sur Airbnb, Booking et Avito — de la mise en ligne jusqu'à l'accueil des voyageurs.",
+    "subtitle": "Location, vente, gestion locative — nous vous accompagnons dans tous vos projets immobiliers à Mohammedia et sa région.",
     "cta1": "Confier mon bien",
     "cta2": "Comment ça marche",
     "ctaWhatsapp": "Écrire sur WhatsApp"
@@ -142,7 +142,7 @@
   },
   "why": {
     "tag": "Pourquoi nous",
-    "title": "Une conciergerie 100% légale et transparente",
+    "title": "Un partenaire immobilier 100% légal et transparent",
     "subtitle": "Nos engagements envers chaque propriétaire.",
     "list": {
       "contract": "Gestion complète des annonces et réservations",
@@ -336,7 +336,7 @@
   },
   "footer": {
     "tagline": "Votre bien, notre priorité.",
-    "description": "Immobilier & Conciergerie de location courte durée à Mohammedia · Mansouria · Bouznika · Benslimane · Maroc.",
+    "description": "Location · Vente · Gestion locative à Mohammedia · Mansouria · Bouznika · Benslimane · Maroc. Votre bien, notre exigence.",
     "links": {
       "title": "Pages",
       "services": "Services",
@@ -350,7 +350,7 @@
     "social": {
       "title": "Suivez-nous"
     },
-    "copyright": "© 2026 Clévia Immobilier - Conciergerie · Maroc"
+    "copyright": "© 2026 Clévia Immobilier · Maroc"
   },
   "calculator": {
     "tag": "Simulateur",

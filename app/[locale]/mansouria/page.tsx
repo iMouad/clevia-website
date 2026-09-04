@@ -5,8 +5,8 @@ import { getPageSeo } from '@/lib/seo'
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params
   return {
-    ...getPageSeo(locale, '/mansouria', 'Conciergerie Airbnb à Mansouria — Clévia', 'Clévia gère votre location courte durée à Mansouria. +15 nuits louées/mois, gestion 100% clé en main.'),
-    keywords: ['conciergerie Mansouria', 'gestion location Mansouria', 'Airbnb Mansouria', 'location courte durée Mansouria', 'El Mansouria'],
+    ...getPageSeo(locale, '/mansouria', 'Immobilier à Mansouria — Clévia Immobilier', 'Clévia, votre partenaire immobilier à Mansouria : location, vente, gestion locative, conciergerie. Votre bien, notre exigence.'),
+    keywords: ['immobilier Mansouria', 'gestion locative Mansouria', 'conciergerie Mansouria', 'location Mansouria', 'El Mansouria', 'vente immobilier Mansouria'],
   }
 }
 
