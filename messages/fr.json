@@ -75,30 +75,72 @@
       "title": "Nos services",
       "subtitle": "Tout ce dont vous avez besoin pour votre projet immobilier."
     },
+    "categories": {
+      "conciergerie": "Conciergerie courte durée",
+      "gestionLocative": "Gestion locative longue durée",
+      "vente": "Vente immobilière",
+      "transversal": "Services complémentaires"
+    },
     "items": {
       "publication": {
         "title": "Publication & visibilité",
-        "description": "Annonces optimisées sur Airbnb, Booking et Avito. Tarification dynamique et photos professionnelles incluses."
-      },
-      "photo": {
-        "title": "Photographie professionnelle",
-        "description": "Séance photo incluse à l'onboarding pour mettre votre bien en valeur et maximiser les réservations."
+        "description": "Annonces optimisées sur Airbnb, Booking et Avito. Tarification dynamique et photos professionnelles incluses.",
+        "category": "conciergerie"
       },
       "accueil": {
         "title": "Accueil & départ voyageurs",
-        "description": "Check-in et check-out gérés par notre équipe. Remise des clés et accompagnement 7j/7."
+        "description": "Check-in et check-out gérés par notre équipe. Remise des clés et accompagnement 7j/7.",
+        "category": "conciergerie"
       },
       "menage": {
         "title": "Ménage & linge",
-        "description": "Nettoyage complet entre chaque séjour, linge hôtelier fourni et entretien régulier."
+        "description": "Nettoyage complet entre chaque séjour, linge hôtelier fourni et entretien régulier.",
+        "category": "conciergerie"
+      },
+      "gestionLocataire": {
+        "title": "Recherche de locataire",
+        "description": "Diffusion de l'annonce, sélection rigoureuse des candidats, vérification des dossiers et présentation des profils fiables.",
+        "category": "gestionLocative"
+      },
+      "bailSuivi": {
+        "title": "Bail & suivi des loyers",
+        "description": "Rédaction du contrat de bail, état des lieux, encaissement des loyers et relance des impayés.",
+        "category": "gestionLocative"
+      },
+      "relationLocataire": {
+        "title": "Relation locataire",
+        "description": "Point de contact unique pour vos locataires. Gestion des demandes, incidents et renouvellements de bail.",
+        "category": "gestionLocative"
+      },
+      "estimationVente": {
+        "title": "Estimation & mise en vente",
+        "description": "Analyse du marché local, estimation précise de votre bien et stratégie de prix pour une vente optimale.",
+        "category": "vente"
+      },
+      "commercialisation": {
+        "title": "Commercialisation",
+        "description": "Photos professionnelles, annonces sur les meilleures plateformes, organisation des visites et négociation au meilleur prix.",
+        "category": "vente"
+      },
+      "accompagnementVente": {
+        "title": "Accompagnement jusqu'à la vente",
+        "description": "Suivi du compromis, coordination avec le notaire et accompagnement complet jusqu'à la remise des clés.",
+        "category": "vente"
+      },
+      "photo": {
+        "title": "Photographie professionnelle",
+        "description": "Séance photo incluse pour mettre votre bien en valeur, que ce soit pour la location ou la vente.",
+        "category": "transversal"
       },
       "reporting": {
-        "title": "Reporting mensuel",
-        "description": "Dashboard revenus, taux d'occupation, avis voyageurs et virement automatique chaque mois."
+        "title": "Reporting & transparence",
+        "description": "Dashboard revenus, rapports mensuels détaillés et virement automatique. Vous gardez le contrôle à tout moment.",
+        "category": "transversal"
       },
       "maintenance": {
         "title": "Maintenance & urgences",
-        "description": "Intervention rapide en cas de problème. Réseau d'artisans de confiance dans toute notre zone d'intervention."
+        "description": "Intervention rapide en cas de problème. Réseau d'artisans de confiance dans toute notre zone d'intervention.",
+        "category": "transversal"
       }
     },
     "pricing": {

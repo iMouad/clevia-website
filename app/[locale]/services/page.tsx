@@ -2,7 +2,7 @@ import { useTranslations } from 'next-intl'
 import { getTranslations } from 'next-intl/server'
 import { getPageSeo } from '@/lib/seo'
 import { getFaqJsonLd, getBreadcrumbJsonLd } from '@/lib/schemas'
-import { Link, usePathname } from '@/i18n/navigation'
+import { Link } from '@/i18n/navigation'
 import { AnimateIn, StaggerContainer, StaggerItem } from '@/components/ui/AnimateIn'
 import type { Metadata } from 'next'
 
@@ -16,33 +16,62 @@ export async function generateMetadata({
   return getPageSeo(locale, '/services', t('hero.title'), t('hero.subtitle'))
 }
 
-const SERVICE_ICONS = [
-  <svg key="pub" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <rect x="3" y="3" width="18" height="14" rx="2" />
-    <path d="M7 21h10M12 17v4" />
-  </svg>,
-  <svg key="photo" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
-    <circle cx="12" cy="13" r="4" />
-  </svg>,
-  <svg key="accueil" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" />
-    <path d="M9 21V12h6v9" />
-  </svg>,
-  <svg key="menage" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M3 6l9-4 9 4v2H3V6zM3 8v10a2 2 0 002 2h14a2 2 0 002-2V8" />
-    <path d="M12 8v12M8 11h8" />
-  </svg>,
-  <svg key="reporting" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M18 20V10M12 20V4M6 20v-6" />
-    <rect x="2" y="2" width="20" height="20" rx="2" />
-  </svg>,
-  <svg key="maintenance" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
-  </svg>,
-]
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  conciergerie: (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="3" y="4" width="18" height="18" rx="2" />
+      <path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" />
+    </svg>
+  ),
+  gestionLocative: (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" />
+      <path d="M9 21V12h6v9" />
+    </svg>
+  ),
+  vente: (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M12 2L2 7l10 5 10-5-10-5z" />
+      <path d="M2 17l10 5 10-5M2 12l10 5 10-5" />
+    </svg>
+  ),
+  transversal: (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14" />
+    </svg>
+  ),
+}
 
-const SERVICE_KEYS = ['publication', 'photo', 'accueil', 'menage', 'reporting', 'maintenance'] as const
+const SERVICE_ICONS: Record<string, React.ReactNode> = {
+  publication: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="14" rx="2" /><path d="M7 21h10M12 17v4" /></svg>,
+  accueil: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" /></svg>,
+  menage: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 6l9-4 9 4v2H3V6zM3 8v10a2 2 0 002 2h14a2 2 0 002-2V8" /><path d="M12 8v12M8 11h8" /></svg>,
+  gestionLocataire: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /><path d="M11 8v6M8 11h6" /></svg>,
+  bailSuivi: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" /></svg>,
+  relationLocataire: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>,
+  estimationVente: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M18 20V10M12 20V4M6 20v-6" /><rect x="2" y="2" width="20" height="20" rx="2" /></svg>,
+  commercialisation: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>,
+  accompagnementVente: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" /><path d="M22 4L12 14.01l-3-3" /></svg>,
+  photo: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" /><circle cx="12" cy="13" r="4" /></svg>,
+  reporting: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M18 20V10M12 20V4M6 20v-6" /></svg>,
+  maintenance: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" /></svg>,
+}
+
+const CATEGORIES = ['conciergerie', 'gestionLocative', 'vente', 'transversal'] as const
+const CATEGORY_SERVICES: Record<string, string[]> = {
+  conciergerie: ['publication', 'accueil', 'menage'],
+  gestionLocative: ['gestionLocataire', 'bailSuivi', 'relationLocataire'],
+  vente: ['estimationVente', 'commercialisation', 'accompagnementVente'],
+  transversal: ['photo', 'reporting', 'maintenance'],
+}
+
+const CATEGORY_COLORS: Record<string, string> = {
+  conciergerie: 'from-terra/10 to-sable/5 border-terra/15',
+  gestionLocative: 'from-brun/8 to-brun/3 border-brun/12',
+  vente: 'from-corail/10 to-sable/5 border-corail/15',
+  transversal: 'from-creme to-white border-brun/8',
+}
 
 function ArrowRight() {
   return (
@@ -76,10 +105,11 @@ export default function ServicesPage() {
     { name: t('hero.title'), path: '/services' },
   ])
 
+  const allServiceKeys = Object.values(CATEGORY_SERVICES).flat()
   const servicesJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Service',
-    serviceType: 'Property Management',
+    serviceType: 'Real Estate Services',
     provider: {
       '@type': 'LocalBusiness',
       name: 'Clévia Immobilier',
@@ -94,7 +124,7 @@ export default function ServicesPage() {
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
       name: t('hero.title'),
-      itemListElement: SERVICE_KEYS.map((key, i) => ({
+      itemListElement: allServiceKeys.map((key) => ({
         '@type': 'Offer',
         itemOffered: {
           '@type': 'Service',
@@ -119,7 +149,8 @@ export default function ServicesPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      {/* ── HERO ────────────────────────────────── */}
+
+      {/* HERO */}
       <section className="bg-creme py-16 md:py-20 px-4 overflow-hidden relative">
         <div
           className="absolute inset-0 pointer-events-none"
@@ -150,36 +181,50 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* ── 6 SERVICES GRID ─────────────────────── */}
-      <section className="bg-white py-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          <StaggerContainer className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {SERVICE_KEYS.map((key, i) => (
-              <StaggerItem key={key}>
-                <div className="bg-creme border border-brun/8 rounded-2xl p-8 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 h-full flex flex-col gap-4 relative overflow-hidden group">
-                  <div className="flex items-start justify-between">
-                    <div className="w-12 h-12 rounded-xl bg-terra/10 flex items-center justify-center text-terra">
-                      {SERVICE_ICONS[i]}
-                    </div>
-                    <span
-                      className="text-3xl text-brun/10 group-hover:text-terra/15 transition-colors"
-                      style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}
-                    >
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
-                  </div>
-                  <h3 className="text-xl text-brun">{t(`items.${key}.title`)}</h3>
-                  <p className="text-brun-mid text-sm leading-relaxed flex-1" style={{ fontFamily: 'var(--font-dm-sans)' }}>
-                    {t(`items.${key}.description`)}
-                  </p>
-                </div>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
-        </div>
-      </section>
+      {/* SERVICES BY CATEGORY */}
+      {CATEGORIES.map((cat, catIdx) => (
+        <section
+          key={cat}
+          className={`${catIdx % 2 === 0 ? 'bg-white' : 'bg-creme'} py-16 md:py-20 px-4`}
+        >
+          <div className="max-w-7xl mx-auto">
+            <AnimateIn className="flex items-center gap-3 mb-10">
+              <div className="w-10 h-10 rounded-xl bg-terra/10 flex items-center justify-center text-terra">
+                {CATEGORY_ICONS[cat]}
+              </div>
+              <h2 className="text-2xl md:text-3xl text-brun">
+                {t(`categories.${cat}`)}
+              </h2>
+            </AnimateIn>
 
-      {/* ── MINI PROCESS ────────────────────────── */}
+            <StaggerContainer className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {CATEGORY_SERVICES[cat].map((key, i) => (
+                <StaggerItem key={key}>
+                  <div className={`bg-gradient-to-br ${CATEGORY_COLORS[cat]} border rounded-2xl p-7 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 h-full flex flex-col gap-4 group`}>
+                    <div className="flex items-start justify-between">
+                      <div className="w-11 h-11 rounded-xl bg-white/80 flex items-center justify-center text-terra shadow-sm">
+                        {SERVICE_ICONS[key]}
+                      </div>
+                      <span
+                        className="text-2xl text-brun/10 group-hover:text-terra/20 transition-colors"
+                        style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}
+                      >
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                    </div>
+                    <h3 className="text-lg text-brun">{t(`items.${key}.title`)}</h3>
+                    <p className="text-brun-mid text-sm leading-relaxed flex-1" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                      {t(`items.${key}.description`)}
+                    </p>
+                  </div>
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
+          </div>
+        </section>
+      ))}
+
+      {/* MINI PROCESS */}
       <section className="bg-creme py-20 px-4 border-y border-brun/5">
         <div className="max-w-5xl mx-auto">
           <AnimateIn className="text-center mb-14">
@@ -228,7 +273,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* ── TARIFICATION (dark) ──────────────────── */}
+      {/* TARIFICATION */}
       <section className="bg-brun py-24 px-4 border-b border-creme/10">
         <div className="max-w-4xl mx-auto">
           <AnimateIn className="text-center mb-14">
@@ -246,7 +291,6 @@ export default function ServicesPage() {
             </p>
           </AnimateIn>
 
-          {/* Included features grid */}
           <AnimateIn delay={0.1}>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-2xl mx-auto mb-12">
               {(['photos', 'annonces', 'accueil', 'menage', 'reporting', 'virement'] as const).map((feat) => (
@@ -260,7 +304,6 @@ export default function ServicesPage() {
             </div>
           </AnimateIn>
 
-          {/* CTA buttons */}
           <AnimateIn delay={0.2} className="text-center">
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
               <Link

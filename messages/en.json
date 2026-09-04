@@ -75,30 +75,72 @@
       "title": "Our services",
       "subtitle": "Everything you need for your real estate project."
     },
+    "categories": {
+      "conciergerie": "Short-term rental concierge",
+      "gestionLocative": "Long-term property management",
+      "vente": "Real estate sales",
+      "transversal": "Additional services"
+    },
     "items": {
       "publication": {
         "title": "Listing & visibility",
-        "description": "Optimized listings on Airbnb, Booking and Avito. Dynamic pricing and professional photos included."
-      },
-      "photo": {
-        "title": "Professional photography",
-        "description": "Photo session included at onboarding to showcase your property and maximize bookings."
+        "description": "Optimized listings on Airbnb, Booking and Avito. Dynamic pricing and professional photos included.",
+        "category": "conciergerie"
       },
       "accueil": {
         "title": "Guest check-in & check-out",
-        "description": "Check-in and check-out managed by our team. Key handover and support 7 days a week."
+        "description": "Check-in and check-out managed by our team. Key handover and support 7 days a week.",
+        "category": "conciergerie"
       },
       "menage": {
         "title": "Cleaning & laundry",
-        "description": "Full cleaning between every stay, hotel-quality linen and regular maintenance."
+        "description": "Full cleaning between every stay, hotel-quality linen and regular maintenance.",
+        "category": "conciergerie"
+      },
+      "gestionLocataire": {
+        "title": "Tenant search",
+        "description": "Listing, rigorous candidate screening, background checks and presentation of reliable profiles.",
+        "category": "gestionLocative"
+      },
+      "bailSuivi": {
+        "title": "Lease & rent tracking",
+        "description": "Lease drafting, property inventory, rent collection and payment follow-up.",
+        "category": "gestionLocative"
+      },
+      "relationLocataire": {
+        "title": "Tenant relations",
+        "description": "Single point of contact for your tenants. Handling requests, incidents and lease renewals.",
+        "category": "gestionLocative"
+      },
+      "estimationVente": {
+        "title": "Valuation & listing",
+        "description": "Local market analysis, accurate property valuation and pricing strategy for an optimal sale.",
+        "category": "vente"
+      },
+      "commercialisation": {
+        "title": "Marketing & sales",
+        "description": "Professional photos, listings on top platforms, viewings and best-price negotiation.",
+        "category": "vente"
+      },
+      "accompagnementVente": {
+        "title": "Support through to sale",
+        "description": "Agreement follow-up, notary coordination and full support through to key handover.",
+        "category": "vente"
+      },
+      "photo": {
+        "title": "Professional photography",
+        "description": "Photo session included to showcase your property, whether for rental or sale.",
+        "category": "transversal"
       },
       "reporting": {
-        "title": "Monthly reporting",
-        "description": "Revenue dashboard, occupancy rate, guest reviews and automatic transfer every month."
+        "title": "Reporting & transparency",
+        "description": "Revenue dashboard, detailed monthly reports and automatic transfer. You stay in control at all times.",
+        "category": "transversal"
       },
       "maintenance": {
         "title": "Maintenance & emergencies",
-        "description": "Fast response when needed. Trusted network of craftsmen across our entire service area."
+        "description": "Fast response when needed. Trusted network of craftsmen across our entire service area.",
+        "category": "transversal"
       }
     },
     "pricing": {

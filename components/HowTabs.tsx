@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 type Step = {
@@ -48,7 +48,15 @@ const STEP_ICONS = [
 
 export default function HowTabs({ tabs }: { tabs: Tab[] }) {
   const [active, setActive] = useState(0)
+  const timelineRef = useRef<HTMLDivElement>(null)
   const current = tabs[active]
+
+  function handleTabClick(i: number) {
+    setActive(i)
+    setTimeout(() => {
+      timelineRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
+  }
 
   return (
     <section className="bg-creme py-20 px-4">
@@ -58,12 +66,12 @@ export default function HowTabs({ tabs }: { tabs: Tab[] }) {
           {tabs.map((tab, i) => (
             <button
               key={tab.id}
-              onClick={() => setActive(i)}
+              onClick={() => handleTabClick(i)}
               className={`
-                relative flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200
+                relative flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300
                 ${active === i
-                  ? 'bg-terra text-white shadow-md'
-                  : 'bg-white text-brun-mid border border-brun/10 hover:border-terra/30 hover:text-terra'
+                  ? 'bg-terra text-white shadow-lg scale-105'
+                  : 'bg-white text-brun-mid border border-brun/10 hover:border-terra/30 hover:text-terra hover:scale-[1.02]'
                 }
               `}
               style={{ fontFamily: 'var(--font-dm-sans)' }}
@@ -75,53 +83,83 @@ export default function HowTabs({ tabs }: { tabs: Tab[] }) {
         </div>
 
         {/* Intro */}
-        <AnimatePresence mode="wait">
-          <motion.p
-            key={current.id + '-intro'}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.25 }}
-            className="text-center text-brun-mid text-base mb-12 max-w-lg mx-auto leading-relaxed"
-            style={{ fontFamily: 'var(--font-dm-sans)' }}
-          >
-            {current.intro}
-          </motion.p>
-        </AnimatePresence>
+        <div ref={timelineRef} className="scroll-mt-24">
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={current.id + '-intro'}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.3 }}
+              className="text-center text-brun-mid text-base mb-14 max-w-lg mx-auto leading-relaxed"
+              style={{ fontFamily: 'var(--font-dm-sans)' }}
+            >
+              {current.intro}
+            </motion.p>
+          </AnimatePresence>
+        </div>
 
         {/* Timeline */}
         <AnimatePresence mode="wait">
           <motion.div
             key={current.id}
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -30 }}
-            transition={{ duration: 0.3 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             className="relative"
           >
-            <div className="absolute left-8 top-8 bottom-8 w-px bg-terra/20 hidden md:block" />
+            {/* Animated vertical line */}
+            <motion.div
+              className="absolute left-8 top-8 w-px bg-terra/20 hidden md:block"
+              initial={{ height: 0 }}
+              animate={{ height: 'calc(100% - 4rem)' }}
+              transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
+            />
 
             <div className="flex flex-col gap-6">
               {current.steps.map((step, i) => (
                 <motion.div
-                  key={step.number + step.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.08, duration: 0.3 }}
+                  key={current.id + '-' + step.number}
+                  initial={{ opacity: 0, x: -40, scale: 0.95 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  transition={{
+                    delay: 0.15 + i * 0.15,
+                    duration: 0.45,
+                    ease: [0.25, 0.46, 0.45, 0.94],
+                  }}
                   className="flex gap-6 md:gap-10 items-start"
                 >
-                  <div className="flex-shrink-0 w-16 h-16 rounded-full bg-white border-2 border-terra/20 flex items-center justify-center relative z-10 shadow-sm">
+                  {/* Circle with pulse on appear */}
+                  <motion.div
+                    className="flex-shrink-0 w-16 h-16 rounded-full bg-white border-2 border-terra/20 flex items-center justify-center relative z-10 shadow-sm"
+                    initial={{ scale: 0, rotate: -90 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{
+                      delay: 0.15 + i * 0.15,
+                      duration: 0.5,
+                      type: 'spring',
+                      stiffness: 200,
+                    }}
+                  >
                     <div className="text-terra">{STEP_ICONS[i] || STEP_ICONS[0]}</div>
-                  </div>
+                  </motion.div>
 
-                  <div className="flex-1 bg-white border border-brun/10 rounded-2xl p-6 hover:shadow-md transition-all duration-200">
+                  {/* Card */}
+                  <motion.div
+                    className="flex-1 bg-white border border-brun/10 rounded-2xl p-6 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+                    whileHover={{ scale: 1.01 }}
+                  >
                     <div className="flex items-start gap-4">
-                      <span
+                      <motion.span
                         className="text-3xl text-terra/40 leading-none"
                         style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 300 }}
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.3 + i * 0.15, duration: 0.3 }}
                       >
                         {step.number}
-                      </span>
+                      </motion.span>
                       <div>
                         <h3 className="text-xl text-brun mb-2">{step.title}</h3>
                         <p className="text-brun-mid text-sm leading-relaxed" style={{ fontFamily: 'var(--font-dm-sans)' }}>
@@ -129,7 +167,7 @@ export default function HowTabs({ tabs }: { tabs: Tab[] }) {
                         </p>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 </motion.div>
               ))}
             </div>
