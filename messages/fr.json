@@ -69,11 +69,11 @@
   "services": {
     "tag": "Nos services",
     "title": "Un service complet, de A à Z",
-    "subtitle": "Tout ce dont vous avez besoin pour louer sans stress, de la mise en ligne jusqu'au virement mensuel.",
+    "subtitle": "Location, vente, gestion locative — tout ce dont vous avez besoin pour votre projet immobilier.",
     "cta": "Voir tous nos services",
     "hero": {
       "title": "Nos services",
-      "subtitle": "Tout ce dont vous avez besoin pour louer sans stress."
+      "subtitle": "Tout ce dont vous avez besoin pour votre projet immobilier."
     },
     "items": {
       "publication": {
@@ -195,51 +195,121 @@
   },
   "how": {
     "tag": "Comment ça marche",
-    "title": "De la première prise de contact au premier virement",
-    "subtitle": "Un processus simple, transparent et sans stress.",
+    "title": "Un accompagnement adapté à chaque projet",
+    "subtitle": "Choisissez votre service et découvrez les étapes.",
     "hero": {
       "title": "Comment ça marche",
-      "subtitle": "De la première prise de contact au premier virement."
+      "subtitle": "Un processus clair pour chaque service. Sélectionnez votre besoin."
     },
-    "steps": {
-      "contact": {
-        "number": "01",
-        "title": "Prise de contact",
-        "description": "Remplissez notre formulaire ou appelez-nous. Nous vous répondons sous 24h."
-      },
-      "visit": {
-        "number": "02",
-        "title": "Visite & évaluation",
-        "description": "Visite gratuite de votre bien et estimation de son potentiel locatif."
-      },
-      "contract": {
-        "number": "03",
-        "title": "Signature du contrat",
-        "description": "Formule personnalisée selon votre bien, sans engagement long terme. Vous gardez le contrôle."
-      },
-      "publish": {
-        "number": "04",
-        "title": "Mise en ligne",
-        "description": "Photos professionnelles, annonces optimisées sur toutes les plateformes. En ligne sous 48h."
-      },
-      "manage": {
-        "number": "05",
-        "title": "Gestion quotidienne",
-        "description": "On gère les réservations, l'accueil des voyageurs, le ménage et la maintenance."
-      },
-      "payment": {
-        "number": "06",
-        "title": "Virement mensuel",
-        "description": "Vous recevez vos revenus chaque mois accompagnés d'un rapport détaillé."
+    "tabs": {
+      "courteDuree": "Location courte durée",
+      "longueDuree": "Location longue durée",
+      "vente": "Vente"
+    },
+    "courteDuree": {
+      "intro": "Confiez-nous votre bien et percevez vos revenus chaque mois — on gère tout.",
+      "steps": {
+        "contact": {
+          "number": "01",
+          "title": "Prise de contact",
+          "description": "Remplissez notre formulaire ou appelez-nous. Nous vous répondons sous 24h."
+        },
+        "visit": {
+          "number": "02",
+          "title": "Visite & évaluation",
+          "description": "Visite gratuite de votre bien et estimation de son potentiel locatif."
+        },
+        "contract": {
+          "number": "03",
+          "title": "Signature du contrat",
+          "description": "Formule personnalisée selon votre bien, sans engagement long terme. Vous gardez le contrôle."
+        },
+        "publish": {
+          "number": "04",
+          "title": "Mise en ligne",
+          "description": "Photos professionnelles, annonces optimisées sur Airbnb, Booking et Avito. En ligne sous 48h."
+        },
+        "manage": {
+          "number": "05",
+          "title": "Gestion quotidienne",
+          "description": "Réservations, accueil voyageurs, ménage entre chaque séjour et maintenance."
+        },
+        "payment": {
+          "number": "06",
+          "title": "Virement mensuel",
+          "description": "Vous recevez vos revenus chaque mois accompagnés d'un rapport détaillé."
+        }
+      }
+    },
+    "longueDuree": {
+      "intro": "Trouvez le locataire idéal et profitez d'un revenu stable sans aucun souci.",
+      "steps": {
+        "contact": {
+          "number": "01",
+          "title": "Prise de contact",
+          "description": "Décrivez-nous votre bien et vos attentes. On vous rappelle sous 24h."
+        },
+        "evaluation": {
+          "number": "02",
+          "title": "Évaluation & estimation",
+          "description": "Visite du bien, estimation du loyer et conseils pour optimiser votre rendement."
+        },
+        "search": {
+          "number": "03",
+          "title": "Recherche de locataire",
+          "description": "Diffusion de l'annonce, sélection rigoureuse des candidats et vérification des dossiers."
+        },
+        "contract": {
+          "number": "04",
+          "title": "Bail & état des lieux",
+          "description": "Rédaction du contrat de bail, état des lieux d'entrée et remise des clés."
+        },
+        "manage": {
+          "number": "05",
+          "title": "Gestion locative",
+          "description": "Suivi des loyers, gestion des incidents, relation locataire et maintenance."
+        }
+      }
+    },
+    "vente": {
+      "intro": "Vendez votre bien au meilleur prix, sans stress et en toute transparence.",
+      "steps": {
+        "contact": {
+          "number": "01",
+          "title": "Prise de contact",
+          "description": "Parlez-nous de votre bien. Estimation gratuite et sans engagement."
+        },
+        "estimation": {
+          "number": "02",
+          "title": "Estimation & stratégie",
+          "description": "Visite du bien, analyse du marché local et définition du prix de vente optimal."
+        },
+        "preparation": {
+          "number": "03",
+          "title": "Préparation & mise en vente",
+          "description": "Photos professionnelles, rédaction de l'annonce et diffusion sur les meilleures plateformes."
+        },
+        "visits": {
+          "number": "04",
+          "title": "Visites & négociation",
+          "description": "Organisation des visites, accompagnement des acheteurs et négociation au meilleur prix."
+        },
+        "closing": {
+          "number": "05",
+          "title": "Signature & remise des clés",
+          "description": "Suivi du compromis, coordination avec le notaire et accompagnement jusqu'à la signature finale."
+        }
       }
     },
     "faq": {
-      "q1": "Combien de temps dure le processus d'inscription ?",
+      "q1": "Combien de temps pour mettre mon bien en location courte durée ?",
       "a1": "De la prise de contact au premier voyageur, comptez environ une semaine. Votre bien est en ligne sous 48h après la signature.",
-      "q2": "Dois-je m'occuper de quelque chose une fois inscrit ?",
-      "a2": "Non, nous gérons tout : réservations, accueil, ménage, maintenance et reporting. Vous recevez votre virement chaque mois.",
-      "q3": "Puis-je utiliser mon bien quand je veux ?",
-      "a3": "Oui, vous bloquez les dates de votre choix dans le calendrier partagé. Votre bien reste le vôtre, nous gérons uniquement les périodes de location."
+      "q2": "Comment sélectionnez-vous les locataires longue durée ?",
+      "a2": "Nous vérifions les dossiers, revenus et références de chaque candidat. Seuls les profils fiables vous sont présentés pour validation.",
+      "q3": "Combien de temps faut-il pour vendre un bien ?",
+      "a3": "Cela dépend du marché, mais notre objectif est de vendre au meilleur prix dans un délai raisonnable. On vous tient informé à chaque étape.",
+      "q4": "Puis-je utiliser mon bien quand je veux en courte durée ?",
+      "a4": "Oui, vous bloquez les dates de votre choix dans le calendrier partagé. Votre bien reste le vôtre."
     }
   },
   "process": {

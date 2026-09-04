@@ -69,11 +69,11 @@
   "services": {
     "tag": "Our services",
     "title": "A complete service, A to Z",
-    "subtitle": "Everything you need to rent stress-free, from listing to monthly transfer.",
+    "subtitle": "Rental, sales, property management — everything you need for your real estate project.",
     "cta": "See all services",
     "hero": {
       "title": "Our services",
-      "subtitle": "Everything you need to rent without stress."
+      "subtitle": "Everything you need for your real estate project."
     },
     "items": {
       "publication": {
@@ -195,51 +195,121 @@
   },
   "how": {
     "tag": "How it works",
-    "title": "From first contact to first transfer",
-    "subtitle": "A simple, transparent and stress-free process.",
+    "title": "A tailored approach for every project",
+    "subtitle": "Choose your service and discover the steps.",
     "hero": {
       "title": "How it works",
-      "subtitle": "From first contact to first transfer."
+      "subtitle": "A clear process for each service. Select your need."
     },
-    "steps": {
-      "contact": {
-        "number": "01",
-        "title": "Get in touch",
-        "description": "Fill out our form or call us. We reply within 24 hours."
-      },
-      "visit": {
-        "number": "02",
-        "title": "Visit & assessment",
-        "description": "Free visit to your property and rental potential estimation."
-      },
-      "contract": {
-        "number": "03",
-        "title": "Sign the contract",
-        "description": "Personalised offer based on your property, no long-term commitment. You stay in control."
-      },
-      "publish": {
-        "number": "04",
-        "title": "Go live",
-        "description": "Professional photos, optimized listings on all platforms. Live within 48 hours."
-      },
-      "manage": {
-        "number": "05",
-        "title": "Daily management",
-        "description": "We handle bookings, guest check-in, cleaning and maintenance."
-      },
-      "payment": {
-        "number": "06",
-        "title": "Monthly transfer",
-        "description": "You receive your income every month with a detailed report."
+    "tabs": {
+      "courteDuree": "Short-term rental",
+      "longueDuree": "Long-term rental",
+      "vente": "Sale"
+    },
+    "courteDuree": {
+      "intro": "Entrust us with your property and receive your income every month — we handle everything.",
+      "steps": {
+        "contact": {
+          "number": "01",
+          "title": "Get in touch",
+          "description": "Fill out our form or call us. We reply within 24 hours."
+        },
+        "visit": {
+          "number": "02",
+          "title": "Visit & assessment",
+          "description": "Free visit to your property and rental potential estimation."
+        },
+        "contract": {
+          "number": "03",
+          "title": "Sign the contract",
+          "description": "Personalised offer based on your property, no long-term commitment. You stay in control."
+        },
+        "publish": {
+          "number": "04",
+          "title": "Go live",
+          "description": "Professional photos, optimized listings on Airbnb, Booking and Avito. Live within 48h."
+        },
+        "manage": {
+          "number": "05",
+          "title": "Daily management",
+          "description": "Bookings, guest check-in, cleaning between stays and maintenance."
+        },
+        "payment": {
+          "number": "06",
+          "title": "Monthly transfer",
+          "description": "You receive your income every month with a detailed report."
+        }
+      }
+    },
+    "longueDuree": {
+      "intro": "Find the ideal tenant and enjoy stable income with zero hassle.",
+      "steps": {
+        "contact": {
+          "number": "01",
+          "title": "Get in touch",
+          "description": "Tell us about your property and expectations. We call you back within 24h."
+        },
+        "evaluation": {
+          "number": "02",
+          "title": "Assessment & estimate",
+          "description": "Property visit, rent estimation and advice to optimise your return."
+        },
+        "search": {
+          "number": "03",
+          "title": "Tenant search",
+          "description": "Listing, rigorous candidate screening and background checks."
+        },
+        "contract": {
+          "number": "04",
+          "title": "Lease & inventory",
+          "description": "Lease drafting, entry inventory and key handover."
+        },
+        "manage": {
+          "number": "05",
+          "title": "Property management",
+          "description": "Rent tracking, incident management, tenant relations and maintenance."
+        }
+      }
+    },
+    "vente": {
+      "intro": "Sell your property at the best price, stress-free and in full transparency.",
+      "steps": {
+        "contact": {
+          "number": "01",
+          "title": "Get in touch",
+          "description": "Tell us about your property. Free, no-commitment estimate."
+        },
+        "estimation": {
+          "number": "02",
+          "title": "Estimate & strategy",
+          "description": "Property visit, local market analysis and optimal pricing."
+        },
+        "preparation": {
+          "number": "03",
+          "title": "Preparation & listing",
+          "description": "Professional photos, listing copywriting and distribution on the best platforms."
+        },
+        "visits": {
+          "number": "04",
+          "title": "Viewings & negotiation",
+          "description": "Organising viewings, buyer support and best-price negotiation."
+        },
+        "closing": {
+          "number": "05",
+          "title": "Signing & key handover",
+          "description": "Agreement follow-up, notary coordination and support through to final signing."
+        }
       }
     },
     "faq": {
-      "q1": "How long does the onboarding process take?",
-      "a1": "From first contact to first guest, about one week. Your property goes live within 48 hours after signing.",
-      "q2": "Do I need to manage anything once signed up?",
-      "a2": "No, we handle everything: bookings, check-in, cleaning, maintenance and reporting. You receive your transfer every month.",
-      "q3": "Can I use my property whenever I want?",
-      "a3": "Yes, you block the dates you want on the shared calendar. Your property remains yours, we only manage the rental periods."
+      "q1": "How long to get my property listed for short-term rental?",
+      "a1": "From first contact to first guest, about one week. Your property goes live within 48h after signing.",
+      "q2": "How do you screen long-term tenants?",
+      "a2": "We verify each candidate's documents, income and references. Only reliable profiles are presented to you for approval.",
+      "q3": "How long does it take to sell a property?",
+      "a3": "It depends on the market, but our goal is to sell at the best price within a reasonable timeframe. We keep you informed at every step.",
+      "q4": "Can I use my property whenever I want in short-term rental?",
+      "a4": "Yes, you block the dates you want on the shared calendar. Your property remains yours."
     }
   },
   "process": {
